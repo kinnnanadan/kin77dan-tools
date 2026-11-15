@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const initialHash = location.hash.replace("#", "");
-  if (["clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "device"].includes(initialHash)) {
+  if (["clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "multivideo", "tonegen", "keymouse", "gamepad", "device"].includes(initialHash)) {
     switchTool(initialHash);
   }
 
@@ -1331,5 +1331,518 @@ document.addEventListener("DOMContentLoaded", () => {
       f.input.classList.remove("computed");
     });
     rcTauEl.textContent = "---";
+  });
+
+  // ==========================================
+  // 11. 複数動画同時再生
+  // ==========================================
+  const mvFileInput = document.getElementById("mv-file-input");
+  const mvClearAllBtn = document.getElementById("mv-clear-all-btn");
+  const mvPlayAllBtn = document.getElementById("mv-play-all");
+  const mvPauseAllBtn = document.getElementById("mv-pause-all");
+  const mvSyncBtn = document.getElementById("mv-sync-btn");
+  const mvSpeedSelect = document.getElementById("mv-speed-select");
+  const mvColsSelect = document.getElementById("mv-cols-select");
+  const mvGrid = document.getElementById("mv-grid");
+  const mvEmptyMsg = document.getElementById("mv-empty-msg");
+
+  let mvItems = []; // { id, url, card, video }
+
+  function updateMvEmptyState() {
+    mvEmptyMsg.classList.toggle("hidden", mvItems.length > 0);
+  }
+
+  mvFileInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const speed = parseFloat(mvSpeedSelect.value) || 1;
+
+    files.forEach((file) => {
+      const url = URL.createObjectURL(file);
+      const card = document.createElement("div");
+      card.className = "mv-item";
+
+      const header = document.createElement("div");
+      header.className = "mv-item-header";
+
+      const title = document.createElement("span");
+      title.className = "mv-title";
+      title.textContent = file.name;
+      title.title = file.name;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "mini-btn";
+      removeBtn.textContent = "削除";
+
+      header.append(title, removeBtn);
+
+      const video = document.createElement("video");
+      video.className = "mv-video";
+      video.src = url;
+      video.controls = true;
+      video.playsInline = true;
+      video.playbackRate = speed;
+
+      const controls = document.createElement("div");
+      controls.className = "mv-item-controls";
+      controls.innerHTML = `
+        <div>
+          <button type="button" class="mini-btn mv-step-back" title="約1フレーム戻す">-0.03s</button>
+          <button type="button" class="mini-btn mv-step-fwd" title="約1フレーム進める">+0.03s</button>
+        </div>
+        <button type="button" class="mini-btn mv-mute-btn">🔊 音声ON</button>
+      `;
+
+      const stepBackBtn = controls.querySelector(".mv-step-back");
+      const stepFwdBtn = controls.querySelector(".mv-step-fwd");
+      const muteBtn = controls.querySelector(".mv-mute-btn");
+
+      stepBackBtn.addEventListener("click", () => {
+        video.pause();
+        video.currentTime = Math.max(0, video.currentTime - 0.033);
+      });
+
+      stepFwdBtn.addEventListener("click", () => {
+        video.pause();
+        video.currentTime = Math.min(video.duration || Infinity, video.currentTime + 0.033);
+      });
+
+      muteBtn.addEventListener("click", () => {
+        video.muted = !video.muted;
+        muteBtn.textContent = video.muted ? "🔇 ミュート" : "🔊 音声ON";
+      });
+
+      removeBtn.addEventListener("click", () => {
+        video.pause();
+        URL.revokeObjectURL(url);
+        card.remove();
+        mvItems = mvItems.filter((item) => item.url !== url);
+        updateMvEmptyState();
+      });
+
+      card.append(header, video, controls);
+      mvGrid.appendChild(card);
+      mvItems.push({ url, card, video });
+    });
+
+    mvFileInput.value = "";
+    updateMvEmptyState();
+  });
+
+  mvPlayAllBtn.addEventListener("click", () => {
+    mvItems.forEach((item) => item.video.play().catch(() => {}));
+  });
+
+  mvPauseAllBtn.addEventListener("click", () => {
+    mvItems.forEach((item) => item.video.pause());
+  });
+
+  mvSyncBtn.addEventListener("click", () => {
+    mvItems.forEach((item) => {
+      item.video.currentTime = 0;
+    });
+  });
+
+  mvSpeedSelect.addEventListener("change", () => {
+    const rate = parseFloat(mvSpeedSelect.value) || 1;
+    mvItems.forEach((item) => {
+      item.video.playbackRate = rate;
+    });
+  });
+
+  mvColsSelect.addEventListener("change", () => {
+    mvGrid.classList.remove("cols-1", "cols-2");
+    if (mvColsSelect.value === "1") mvGrid.classList.add("cols-1");
+    if (mvColsSelect.value === "2") mvGrid.classList.add("cols-2");
+  });
+
+  mvClearAllBtn.addEventListener("click", () => {
+    mvItems.forEach((item) => {
+      item.video.pause();
+      URL.revokeObjectURL(item.url);
+      item.card.remove();
+    });
+    mvItems = [];
+    updateMvEmptyState();
+  });
+
+  // ==========================================
+  // 12. 周波数ジェネレーター（Web Audio API）
+  // ==========================================
+  const tgFreqInput = document.getElementById("tg-freq-input");
+  const tgFreqSlider = document.getElementById("tg-freq-slider");
+  const tgVolSlider = document.getElementById("tg-vol-slider");
+  const tgVolVal = document.getElementById("tg-vol-val");
+  const tgToggleBtn = document.getElementById("tg-toggle-btn");
+  const waveButtons = document.querySelectorAll(".wave-btn");
+
+  let audioCtx = null;
+  let oscillator = null;
+  let gainNode = null;
+  let tgPlaying = false;
+  let currentWave = "sine";
+
+  // 20Hz 〜 20000Hz の対数スケール変換
+  function sliderToFreq(val) {
+    const minLog = Math.log10(20);
+    const maxLog = Math.log10(20000);
+    const freq = Math.pow(10, minLog + ((maxLog - minLog) * val) / 1000);
+    return Math.round(freq * 10) / 10;
+  }
+
+  function freqToSlider(freq) {
+    const clamped = Math.min(20000, Math.max(20, freq));
+    const minLog = Math.log10(20);
+    const maxLog = Math.log10(20000);
+    return Math.round(((Math.log10(clamped) - minLog) / (maxLog - minLog)) * 1000);
+  }
+
+  function setFrequency(freq, syncSlider = true) {
+    const clamped = Math.min(22000, Math.max(1, Number(freq) || 440));
+    tgFreqInput.value = clamped;
+    if (syncSlider) {
+      tgFreqSlider.value = freqToSlider(clamped);
+    }
+    if (oscillator && audioCtx) {
+      oscillator.frequency.setValueAtTime(clamped, audioCtx.currentTime);
+    }
+  }
+
+  tgFreqSlider.addEventListener("input", () => {
+    setFrequency(sliderToFreq(Number(tgFreqSlider.value)), false);
+  });
+
+  tgFreqInput.addEventListener("input", () => {
+    setFrequency(tgFreqInput.value, true);
+  });
+
+  document.querySelectorAll(".tg-step").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const current = parseFloat(tgFreqInput.value) || 440;
+      const delta = parseFloat(btn.dataset.delta);
+      setFrequency(Math.round((current + delta) * 10) / 10, true);
+    });
+  });
+
+  document.querySelectorAll(".tg-preset").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setFrequency(parseFloat(btn.dataset.freq), true);
+    });
+  });
+
+  waveButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentWave = btn.dataset.wave;
+      waveButtons.forEach((b) => b.classList.toggle("active", b === btn));
+      if (oscillator) {
+        oscillator.type = currentWave;
+      }
+    });
+  });
+
+  tgVolSlider.addEventListener("input", () => {
+    const pct = Number(tgVolSlider.value);
+    tgVolVal.textContent = `${pct}%`;
+    if (gainNode && audioCtx) {
+      gainNode.gain.setValueAtTime(pct / 100, audioCtx.currentTime);
+    }
+  });
+
+  tgToggleBtn.addEventListener("click", () => {
+    if (!tgPlaying) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      oscillator = audioCtx.createOscillator();
+      gainNode = audioCtx.createGain();
+
+      oscillator.type = currentWave;
+      oscillator.frequency.setValueAtTime(parseFloat(tgFreqInput.value) || 440, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(Number(tgVolSlider.value) / 100, audioCtx.currentTime);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+
+      tgPlaying = true;
+      tgToggleBtn.textContent = "⏹ 停止";
+    } else {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator.disconnect();
+        oscillator = null;
+      }
+      tgPlaying = false;
+      tgToggleBtn.textContent = "▶ 音を鳴らす";
+    }
+  });
+
+  // ==========================================
+  // 13. キーボード・マウス動作確認
+  // ==========================================
+  const kmPreventCheck = document.getElementById("km-prevent-default");
+  const kmActiveKeysEl = document.getElementById("km-active-keys");
+  const kmActiveCountEl = document.getElementById("km-active-count");
+  const kmLastKeyEl = document.getElementById("km-last-key");
+  const kmLastCodeEl = document.getElementById("km-last-code");
+  const kmLastIntervalEl = document.getElementById("km-last-interval");
+  const kmHistoryEl = document.getElementById("km-history");
+  const kmClearBtn = document.getElementById("km-clear-btn");
+
+  const kmMousePad = document.getElementById("km-mouse-pad");
+  const kmMousePosEl = document.getElementById("km-mouse-pos");
+  const kmWheelCountEl = document.getElementById("km-wheel-count");
+  const mbtnWheelEl = document.getElementById("mbtn-wheel");
+
+  const pressedKeyMap = new Map(); // code -> label
+  const lastKeyDownTime = new Map(); // code -> timestamp
+  let wheelTotal = 0;
+
+  function renderActiveKeys() {
+    kmActiveCountEl.textContent = String(pressedKeyMap.size);
+    if (pressedKeyMap.size === 0) {
+      kmActiveKeysEl.innerHTML = '<span class="hint-text">キーを押してください...</span>';
+      return;
+    }
+    kmActiveKeysEl.innerHTML = "";
+    pressedKeyMap.forEach((label) => {
+      const span = document.createElement("span");
+      span.className = "key-badge";
+      span.textContent = label;
+      kmActiveKeysEl.appendChild(span);
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (currentTool !== "keymouse") return;
+    if (kmPreventCheck.checked) e.preventDefault();
+    if (e.repeat) return;
+
+    const now = performance.now();
+    const displayKey = e.key === " " ? "Space" : e.key;
+    const label = `${displayKey} (${e.code})`;
+
+    pressedKeyMap.set(e.code, label);
+    renderActiveKeys();
+
+    kmLastKeyEl.textContent = displayKey;
+    kmLastCodeEl.textContent = e.code;
+
+    if (lastKeyDownTime.has(e.code)) {
+      const diff = now - lastKeyDownTime.get(e.code);
+      kmLastIntervalEl.textContent = `${diff.toFixed(1)} ms`;
+    } else {
+      kmLastIntervalEl.textContent = "初回";
+    }
+    lastKeyDownTime.set(e.code, now);
+
+    const chip = document.createElement("span");
+    chip.className = "key-hist-chip";
+    chip.textContent = `${displayKey} [${e.code}]`;
+    kmHistoryEl.prepend(chip);
+    if (kmHistoryEl.children.length > 40) {
+      kmHistoryEl.lastChild.remove();
+    }
+  });
+
+  document.addEventListener("keyup", (e) => {
+    if (pressedKeyMap.has(e.code)) {
+      pressedKeyMap.delete(e.code);
+      renderActiveKeys();
+    }
+  });
+
+  window.addEventListener("blur", () => {
+    if (pressedKeyMap.size > 0) {
+      pressedKeyMap.clear();
+      renderActiveKeys();
+    }
+  });
+
+  kmMousePad.addEventListener("mousemove", (e) => {
+    const rect = kmMousePad.getBoundingClientRect();
+    const x = Math.round(e.clientX - rect.left);
+    const y = Math.round(e.clientY - rect.top);
+    kmMousePosEl.textContent = `X: ${x}, Y: ${y}`;
+  });
+
+  kmMousePad.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    const cell = document.getElementById(`mbtn-${e.button}`);
+    if (cell) cell.classList.add("active");
+  });
+
+  document.addEventListener("mouseup", (e) => {
+    const cell = document.getElementById(`mbtn-${e.button}`);
+    if (cell) cell.classList.remove("active");
+  });
+
+  kmMousePad.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  kmMousePad.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    wheelTotal += Math.round(e.deltaY);
+    kmWheelCountEl.textContent = String(wheelTotal);
+    mbtnWheelEl.textContent = e.deltaY < 0 ? "ホイール: ↑ 上回転" : "ホイール: ↓ 下回転";
+    mbtnWheelEl.classList.add("active");
+    clearTimeout(mbtnWheelEl._timer);
+    mbtnWheelEl._timer = setTimeout(() => {
+      mbtnWheelEl.classList.remove("active");
+    }, 180);
+  }, { passive: false });
+
+  kmClearBtn.addEventListener("click", () => {
+    pressedKeyMap.clear();
+    lastKeyDownTime.clear();
+    renderActiveKeys();
+    kmHistoryEl.innerHTML = "";
+    kmLastKeyEl.textContent = "---";
+    kmLastCodeEl.textContent = "---";
+    kmLastIntervalEl.textContent = "--- ms";
+    wheelTotal = 0;
+    kmWheelCountEl.textContent = "0";
+    mbtnWheelEl.textContent = "ホイール: 待機中";
+  });
+
+  // ==========================================
+  // 14. コントローラー動作確認（Gamepad API）
+  // ==========================================
+  const gpSelect = document.getElementById("gp-select");
+  const gpVibrateBtn = document.getElementById("gp-vibrate-btn");
+  const gpEmptyCard = document.getElementById("gp-empty-card");
+  const gpActiveArea = document.getElementById("gp-active-area");
+  const gpNameEl = document.getElementById("gp-name");
+  const gpMappingEl = document.getElementById("gp-mapping");
+  const gpStickLEl = document.getElementById("gp-stick-l");
+  const gpStickREl = document.getElementById("gp-stick-r");
+  const gpStickLValEl = document.getElementById("gp-stick-l-val");
+  const gpStickRValEl = document.getElementById("gp-stick-r-val");
+  const gpButtonsGrid = document.getElementById("gp-buttons-grid");
+
+  const standardBtnNames = [
+    "B0 (A / ×)", "B1 (B / ○)", "B2 (X / □)", "B3 (Y / △)",
+    "B4 (L1 / LB)", "B5 (R1 / RB)", "B6 (L2 / LT)", "B7 (R2 / RT)",
+    "B8 (Select / Share)", "B9 (Start / Options)", "B10 (L3)", "B11 (R3)",
+    "B12 (十字 上)", "B13 (十字 下)", "B14 (十字 左)", "B15 (十字 右)",
+    "B16 (Home / PS)"
+  ];
+
+  let renderedBtnCount = 0;
+
+  function refreshGamepadList() {
+    const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter(Boolean) : [];
+    const prevVal = gpSelect.value;
+
+    gpSelect.innerHTML = "";
+    if (pads.length === 0) {
+      gpSelect.innerHTML = '<option value="">未接続（ボタンを押して認識）</option>';
+      gpEmptyCard.classList.remove("hidden");
+      gpActiveArea.classList.add("hidden");
+      gpVibrateBtn.disabled = true;
+      return;
+    }
+
+    pads.forEach((pad) => {
+      const opt = document.createElement("option");
+      opt.value = String(pad.index);
+      opt.textContent = `[#${pad.index}] ${pad.id}`;
+      gpSelect.appendChild(opt);
+    });
+
+    if (pads.some((p) => String(p.index) === prevVal)) {
+      gpSelect.value = prevVal;
+    }
+    gpEmptyCard.classList.add("hidden");
+    gpActiveArea.classList.remove("hidden");
+  }
+
+  window.addEventListener("gamepadconnected", refreshGamepadList);
+  window.addEventListener("gamepaddisconnected", refreshGamepadList);
+
+  function pollGamepads() {
+    if (currentTool === "gamepad" && navigator.getGamepads) {
+      const pads = Array.from(navigator.getGamepads()).filter(Boolean);
+      if (pads.length > 0 && gpSelect.value === "") {
+        refreshGamepadList();
+      }
+
+      const selectedIdx = parseInt(gpSelect.value, 10);
+      const pad = pads.find((p) => p.index === selectedIdx) || pads[0];
+
+      if (pad) {
+        gpEmptyCard.classList.add("hidden");
+        gpActiveArea.classList.remove("hidden");
+        gpNameEl.textContent = pad.id;
+        gpMappingEl.textContent = pad.mapping || "non-standard";
+        gpVibrateBtn.disabled = !pad.vibrationActuator;
+
+        // スティック更新（半径62px内で移動）
+        const lx = pad.axes[0] || 0;
+        const ly = pad.axes[1] || 0;
+        const rx = pad.axes[2] || 0;
+        const ry = pad.axes[3] || 0;
+
+        gpStickLEl.style.transform = `translate(calc(-50% + ${lx * 58}px), calc(-50% + ${ly * 58}px))`;
+        gpStickREl.style.transform = `translate(calc(-50% + ${rx * 58}px), calc(-50% + ${ry * 58}px))`;
+        gpStickLValEl.textContent = `X: ${lx.toFixed(3)} / Y: ${ly.toFixed(3)}`;
+        gpStickRValEl.textContent = `X: ${rx.toFixed(3)} / Y: ${ry.toFixed(3)}`;
+
+        // ボタン枠の生成（ボタン数が変わった場合のみ再構築）
+        if (renderedBtnCount !== pad.buttons.length) {
+          renderedBtnCount = pad.buttons.length;
+          gpButtonsGrid.innerHTML = "";
+          pad.buttons.forEach((_, idx) => {
+            const cell = document.createElement("div");
+            cell.className = "gp-btn-cell";
+            cell.id = `gp-btn-cell-${idx}`;
+            const label = standardBtnNames[idx] || `Button ${idx}`;
+            cell.innerHTML = `
+              <div class="gp-btn-top">
+                <span>${label}</span>
+                <span id="gp-btn-val-${idx}">0%</span>
+              </div>
+              <div class="gp-btn-bar-bg">
+                <div class="gp-btn-bar-fill" id="gp-btn-bar-${idx}"></div>
+              </div>
+            `;
+            gpButtonsGrid.appendChild(cell);
+          });
+        }
+
+        // 各ボタンの値更新
+        pad.buttons.forEach((btn, idx) => {
+          const cell = document.getElementById(`gp-btn-cell-${idx}`);
+          const valEl = document.getElementById(`gp-btn-val-${idx}`);
+          const barEl = document.getElementById(`gp-btn-bar-${idx}`);
+          if (!cell) return;
+
+          const pct = Math.round(btn.value * 100);
+          cell.classList.toggle("pressed", btn.pressed || btn.value > 0.05);
+          valEl.textContent = `${pct}%`;
+          barEl.style.width = `${pct}%`;
+        });
+      }
+    }
+    requestAnimationFrame(pollGamepads);
+  }
+  requestAnimationFrame(pollGamepads);
+
+  gpVibrateBtn.addEventListener("click", () => {
+    const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter(Boolean) : [];
+    const selectedIdx = parseInt(gpSelect.value, 10);
+    const pad = pads.find((p) => p.index === selectedIdx) || pads[0];
+    if (pad && pad.vibrationActuator) {
+      pad.vibrationActuator.playEffect("dual-rumble", {
+        startDelay: 0,
+        duration: 400,
+        weakMagnitude: 0.7,
+        strongMagnitude: 0.7
+      }).catch(() => {});
+    }
   });
 });

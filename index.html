@@ -34,6 +34,10 @@
           <li><a href="#base" class="nav-link tool-link" data-tool="base">進数変換</a></li>
           <li><a href="#led" class="nav-link tool-link" data-tool="led">LED抵抗計算</a></li>
           <li><a href="#rc" class="nav-link tool-link" data-tool="rc">RCフィルター計算</a></li>
+          <li><a href="#multivideo" class="nav-link tool-link" data-tool="multivideo">複数動画同時再生</a></li>
+          <li><a href="#tonegen" class="nav-link tool-link" data-tool="tonegen">周波数ジェネレーター</a></li>
+          <li><a href="#keymouse" class="nav-link tool-link" data-tool="keymouse">キーボード・マウス確認</a></li>
+          <li><a href="#gamepad" class="nav-link tool-link" data-tool="gamepad">コントローラー確認</a></li>
           <li><a href="#device" class="nav-link tool-link" data-tool="device">端末スペック</a></li>
         </ul>
 
@@ -472,7 +476,7 @@
         </div>
       </section>
 
-      <!-- 8. 端末スペック -->
+      <!-- 12. 端末スペック -->
       <section id="panel-device" class="tool-panel">
         <div class="panel-header">
           <h1>端末スペック</h1>
@@ -489,6 +493,238 @@
             <h2>User-Agent</h2>
           </div>
           <code class="ua-text" id="device-ua">---</code>
+        </div>
+      </section>
+
+      <!-- 8. 複数動画同時再生 -->
+      <section id="panel-multivideo" class="tool-panel">
+        <div class="panel-header">
+          <h1>複数動画同時再生</h1>
+          <div class="header-controls">
+            <label class="action-btn primary file-label">
+              動画を追加選択
+              <input type="file" id="mv-file-input" accept="video/*" multiple hidden>
+            </label>
+            <button type="button" id="mv-clear-all-btn" class="action-btn">すべて解除</button>
+          </div>
+        </div>
+
+        <div class="card mv-toolbar">
+          <div class="mv-controls">
+            <button type="button" id="mv-play-all" class="action-btn primary">▶ 同時再生</button>
+            <button type="button" id="mv-pause-all" class="action-btn">⏸ 一時停止</button>
+            <button type="button" id="mv-sync-btn" class="action-btn">⏮ 先頭に同期</button>
+          </div>
+          <div class="mv-options">
+            <label class="inline-label">
+              速度:
+              <select id="mv-speed-select" class="unit-select">
+                <option value="0.25">0.25x</option>
+                <option value="0.5">0.5x</option>
+                <option value="1" selected>1.0x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2">2.0x</option>
+              </select>
+            </label>
+            <label class="inline-label">
+              表示列:
+              <select id="mv-cols-select" class="unit-select">
+                <option value="auto" selected>自動</option>
+                <option value="2">2列比較</option>
+                <option value="1">1列縦並び</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div id="mv-grid" class="mv-grid mt-1">
+          <div class="card mv-empty" id="mv-empty-msg">
+            上の「動画を追加選択」から2つ以上の動画ファイルを選択してください（ブラウザ内処理のためアップロードは行われません）。
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. 周波数ジェネレーター -->
+      <section id="panel-tonegen" class="tool-panel">
+        <div class="panel-header">
+          <h1>周波数ジェネレーター</h1>
+          <span class="hint-text">※ 再生時はスピーカー・イヤホンの音量にご注意ください</span>
+        </div>
+
+        <div class="card tg-card">
+          <div class="tg-freq-display">
+            <input type="number" id="tg-freq-input" class="tg-freq-num" min="1" max="22000" step="0.1" value="440" aria-label="周波数(Hz)">
+            <span class="tg-unit">Hz</span>
+          </div>
+
+          <div class="tg-step-btns">
+            <button type="button" class="mini-btn tg-step" data-delta="-100">-100Hz</button>
+            <button type="button" class="mini-btn tg-step" data-delta="-10">-10Hz</button>
+            <button type="button" class="mini-btn tg-step" data-delta="-1">-1Hz</button>
+            <button type="button" class="mini-btn tg-step" data-delta="1">+1Hz</button>
+            <button type="button" class="mini-btn tg-step" data-delta="10">+10Hz</button>
+            <button type="button" class="mini-btn tg-step" data-delta="100">+100Hz</button>
+          </div>
+
+          <div class="tg-slider-wrap">
+            <input type="range" id="tg-freq-slider" class="tg-slider" min="0" max="1000" value="447" aria-label="周波数スライダー">
+            <div class="tg-slider-labels">
+              <span>20 Hz</span>
+              <span>200 Hz</span>
+              <span>2 kHz</span>
+              <span>20 kHz</span>
+            </div>
+          </div>
+
+          <div class="tg-settings-grid">
+            <div class="field-group">
+              <label>波形タイプ</label>
+              <div class="wave-group" role="group" aria-label="波形選択">
+                <button type="button" class="control-btn wave-btn active" data-wave="sine">正弦波 (Sine)</button>
+                <button type="button" class="control-btn wave-btn" data-wave="square">矩形波 (Square)</button>
+                <button type="button" class="control-btn wave-btn" data-wave="triangle">三角波 (Triangle)</button>
+                <button type="button" class="control-btn wave-btn" data-wave="sawtooth">ノコギリ波 (Saw)</button>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="tg-vol-slider">出力音量: <strong id="tg-vol-val">20%</strong></label>
+              <input type="range" id="tg-vol-slider" class="tg-slider" min="0" max="100" value="20">
+            </div>
+          </div>
+
+          <div class="preset-bar mt-1">
+            <span class="hint-text">プリセット:</span>
+            <button type="button" class="mini-btn tg-preset" data-freq="60">60Hz</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="100">100Hz</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="440">440Hz (A4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="1000">1kHz</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="8000">8kHz</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="15000">15kHz</button>
+          </div>
+
+          <div class="tg-play-wrap">
+            <button type="button" id="tg-toggle-btn" class="action-btn primary tg-play-btn">▶ 音を鳴らす</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. キーボード・マウス動作確認 -->
+      <section id="panel-keymouse" class="tool-panel">
+        <div class="panel-header">
+          <h1>キーボード・マウス動作確認</h1>
+          <button type="button" id="km-clear-btn" class="action-btn">履歴リセット</button>
+        </div>
+
+        <div class="card">
+          <div class="history-header">
+            <h2>キーボード入力テスト</h2>
+            <label class="checkbox-label">
+              <input type="checkbox" id="km-prevent-default" checked>
+              ブラウザ操作（Tab/Space等）を抑制
+            </label>
+          </div>
+
+          <div class="km-section-label">現在押下中のキー（同時押し確認: <strong id="km-active-count">0</strong> キー）</div>
+          <div id="km-active-keys" class="key-badge-box">
+            <span class="hint-text">キーを押してください...</span>
+          </div>
+
+          <div class="km-detail-grid mt-1">
+            <div class="bpm-stat-item">
+              <span class="stat-label">直近の Key</span>
+              <span class="stat-val mono" id="km-last-key">---</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">物理コード (Code)</span>
+              <span class="stat-val mono" id="km-last-code">---</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">同キー連打間隔 (チャタリング確認)</span>
+              <span class="stat-val mono" id="km-last-interval">--- ms</span>
+            </div>
+          </div>
+
+          <div class="km-section-label mt-1">入力履歴（最新順）</div>
+          <div id="km-history" class="key-history-box"></div>
+        </div>
+
+        <div class="card mt-1">
+          <div class="history-header">
+            <h2>マウス入力テスト</h2>
+            <span class="hint-text">下の枠内でクリック・ホイール操作を行ってください</span>
+          </div>
+
+          <div id="km-mouse-pad" class="mouse-pad" tabindex="0">
+            <div class="mouse-pad-title">マウス動作確認エリア（右クリック・戻る/進むボタン対応）</div>
+            <div class="mouse-coords">座標: <code id="km-mouse-pos">X: ---, Y: ---</code> / ホイール累計: <code id="km-wheel-count">0</code></div>
+          </div>
+
+          <div class="mouse-btn-grid mt-1">
+            <div class="mouse-btn-item" id="mbtn-0">左クリック (0)</div>
+            <div class="mouse-btn-item" id="mbtn-1">中クリック (1)</div>
+            <div class="mouse-btn-item" id="mbtn-2">右クリック (2)</div>
+            <div class="mouse-btn-item" id="mbtn-3">戻るボタン (3)</div>
+            <div class="mouse-btn-item" id="mbtn-4">進むボタン (4)</div>
+            <div class="mouse-btn-item" id="mbtn-wheel">ホイール: 待機中</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. コントローラー動作確認 -->
+      <section id="panel-gamepad" class="tool-panel">
+        <div class="panel-header">
+          <h1>コントローラー動作確認</h1>
+          <div class="header-controls">
+            <select id="gp-select" class="unit-select" aria-label="コントローラー選択">
+              <option value="">未接続（ボタンを押して認識）</option>
+            </select>
+            <button type="button" id="gp-vibrate-btn" class="action-btn" disabled>振動テスト</button>
+          </div>
+        </div>
+
+        <div class="card" id="gp-empty-card">
+          <p class="hint-text">
+            USBまたはBluetoothでコントローラーを接続し、<strong>いずれかのボタンを押してください</strong>（ブラウザのセキュリティ仕様により、ボタン操作後に認識が始まります）。
+          </p>
+        </div>
+
+        <div id="gp-active-area" class="hidden">
+          <div class="card">
+            <div class="gp-info-bar">
+              <div><strong>デバイス名:</strong> <span id="gp-name">---</span></div>
+              <div><strong>マッピング:</strong> <code id="gp-mapping">---</code></div>
+            </div>
+
+            <div class="gp-sticks-grid mt-1">
+              <div class="stick-card">
+                <div class="stick-title">左スティック (Axes 0, 1)</div>
+                <div class="stick-pad">
+                  <div class="stick-crosshair-h"></div>
+                  <div class="stick-crosshair-v"></div>
+                  <div class="stick-dot" id="gp-stick-l"></div>
+                </div>
+                <div class="stick-coords mono" id="gp-stick-l-val">X: 0.000 / Y: 0.000</div>
+              </div>
+
+              <div class="stick-card">
+                <div class="stick-title">右スティック (Axes 2, 3)</div>
+                <div class="stick-pad">
+                  <div class="stick-crosshair-h"></div>
+                  <div class="stick-crosshair-v"></div>
+                  <div class="stick-dot" id="gp-stick-r"></div>
+                </div>
+                <div class="stick-coords mono" id="gp-stick-r-val">X: 0.000 / Y: 0.000</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-1">
+            <div class="history-header">
+              <h2>ボタン・トリガー入力状態</h2>
+            </div>
+            <div id="gp-buttons-grid" class="gp-buttons-grid"></div>
+          </div>
         </div>
       </section>
 
