@@ -548,64 +548,45 @@
       <section id="panel-tonegen" class="tool-panel">
         <div class="panel-header">
           <h1>周波数ジェネレーター</h1>
-          <span class="hint-text">※ 再生時はスピーカー・イヤホンの音量にご注意ください</span>
+          <div class="header-controls">
+            <button type="button" id="tg-add-btn" class="action-btn">+ 音を追加</button>
+            <button type="button" id="tg-toggle-btn" class="action-btn primary">▶ すべて再生</button>
+          </div>
         </div>
 
-        <div class="card tg-card">
-          <div class="tg-freq-display">
-            <input type="number" id="tg-freq-input" class="tg-freq-num" min="1" max="22000" step="0.1" value="440" aria-label="周波数(Hz)">
-            <span class="tg-unit">Hz</span>
-          </div>
-
-          <div class="tg-step-btns">
-            <button type="button" class="mini-btn tg-step" data-delta="-100">-100Hz</button>
-            <button type="button" class="mini-btn tg-step" data-delta="-10">-10Hz</button>
-            <button type="button" class="mini-btn tg-step" data-delta="-1">-1Hz</button>
-            <button type="button" class="mini-btn tg-step" data-delta="1">+1Hz</button>
-            <button type="button" class="mini-btn tg-step" data-delta="10">+10Hz</button>
-            <button type="button" class="mini-btn tg-step" data-delta="100">+100Hz</button>
-          </div>
-
-          <div class="tg-slider-wrap">
-            <input type="range" id="tg-freq-slider" class="tg-slider" min="0" max="1000" value="447" aria-label="周波数スライダー">
-            <div class="tg-slider-labels">
-              <span>20 Hz</span>
-              <span>200 Hz</span>
-              <span>2 kHz</span>
-              <span>20 kHz</span>
-            </div>
-          </div>
-
-          <div class="tg-settings-grid">
-            <div class="field-group">
-              <label>波形タイプ</label>
-              <div class="wave-group" role="group" aria-label="波形選択">
-                <button type="button" class="control-btn wave-btn active" data-wave="sine">正弦波 (Sine)</button>
-                <button type="button" class="control-btn wave-btn" data-wave="square">矩形波 (Square)</button>
-                <button type="button" class="control-btn wave-btn" data-wave="triangle">三角波 (Triangle)</button>
-                <button type="button" class="control-btn wave-btn" data-wave="sawtooth">ノコギリ波 (Saw)</button>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="tg-vol-slider">出力音量: <strong id="tg-vol-val">20%</strong></label>
+        <div class="card">
+          <div class="tg-master-bar">
+            <div class="field-group tg-vol-group">
+              <label for="tg-vol-slider">マスター音量: <strong id="tg-vol-val">20%</strong></label>
               <input type="range" id="tg-vol-slider" class="tg-slider" min="0" max="100" value="20">
             </div>
+            <span class="hint-text">※ 再生時は音量にご注意ください（複数音は自動で音量を平均化します）</span>
           </div>
 
           <div class="preset-bar mt-1">
-            <span class="hint-text">プリセット:</span>
+            <span class="hint-text">音階（選択中の音に反映）:</span>
+            <button type="button" class="mini-btn tg-preset" data-freq="261.63">ド (C4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="293.66">レ (D4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="329.63">ミ (E4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="349.23">ファ (F4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="392.00">ソ (G4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="440.00">ラ (A4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="493.88">シ (B4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="523.25">ド↑ (C5)</button>
+          </div>
+
+          <div class="preset-bar">
+            <span class="hint-text">テスト周波数:</span>
             <button type="button" class="mini-btn tg-preset" data-freq="60">60Hz</button>
             <button type="button" class="mini-btn tg-preset" data-freq="100">100Hz</button>
-            <button type="button" class="mini-btn tg-preset" data-freq="440">440Hz (A4)</button>
+            <button type="button" class="mini-btn tg-preset" data-freq="440">440Hz</button>
             <button type="button" class="mini-btn tg-preset" data-freq="1000">1kHz</button>
             <button type="button" class="mini-btn tg-preset" data-freq="8000">8kHz</button>
             <button type="button" class="mini-btn tg-preset" data-freq="15000">15kHz</button>
           </div>
 
-          <div class="tg-play-wrap">
-            <button type="button" id="tg-toggle-btn" class="action-btn primary tg-play-btn">▶ 音を鳴らす</button>
-          </div>
+          <!-- 複数音スロット一覧 -->
+          <div id="tg-channels" class="tg-channels mt-1"></div>
         </div>
       </section>
 
@@ -613,34 +594,38 @@
       <section id="panel-keymouse" class="tool-panel">
         <div class="panel-header">
           <h1>キーボード・マウス動作確認</h1>
-          <button type="button" id="km-clear-btn" class="action-btn">履歴リセット</button>
+          <button type="button" id="km-clear-btn" class="action-btn">色・履歴をリセット</button>
         </div>
 
         <div class="card">
           <div class="history-header">
             <h2>キーボード入力テスト</h2>
-            <label class="checkbox-label">
-              <input type="checkbox" id="km-prevent-default" checked>
-              ブラウザ操作（Tab/Space等）を抑制
-            </label>
+            <div class="header-controls">
+              <span class="km-legend"><i class="leg-box active"></i>押下中</span>
+              <span class="km-legend"><i class="leg-box tested"></i>確認済</span>
+              <label class="checkbox-label">
+                <input type="checkbox" id="km-prevent-default" checked>
+                ブラウザ操作を抑制
+              </label>
+            </div>
           </div>
 
-          <div class="km-section-label">現在押下中のキー（同時押し確認: <strong id="km-active-count">0</strong> キー）</div>
-          <div id="km-active-keys" class="key-badge-box">
-            <span class="hint-text">キーを押してください...</span>
+          <!-- ビジュアルキーボード図 -->
+          <div class="kb-scroll-wrap">
+            <div id="kb-visual" class="kb-visual"></div>
           </div>
 
           <div class="km-detail-grid mt-1">
             <div class="bpm-stat-item">
-              <span class="stat-label">直近の Key</span>
+              <span class="stat-label">現在押下中 / 確認済</span>
+              <span class="stat-val mono"><span id="km-active-count">0</span> / <span id="km-tested-count">0</span> キー</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">直近の Key / Code</span>
               <span class="stat-val mono" id="km-last-key">---</span>
             </div>
             <div class="bpm-stat-item">
-              <span class="stat-label">物理コード (Code)</span>
-              <span class="stat-val mono" id="km-last-code">---</span>
-            </div>
-            <div class="bpm-stat-item">
-              <span class="stat-label">同キー連打間隔 (チャタリング確認)</span>
+              <span class="stat-label">同キー連打間隔</span>
               <span class="stat-val mono" id="km-last-interval">--- ms</span>
             </div>
           </div>
@@ -652,21 +637,48 @@
         <div class="card mt-1">
           <div class="history-header">
             <h2>マウス入力テスト</h2>
-            <span class="hint-text">下の枠内でクリック・ホイール操作を行ってください</span>
+            <span class="hint-text">下のテストエリアまたはマウス図上でクリック・ホイール操作</span>
           </div>
 
-          <div id="km-mouse-pad" class="mouse-pad" tabindex="0">
-            <div class="mouse-pad-title">マウス動作確認エリア（右クリック・戻る/進むボタン対応）</div>
-            <div class="mouse-coords">座標: <code id="km-mouse-pos">X: ---, Y: ---</code> / ホイール累計: <code id="km-wheel-count">0</code></div>
-          </div>
+          <div class="mouse-visual-layout" id="km-mouse-pad" tabindex="0">
+            <!-- マウス形状のSVGアイコン -->
+            <div class="mouse-svg-wrap">
+              <svg viewBox="0 0 180 260" class="mouse-svg" aria-label="マウス形状テスト図">
+                <!-- 本体ベース -->
+                <rect x="25" y="10" width="130" height="240" rx="65" class="m-body" />
+                <!-- 左クリック (0) -->
+                <path id="msvg-0" d="M 90 10 L 90 105 L 25 105 L 25 75 A 65 65 0 0 1 90 10 Z" class="m-part" />
+                <!-- 右クリック (2) -->
+                <path id="msvg-2" d="M 90 10 A 65 65 0 0 1 155 75 L 155 105 L 90 105 Z" class="m-part" />
+                <!-- 中央仕切り線 -->
+                <line x1="25" y1="105" x2="155" y2="105" class="m-line" />
+                <line x1="90" y1="10" x2="90" y2="105" class="m-line" />
+                <!-- ホイール / 中クリック (1) -->
+                <rect id="msvg-1" x="80" y="34" width="20" height="46" rx="10" class="m-part m-wheel-part" />
+                <!-- サイドボタン: 進む (4) -->
+                <rect id="msvg-4" x="15" y="112" width="12" height="36" rx="5" class="m-part" />
+                <!-- サイドボタン: 戻る (3) -->
+                <rect id="msvg-3" x="15" y="156" width="12" height="36" rx="5" class="m-part" />
+                <!-- ラベル -->
+                <text x="56" y="75" class="m-svg-text">左</text>
+                <text x="124" y="75" class="m-svg-text">右</text>
+                <text x="90" y="61" class="m-svg-text small">中</text>
+              </svg>
+            </div>
 
-          <div class="mouse-btn-grid mt-1">
-            <div class="mouse-btn-item" id="mbtn-0">左クリック (0)</div>
-            <div class="mouse-btn-item" id="mbtn-1">中クリック (1)</div>
-            <div class="mouse-btn-item" id="mbtn-2">右クリック (2)</div>
-            <div class="mouse-btn-item" id="mbtn-3">戻るボタン (3)</div>
-            <div class="mouse-btn-item" id="mbtn-4">進むボタン (4)</div>
-            <div class="mouse-btn-item" id="mbtn-wheel">ホイール: 待機中</div>
+            <div class="mouse-status-side">
+              <div class="mouse-coords">
+                座標: <code id="km-mouse-pos">X: ---, Y: ---</code> ／ ホイール累計: <code id="km-wheel-count">0</code>
+              </div>
+              <div class="mouse-btn-grid mt-1">
+                <div class="mouse-btn-item" id="mbtn-0">左クリック (0)</div>
+                <div class="mouse-btn-item" id="mbtn-1">中クリック (1)</div>
+                <div class="mouse-btn-item" id="mbtn-2">右クリック (2)</div>
+                <div class="mouse-btn-item" id="mbtn-4">進むボタン (4)</div>
+                <div class="mouse-btn-item" id="mbtn-3">戻るボタン (3)</div>
+                <div class="mouse-btn-item" id="mbtn-wheel">ホイール: 待機中</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -679,14 +691,20 @@
             <select id="gp-select" class="unit-select" aria-label="コントローラー選択">
               <option value="">未接続（ボタンを押して認識）</option>
             </select>
+            <button type="button" id="gp-rescan-btn" class="action-btn">再検出</button>
             <button type="button" id="gp-vibrate-btn" class="action-btn" disabled>振動テスト</button>
           </div>
         </div>
 
         <div class="card" id="gp-empty-card">
           <p class="hint-text">
-            USBまたはBluetoothでコントローラーを接続し、<strong>いずれかのボタンを押してください</strong>（ブラウザのセキュリティ仕様により、ボタン操作後に認識が始まります）。
+            DualSense などのコントローラーを USB または Bluetooth で接続し、<strong>「× / ○ / □ / △ / PSボタン」のいずれかを押してから「再検出」</strong>を押してください。
           </p>
+          <ul class="gp-troubleshoot-list mt-1">
+            <li>ブラウザの仕様上、スティック操作だけでは認識が開始されず、<strong>デジタルボタンを1回押す</strong>必要があります。</li>
+            <li>Windows で <strong>Steam</strong> や <strong>DS4Windows</strong> が裏で起動していると、DualSense が専有されてブラウザから見えなくなる場合があります。</li>
+            <li>現在の環境状態: <code id="gp-env-status">確認中...</code></li>
+          </ul>
         </div>
 
         <div id="gp-active-area" class="hidden">
@@ -698,7 +716,7 @@
 
             <div class="gp-sticks-grid mt-1">
               <div class="stick-card">
-                <div class="stick-title">左スティック (Axes 0, 1)</div>
+                <div class="stick-title">左スティック</div>
                 <div class="stick-pad">
                   <div class="stick-crosshair-h"></div>
                   <div class="stick-crosshair-v"></div>
@@ -708,7 +726,7 @@
               </div>
 
               <div class="stick-card">
-                <div class="stick-title">右スティック (Axes 2, 3)</div>
+                <div class="stick-title">右スティック</div>
                 <div class="stick-pad">
                   <div class="stick-crosshair-h"></div>
                   <div class="stick-crosshair-v"></div>
@@ -717,6 +735,10 @@
                 <div class="stick-coords mono" id="gp-stick-r-val">X: 0.000 / Y: 0.000</div>
               </div>
             </div>
+
+            <!-- 全アナログ軸（DualSenseのBluetooth接続時の軸ズレ確認用） -->
+            <div class="km-section-label mt-1">アナログ軸 (Axes) 生データ</div>
+            <div id="gp-axes-grid" class="gp-axes-grid"></div>
           </div>
 
           <div class="card mt-1">

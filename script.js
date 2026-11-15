@@ -1469,22 +1469,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 12. 周波数ジェネレーター（Web Audio API）
+  // 12. 周波数ジェネレーター（複数音同時出力・音階プリセット対応）
   // ==========================================
-  const tgFreqInput = document.getElementById("tg-freq-input");
-  const tgFreqSlider = document.getElementById("tg-freq-slider");
+  const tgChannelsEl = document.getElementById("tg-channels");
+  const tgAddBtn = document.getElementById("tg-add-btn");
+  const tgToggleBtn = document.getElementById("tg-toggle-btn");
   const tgVolSlider = document.getElementById("tg-vol-slider");
   const tgVolVal = document.getElementById("tg-vol-val");
-  const tgToggleBtn = document.getElementById("tg-toggle-btn");
-  const waveButtons = document.querySelectorAll(".wave-btn");
 
   let audioCtx = null;
-  let oscillator = null;
-  let gainNode = null;
+  let masterGain = null;
   let tgPlaying = false;
-  let currentWave = "sine";
+  let nextChannelId = 1;
+  let selectedChannelId = null;
+  let tgChannels = []; // { id, freq, wave, enabled, osc, gain }
 
-  // 20Hz 〜 20000Hz の対数スケール変換
   function sliderToFreq(val) {
     const minLog = Math.log10(20);
     const maxLog = Math.log10(20000);
@@ -1499,54 +1498,157 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.round(((Math.log10(clamped) - minLog) / (maxLog - minLog)) * 1000);
   }
 
-  function setFrequency(freq, syncSlider = true) {
-    const clamped = Math.min(22000, Math.max(1, Number(freq) || 440));
-    tgFreqInput.value = clamped;
-    if (syncSlider) {
-      tgFreqSlider.value = freqToSlider(clamped);
-    }
-    if (oscillator && audioCtx) {
-      oscillator.frequency.setValueAtTime(clamped, audioCtx.currentTime);
-    }
+  function syncAudioNodes() {
+    if (!tgPlaying || !audioCtx || !masterGain) return;
+    const activeCount = tgChannels.filter((c) => c.enabled).length;
+    const perGain = activeCount > 0 ? 1 / activeCount : 0;
+
+    tgChannels.forEach((ch) => {
+      if (ch.enabled) {
+        if (!ch.osc) {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.type = ch.wave;
+          osc.frequency.setValueAtTime(ch.freq, audioCtx.currentTime);
+          g.gain.setValueAtTime(perGain, audioCtx.currentTime);
+          osc.connect(g);
+          g.connect(masterGain);
+          osc.start();
+          ch.osc = osc;
+          ch.gain = g;
+        } else {
+          ch.osc.type = ch.wave;
+          ch.osc.frequency.setValueAtTime(ch.freq, audioCtx.currentTime);
+          ch.gain.gain.setValueAtTime(perGain, audioCtx.currentTime);
+        }
+      } else if (ch.osc) {
+        ch.osc.stop();
+        ch.osc.disconnect();
+        ch.osc = null;
+        ch.gain = null;
+      }
+    });
   }
 
-  tgFreqSlider.addEventListener("input", () => {
-    setFrequency(sliderToFreq(Number(tgFreqSlider.value)), false);
-  });
+  function renderTgChannels() {
+    tgChannelsEl.innerHTML = "";
+    tgChannels.forEach((ch, idx) => {
+      const card = document.createElement("div");
+      card.className = "tg-channel-card" + (ch.id === selectedChannelId ? " selected" : "");
 
-  tgFreqInput.addEventListener("input", () => {
-    setFrequency(tgFreqInput.value, true);
-  });
+      card.innerHTML = `
+        <div class="tg-ch-top">
+          <span class="tg-ch-title">音 ${idx + 1} ${ch.id === selectedChannelId ? "（選択中）" : ""}</span>
+          <div class="header-controls">
+            <button type="button" class="mini-btn ch-mute-btn">${ch.enabled ? "🔊 ON" : "🔇 ミュート"}</button>
+            ${tgChannels.length > 1 ? '<button type="button" class="mini-btn ch-del-btn">削除</button>' : ""}
+          </div>
+        </div>
+        <div class="tg-ch-controls">
+          <div class="tg-freq-box">
+            <input type="number" class="tg-freq-num ch-freq-input" min="1" max="22000" step="0.01" value="${ch.freq}">
+            <span>Hz</span>
+          </div>
+          <input type="range" class="tg-slider tg-ch-slider ch-slider" min="0" max="1000" value="${freqToSlider(ch.freq)}">
+          <select class="unit-select ch-wave-select">
+            <option value="sine" ${ch.wave === "sine" ? "selected" : ""}>正弦波 (Sine)</option>
+            <option value="square" ${ch.wave === "square" ? "selected" : ""}>矩形波 (Square)</option>
+            <option value="triangle" ${ch.wave === "triangle" ? "selected" : ""}>三角波 (Triangle)</option>
+            <option value="sawtooth" ${ch.wave === "sawtooth" ? "selected" : ""}>ノコギリ波 (Saw)</option>
+          </select>
+        </div>
+      `;
 
-  document.querySelectorAll(".tg-step").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const current = parseFloat(tgFreqInput.value) || 440;
-      const delta = parseFloat(btn.dataset.delta);
-      setFrequency(Math.round((current + delta) * 10) / 10, true);
+      card.addEventListener("pointerdown", () => {
+        if (selectedChannelId !== ch.id) {
+          selectedChannelId = ch.id;
+          renderTgChannels();
+        }
+      });
+
+      const freqInput = card.querySelector(".ch-freq-input");
+      const sliderInput = card.querySelector(".ch-slider");
+      const waveSelect = card.querySelector(".ch-wave-select");
+      const muteBtn = card.querySelector(".ch-mute-btn");
+      const delBtn = card.querySelector(".ch-del-btn");
+
+      freqInput.addEventListener("input", () => {
+        ch.freq = Math.min(22000, Math.max(1, parseFloat(freqInput.value) || 440));
+        sliderInput.value = freqToSlider(ch.freq);
+        syncAudioNodes();
+      });
+
+      sliderInput.addEventListener("input", () => {
+        ch.freq = sliderToFreq(Number(sliderInput.value));
+        freqInput.value = ch.freq;
+        syncAudioNodes();
+      });
+
+      waveSelect.addEventListener("change", () => {
+        ch.wave = waveSelect.value;
+        syncAudioNodes();
+      });
+
+      muteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        ch.enabled = !ch.enabled;
+        muteBtn.textContent = ch.enabled ? "🔊 ON" : "🔇 ミュート";
+        syncAudioNodes();
+      });
+
+      if (delBtn) {
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (ch.osc) {
+            ch.osc.stop();
+            ch.osc.disconnect();
+          }
+          tgChannels = tgChannels.filter((item) => item.id !== ch.id);
+          if (selectedChannelId === ch.id && tgChannels.length > 0) {
+            selectedChannelId = tgChannels[0].id;
+          }
+          renderTgChannels();
+          syncAudioNodes();
+        });
+      }
+
+      tgChannelsEl.appendChild(card);
     });
+  }
+
+  function addTgChannel(freq = 440, wave = "sine") {
+    const id = nextChannelId++;
+    tgChannels.push({ id, freq, wave, enabled: true, osc: null, gain: null });
+    selectedChannelId = id;
+    renderTgChannels();
+    syncAudioNodes();
+  }
+
+  // 初期1音目（440Hz）を作成
+  addTgChannel(440, "sine");
+
+  tgAddBtn.addEventListener("click", () => {
+    // 2音目以降は和音になりやすいようデフォルト周波数を少し変えて追加
+    const defaultNotes = [440, 523.25, 659.25, 783.99];
+    const freq = defaultNotes[tgChannels.length % defaultNotes.length];
+    addTgChannel(freq, "sine");
   });
 
   document.querySelectorAll(".tg-preset").forEach((btn) => {
     btn.addEventListener("click", () => {
-      setFrequency(parseFloat(btn.dataset.freq), true);
-    });
-  });
-
-  waveButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentWave = btn.dataset.wave;
-      waveButtons.forEach((b) => b.classList.toggle("active", b === btn));
-      if (oscillator) {
-        oscillator.type = currentWave;
-      }
+      const target = tgChannels.find((c) => c.id === selectedChannelId) || tgChannels[0];
+      if (!target) return;
+      target.freq = parseFloat(btn.dataset.freq);
+      renderTgChannels();
+      syncAudioNodes();
     });
   });
 
   tgVolSlider.addEventListener("input", () => {
     const pct = Number(tgVolSlider.value);
     tgVolVal.textContent = `${pct}%`;
-    if (gainNode && audioCtx) {
-      gainNode.gain.setValueAtTime(pct / 100, audioCtx.currentTime);
+    if (masterGain && audioCtx) {
+      masterGain.gain.setValueAtTime(pct / 100, audioCtx.currentTime);
     }
   });
 
@@ -1554,42 +1656,38 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tgPlaying) {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.connect(audioCtx.destination);
       }
       if (audioCtx.state === "suspended") {
         audioCtx.resume();
       }
-      oscillator = audioCtx.createOscillator();
-      gainNode = audioCtx.createGain();
-
-      oscillator.type = currentWave;
-      oscillator.frequency.setValueAtTime(parseFloat(tgFreqInput.value) || 440, audioCtx.currentTime);
-      gainNode.gain.setValueAtTime(Number(tgVolSlider.value) / 100, audioCtx.currentTime);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.start();
-
+      masterGain.gain.setValueAtTime(Number(tgVolSlider.value) / 100, audioCtx.currentTime);
       tgPlaying = true;
-      tgToggleBtn.textContent = "⏹ 停止";
+      syncAudioNodes();
+      tgToggleBtn.textContent = "⏹ すべて停止";
     } else {
-      if (oscillator) {
-        oscillator.stop();
-        oscillator.disconnect();
-        oscillator = null;
-      }
+      tgChannels.forEach((ch) => {
+        if (ch.osc) {
+          ch.osc.stop();
+          ch.osc.disconnect();
+          ch.osc = null;
+          ch.gain = null;
+        }
+      });
       tgPlaying = false;
-      tgToggleBtn.textContent = "▶ 音を鳴らす";
+      tgToggleBtn.textContent = "▶ すべて再生";
     }
   });
 
   // ==========================================
-  // 13. キーボード・マウス動作確認
+  // 13. キーボード・マウス動作確認（ビジュアル図・押下済色変化）
   // ==========================================
+  const kbVisualEl = document.getElementById("kb-visual");
   const kmPreventCheck = document.getElementById("km-prevent-default");
-  const kmActiveKeysEl = document.getElementById("km-active-keys");
   const kmActiveCountEl = document.getElementById("km-active-count");
+  const kmTestedCountEl = document.getElementById("km-tested-count");
   const kmLastKeyEl = document.getElementById("km-last-key");
-  const kmLastCodeEl = document.getElementById("km-last-code");
   const kmLastIntervalEl = document.getElementById("km-last-interval");
   const kmHistoryEl = document.getElementById("km-history");
   const kmClearBtn = document.getElementById("km-clear-btn");
@@ -1599,23 +1697,84 @@ document.addEventListener("DOMContentLoaded", () => {
   const kmWheelCountEl = document.getElementById("km-wheel-count");
   const mbtnWheelEl = document.getElementById("mbtn-wheel");
 
-  const pressedKeyMap = new Map(); // code -> label
-  const lastKeyDownTime = new Map(); // code -> timestamp
+  // キーボード配列定義（JIS / US 共通物理コード対応）
+  const kbLayoutRows = [
+    [
+      { code: "Escape", label: "Esc", w: 1.2 }, { spacer: 0.5 },
+      { code: "F1", label: "F1" }, { code: "F2", label: "F2" }, { code: "F3", label: "F3" }, { code: "F4", label: "F4" }, { spacer: 0.3 },
+      { code: "F5", label: "F5" }, { code: "F6", label: "F6" }, { code: "F7", label: "F7" }, { code: "F8", label: "F8" }, { spacer: 0.3 },
+      { code: "F9", label: "F9" }, { code: "F10", label: "F10" }, { code: "F11", label: "F11" }, { code: "F12", label: "F12" }, { spacer: 0.3 },
+      { code: "PrintScreen", label: "PrtSc" }, { code: "ScrollLock", label: "ScrLk" }, { code: "Pause", label: "Pause" }
+    ],
+    [
+      { code: "Backquote", label: "半/全" },
+      { code: "Digit1", label: "1" }, { code: "Digit2", label: "2" }, { code: "Digit3", label: "3" }, { code: "Digit4", label: "4" },
+      { code: "Digit5", label: "5" }, { code: "Digit6", label: "6" }, { code: "Digit7", label: "7" }, { code: "Digit8", label: "8" },
+      { code: "Digit9", label: "9" }, { code: "Digit0", label: "0" }, { code: "Minus", label: "-" }, { code: "Equal", label: "^ / =" },
+      { code: "IntlYen", label: "¥" }, { code: "Backspace", label: "BS", w: 1.6 }, { spacer: 0.3 },
+      { code: "Insert", label: "Ins" }, { code: "Home", label: "Home" }, { code: "PageUp", label: "PgUp" }
+    ],
+    [
+      { code: "Tab", label: "Tab", w: 1.4 },
+      { code: "KeyQ", label: "Q" }, { code: "KeyW", label: "W" }, { code: "KeyE", label: "E" }, { code: "KeyR", label: "R" },
+      { code: "KeyT", label: "T" }, { code: "KeyY", label: "Y" }, { code: "KeyU", label: "U" }, { code: "KeyI", label: "I" },
+      { code: "KeyO", label: "O" }, { code: "KeyP", label: "P" }, { code: "BracketLeft", label: "@ / [" }, { code: "BracketRight", label: "[ / ]" },
+      { code: "Enter", label: "Enter", w: 1.6 }, { spacer: 0.3 },
+      { code: "Delete", label: "Del" }, { code: "End", label: "End" }, { code: "PageDown", label: "PgDn" }
+    ],
+    [
+      { code: "CapsLock", label: "Caps", w: 1.7 },
+      { code: "KeyA", label: "A" }, { code: "KeyS", label: "S" }, { code: "KeyD", label: "D" }, { code: "KeyF", label: "F" },
+      { code: "KeyG", label: "G" }, { code: "KeyH", label: "H" }, { code: "KeyJ", label: "J" }, { code: "KeyK", label: "K" },
+      { code: "KeyL", label: "L" }, { code: "Semicolon", label: ";" }, { code: "Quote", label: ": / '" }, { code: "Backslash", label: "] / \\" },
+      { spacer: 1.3 }, { spacer: 0.3 }, { spacer: 3.1 }
+    ],
+    [
+      { code: "ShiftLeft", label: "Shift", w: 2.1 },
+      { code: "KeyZ", label: "Z" }, { code: "KeyX", label: "X" }, { code: "KeyC", label: "C" }, { code: "KeyV", label: "V" },
+      { code: "KeyB", label: "B" }, { code: "KeyN", label: "N" }, { code: "KeyM", label: "M" }, { code: "Comma", label: "," },
+      { code: "Period", label: "." }, { code: "Slash", label: "/" }, { code: "IntlRo", label: "ろ" },
+      { code: "ShiftRight", label: "Shift", w: 1.9 }, { spacer: 0.3 },
+      { spacer: 1 }, { code: "ArrowUp", label: "↑" }, { spacer: 1 }
+    ],
+    [
+      { code: "ControlLeft", label: "Ctrl", w: 1.3 }, { code: "MetaLeft", label: "Win", w: 1.2 }, { code: "AltLeft", label: "Alt", w: 1.2 },
+      { code: "NonConvert", label: "無変換", w: 1.3 }, { code: "Space", label: "Space", w: 4.2 }, { code: "Convert", label: "変換", w: 1.3 },
+      { code: "KanaMode", label: "かな", w: 1.2 }, { code: "AltRight", label: "Alt", w: 1.1 }, { code: "ContextMenu", label: "Menu", w: 1.1 },
+      { code: "ControlRight", label: "Ctrl", w: 1.3 }, { spacer: 0.3 },
+      { code: "ArrowLeft", label: "←" }, { code: "ArrowDown", label: "↓" }, { code: "ArrowRight", label: "→" }
+    ]
+  ];
+
+  const keyDomMap = new Map();
+  kbLayoutRows.forEach((row) => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "kb-row";
+    row.forEach((item) => {
+      const kDiv = document.createElement("div");
+      if (item.spacer) {
+        kDiv.className = "kb-key spacer";
+        kDiv.style.setProperty("--w", item.spacer);
+      } else {
+        kDiv.className = "kb-key";
+        kDiv.style.setProperty("--w", item.w || 1);
+        kDiv.textContent = item.label;
+        kDiv.title = item.code;
+        keyDomMap.set(item.code, kDiv);
+      }
+      rowDiv.appendChild(kDiv);
+    });
+    kbVisualEl.appendChild(rowDiv);
+  });
+
+  const activeKeyCodes = new Set();
+  const testedKeyCodes = new Set();
+  const lastKeyDownTime = new Map();
   let wheelTotal = 0;
 
-  function renderActiveKeys() {
-    kmActiveCountEl.textContent = String(pressedKeyMap.size);
-    if (pressedKeyMap.size === 0) {
-      kmActiveKeysEl.innerHTML = '<span class="hint-text">キーを押してください...</span>';
-      return;
-    }
-    kmActiveKeysEl.innerHTML = "";
-    pressedKeyMap.forEach((label) => {
-      const span = document.createElement("span");
-      span.className = "key-badge";
-      span.textContent = label;
-      kmActiveKeysEl.appendChild(span);
-    });
+  function updateKeyCounts() {
+    kmActiveCountEl.textContent = String(activeKeyCodes.size);
+    kmTestedCountEl.textContent = String(testedKeyCodes.size);
   }
 
   document.addEventListener("keydown", (e) => {
@@ -1625,13 +1784,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const now = performance.now();
     const displayKey = e.key === " " ? "Space" : e.key;
-    const label = `${displayKey} (${e.code})`;
 
-    pressedKeyMap.set(e.code, label);
-    renderActiveKeys();
+    activeKeyCodes.add(e.code);
+    testedKeyCodes.add(e.code);
+    updateKeyCounts();
 
-    kmLastKeyEl.textContent = displayKey;
-    kmLastCodeEl.textContent = e.code;
+    const keyEl = keyDomMap.get(e.code);
+    if (keyEl) {
+      keyEl.classList.add("active", "tested");
+    }
+
+    kmLastKeyEl.textContent = `${displayKey} (${e.code})`;
 
     if (lastKeyDownTime.has(e.code)) {
       const diff = now - lastKeyDownTime.get(e.code);
@@ -1651,17 +1814,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("keyup", (e) => {
-    if (pressedKeyMap.has(e.code)) {
-      pressedKeyMap.delete(e.code);
-      renderActiveKeys();
+    activeKeyCodes.delete(e.code);
+    updateKeyCounts();
+    const keyEl = keyDomMap.get(e.code);
+    if (keyEl) {
+      keyEl.classList.remove("active");
     }
   });
 
   window.addEventListener("blur", () => {
-    if (pressedKeyMap.size > 0) {
-      pressedKeyMap.clear();
-      renderActiveKeys();
-    }
+    activeKeyCodes.forEach((code) => {
+      const keyEl = keyDomMap.get(code);
+      if (keyEl) keyEl.classList.remove("active");
+    });
+    activeKeyCodes.clear();
+    updateKeyCounts();
   });
 
   kmMousePad.addEventListener("mousemove", (e) => {
@@ -1673,13 +1840,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   kmMousePad.addEventListener("mousedown", (e) => {
     e.preventDefault();
-    const cell = document.getElementById(`mbtn-${e.button}`);
-    if (cell) cell.classList.add("active");
+    const box = document.getElementById(`mbtn-${e.button}`);
+    const svgPart = document.getElementById(`msvg-${e.button}`);
+    if (box) box.classList.add("active", "tested");
+    if (svgPart) svgPart.classList.add("active", "tested");
   });
 
   document.addEventListener("mouseup", (e) => {
-    const cell = document.getElementById(`mbtn-${e.button}`);
-    if (cell) cell.classList.remove("active");
+    const box = document.getElementById(`mbtn-${e.button}`);
+    const svgPart = document.getElementById(`msvg-${e.button}`);
+    if (box) box.classList.remove("active");
+    if (svgPart) svgPart.classList.remove("active");
   });
 
   kmMousePad.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -1689,7 +1860,10 @@ document.addEventListener("DOMContentLoaded", () => {
     wheelTotal += Math.round(e.deltaY);
     kmWheelCountEl.textContent = String(wheelTotal);
     mbtnWheelEl.textContent = e.deltaY < 0 ? "ホイール: ↑ 上回転" : "ホイール: ↓ 下回転";
-    mbtnWheelEl.classList.add("active");
+    mbtnWheelEl.classList.add("active", "tested");
+    const wheelSvg = document.getElementById("msvg-1");
+    if (wheelSvg) wheelSvg.classList.add("tested");
+
     clearTimeout(mbtnWheelEl._timer);
     mbtnWheelEl._timer = setTimeout(() => {
       mbtnWheelEl.classList.remove("active");
@@ -1697,12 +1871,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }, { passive: false });
 
   kmClearBtn.addEventListener("click", () => {
-    pressedKeyMap.clear();
+    activeKeyCodes.clear();
+    testedKeyCodes.clear();
     lastKeyDownTime.clear();
-    renderActiveKeys();
+    keyDomMap.forEach((el) => el.classList.remove("active", "tested"));
+    document.querySelectorAll(".mouse-btn-item, .m-part").forEach((el) => el.classList.remove("active", "tested"));
+    updateKeyCounts();
     kmHistoryEl.innerHTML = "";
     kmLastKeyEl.textContent = "---";
-    kmLastCodeEl.textContent = "---";
     kmLastIntervalEl.textContent = "--- ms";
     wheelTotal = 0;
     kmWheelCountEl.textContent = "0";
@@ -1710,11 +1886,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 14. コントローラー動作確認（Gamepad API）
+  // 14. コントローラー動作確認（DualSense対応強化）
   // ==========================================
   const gpSelect = document.getElementById("gp-select");
+  const gpRescanBtn = document.getElementById("gp-rescan-btn");
   const gpVibrateBtn = document.getElementById("gp-vibrate-btn");
   const gpEmptyCard = document.getElementById("gp-empty-card");
+  const gpEnvStatusEl = document.getElementById("gp-env-status");
   const gpActiveArea = document.getElementById("gp-active-area");
   const gpNameEl = document.getElementById("gp-name");
   const gpMappingEl = document.getElementById("gp-mapping");
@@ -1722,20 +1900,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const gpStickREl = document.getElementById("gp-stick-r");
   const gpStickLValEl = document.getElementById("gp-stick-l-val");
   const gpStickRValEl = document.getElementById("gp-stick-r-val");
+  const gpAxesGrid = document.getElementById("gp-axes-grid");
   const gpButtonsGrid = document.getElementById("gp-buttons-grid");
 
-  const standardBtnNames = [
-    "B0 (A / ×)", "B1 (B / ○)", "B2 (X / □)", "B3 (Y / △)",
-    "B4 (L1 / LB)", "B5 (R1 / RB)", "B6 (L2 / LT)", "B7 (R2 / RT)",
-    "B8 (Select / Share)", "B9 (Start / Options)", "B10 (L3)", "B11 (R3)",
+  // DualSense / 標準コントローラー両対応ラベル
+  const psBtnNames = [
+    "B0 (× / A)", "B1 (○ / B)", "B2 (□ / X)", "B3 (△ / Y)",
+    "B4 (L1)", "B5 (R1)", "B6 (L2)", "B7 (R2)",
+    "B8 (Create / Share)", "B9 (Options)", "B10 (L3)", "B11 (R3)",
     "B12 (十字 上)", "B13 (十字 下)", "B14 (十字 左)", "B15 (十字 右)",
-    "B16 (Home / PS)"
+    "B16 (PS / Home)", "B17 (タッチパッド)"
   ];
 
   let renderedBtnCount = 0;
+  let renderedAxesCount = 0;
+
+  function getConnectedPads() {
+    if (!navigator.getGamepads) return [];
+    const list = navigator.getGamepads();
+    const result = [];
+    for (let i = 0; i < list.length; i++) {
+      if (list[i]) result.push(list[i]);
+    }
+    return result;
+  }
+
+  function updateGpEnvStatus(padCount) {
+    const secure = window.isSecureContext ? "HTTPS/安全コンテキストOK" : "非HTTPS（API制限の可能性）";
+    const api = navigator.getGamepads ? "Gamepad API対応" : "Gamepad API非対応";
+    gpEnvStatusEl.textContent = `${api} / ${secure} / 現在の検出数: ${padCount}台`;
+  }
 
   function refreshGamepadList() {
-    const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter(Boolean) : [];
+    const pads = getConnectedPads();
+    updateGpEnvStatus(pads.length);
     const prevVal = gpSelect.value;
 
     gpSelect.innerHTML = "";
@@ -1761,13 +1959,15 @@ document.addEventListener("DOMContentLoaded", () => {
     gpActiveArea.classList.remove("hidden");
   }
 
+  updateGpEnvStatus(0);
   window.addEventListener("gamepadconnected", refreshGamepadList);
   window.addEventListener("gamepaddisconnected", refreshGamepadList);
+  gpRescanBtn.addEventListener("click", refreshGamepadList);
 
   function pollGamepads() {
-    if (currentTool === "gamepad" && navigator.getGamepads) {
-      const pads = Array.from(navigator.getGamepads()).filter(Boolean);
-      if (pads.length > 0 && gpSelect.value === "") {
+    if (currentTool === "gamepad") {
+      const pads = getConnectedPads();
+      if (pads.length > 0 && (gpSelect.value === "" || gpSelect.options.length !== pads.length)) {
         refreshGamepadList();
       }
 
@@ -1778,21 +1978,38 @@ document.addEventListener("DOMContentLoaded", () => {
         gpEmptyCard.classList.add("hidden");
         gpActiveArea.classList.remove("hidden");
         gpNameEl.textContent = pad.id;
-        gpMappingEl.textContent = pad.mapping || "non-standard";
+        gpMappingEl.textContent = pad.mapping || "non-standard (Raw HID)";
         gpVibrateBtn.disabled = !pad.vibrationActuator;
 
-        // スティック更新（半径62px内で移動）
+        // DualSense Bluetooth/Raw HID 接続時は右スティックYが axes[5] に割り当てられる場合があるための自動補正
         const lx = pad.axes[0] || 0;
         const ly = pad.axes[1] || 0;
         const rx = pad.axes[2] || 0;
-        const ry = pad.axes[3] || 0;
+        const useAxis5ForRy = pad.mapping !== "standard" && pad.axes.length >= 6 && Math.abs(pad.axes[5]) < 0.5 && Math.abs(pad.axes[3]) > 0.8;
+        const ry = useAxis5ForRy ? (pad.axes[5] || 0) : (pad.axes[3] || 0);
 
         gpStickLEl.style.transform = `translate(calc(-50% + ${lx * 58}px), calc(-50% + ${ly * 58}px))`;
         gpStickREl.style.transform = `translate(calc(-50% + ${rx * 58}px), calc(-50% + ${ry * 58}px))`;
         gpStickLValEl.textContent = `X: ${lx.toFixed(3)} / Y: ${ly.toFixed(3)}`;
         gpStickRValEl.textContent = `X: ${rx.toFixed(3)} / Y: ${ry.toFixed(3)}`;
 
-        // ボタン枠の生成（ボタン数が変わった場合のみ再構築）
+        // 全アナログ軸 (Axes) の生値更新
+        if (renderedAxesCount !== pad.axes.length) {
+          renderedAxesCount = pad.axes.length;
+          gpAxesGrid.innerHTML = "";
+          pad.axes.forEach((_, idx) => {
+            const div = document.createElement("div");
+            div.className = "gp-axis-cell";
+            div.innerHTML = `<span>Axis ${idx}</span><strong id="gp-axis-val-${idx}">0.000</strong>`;
+            gpAxesGrid.appendChild(div);
+          });
+        }
+        pad.axes.forEach((val, idx) => {
+          const el = document.getElementById(`gp-axis-val-${idx}`);
+          if (el) el.textContent = val.toFixed(3);
+        });
+
+        // ボタン枠の生成
         if (renderedBtnCount !== pad.buttons.length) {
           renderedBtnCount = pad.buttons.length;
           gpButtonsGrid.innerHTML = "";
@@ -1800,7 +2017,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const cell = document.createElement("div");
             cell.className = "gp-btn-cell";
             cell.id = `gp-btn-cell-${idx}`;
-            const label = standardBtnNames[idx] || `Button ${idx}`;
+            const label = psBtnNames[idx] || `Button ${idx}`;
             cell.innerHTML = `
               <div class="gp-btn-top">
                 <span>${label}</span>
@@ -1833,7 +2050,7 @@ document.addEventListener("DOMContentLoaded", () => {
   requestAnimationFrame(pollGamepads);
 
   gpVibrateBtn.addEventListener("click", () => {
-    const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter(Boolean) : [];
+    const pads = getConnectedPads();
     const selectedIdx = parseInt(gpSelect.value, 10);
     const pad = pads.find((p) => p.index === selectedIdx) || pads[0];
     if (pad && pad.vibrationActuator) {
