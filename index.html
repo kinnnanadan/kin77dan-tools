@@ -10,7 +10,7 @@
   <!-- モバイル用ヘッダー -->
   <header class="mobile-header">
     <button id="menu-toggle" class="icon-btn" aria-label="メニューを開く">☰</button>
-    <span class="site-title-mobile">kin77dan Tools</span>
+    <a href="#home" class="site-title-mobile" id="mobile-home-link">kin77dan Tools</a>
   </header>
 
   <!-- オーバーレイ（モバイル時） -->
@@ -20,14 +20,14 @@
     <!-- サイドメニュー -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
-        <a href="./" class="site-title">kin77dan Tools</a>
+        <a href="#home" class="site-title" id="sidebar-home-link">kin77dan Tools</a>
         <p class="site-subtitle">Daily Utilities / Web Tools</p>
       </div>
 
       <nav class="nav-section">
         <div class="nav-label">TOOLS</div>
         <ul class="nav-list">
-          <li><a href="#clock" class="nav-link tool-link active" data-tool="clock">デジタル時計</a></li>
+          <li><a href="#clock" class="nav-link tool-link" data-tool="clock">デジタル時計</a></li>
           <li><a href="#calc" class="nav-link tool-link" data-tool="calc">電卓</a></li>
           <li><a href="#stopwatch" class="nav-link tool-link" data-tool="stopwatch">ストップウォッチ</a></li>
           <li><a href="#bpm" class="nav-link tool-link" data-tool="bpm">BPM測定</a></li>
@@ -80,8 +80,125 @@
 
     <!-- メインコンテンツ -->
     <main class="main-content">
+      <!-- 0. TOPページ（ツール一覧＆検索） -->
+      <section id="panel-home" class="tool-panel active">
+        <div class="card home-hero">
+          <h1>kin77dan Tools</h1>
+          <p>
+            私個人が日常的に欲しいと思ったWebツール（時計・関数電卓・電子工作計算・デバイス動作確認など）を適当にまとめた個人ツール集です。すべてブラウザ内のみで動作します。
+          </p>
+        </div>
+
+        <div class="home-search-bar mt-1">
+          <input type="text" id="home-search-input" class="tool-input" placeholder="ツール名や用途で検索（例: 時計, 微分, 抵抗, DualSense, 16進数, Hz...）" autocomplete="off">
+          <button type="button" id="home-search-clear" class="action-btn">クリア</button>
+        </div>
+
+        <div id="home-tools-grid" class="home-tools-grid mt-1">
+          <a href="#clock" class="tool-card" data-tool="clock" data-keywords="時計 世界時計 unix 全画面 時刻">
+            <div class="tool-card-top">
+              <h3>デジタル時計</h3>
+              <span class="tag">日常</span>
+            </div>
+            <p>全画面表示・UNIXタイムスタンプ・世界時計表示に対応したシンプル時計。</p>
+          </a>
+
+          <a href="#calc" class="tool-card" data-tool="calc" data-keywords="電卓 計算 関数 微分 積分 方程式 分数 順列 組合せ sin cos">
+            <div class="tool-card-top">
+              <h3>電卓（シンプル / 関数 / 多機能）</h3>
+              <span class="tag">計算</span>
+            </div>
+            <p>通常電卓から微積分・方程式・分数入力・変数代入まで切り替え可能な計算機。</p>
+          </a>
+
+          <a href="#stopwatch" class="tool-card" data-tool="stopwatch" data-keywords="ストップウォッチ タイマー ラップ 計測">
+            <div class="tool-card-top">
+              <h3>ストップウォッチ</h3>
+              <span class="tag">計測</span>
+            </div>
+            <p>1/100秒単位の計測とラップタイム記録に対応。</p>
+          </a>
+
+          <a href="#bpm" class="tool-card" data-tool="bpm" data-keywords="bpm テンポ 音楽 リズム タップ 測定">
+            <div class="tool-card-top">
+              <h3>BPM測定</h3>
+              <span class="tag">音楽</span>
+            </div>
+            <p>Spaceキーやタップ間隔からリアルタイムに曲のBPMを計測。</p>
+          </a>
+
+          <a href="#base" class="tool-card" data-tool="base" data-keywords="進数 2進数 8進数 10進数 16進数 bin oct dec hex 変換">
+            <div class="tool-card-top">
+              <h3>2・8・10・16進数変換</h3>
+              <span class="tag">開発・工作</span>
+            </div>
+            <p>いずれか1つに入力すると他の進数へ即座に相互変換。0〜15の早見表付き。</p>
+          </a>
+
+          <a href="#led" class="tool-card" data-tool="led" data-keywords="led 抵抗 計算 電子工作 電圧 電流 e24">
+            <div class="tool-card-top">
+              <h3>LED抵抗計算</h3>
+              <span class="tag">電子工作</span>
+            </div>
+            <p>電源電圧・順方向電圧・目標電流から必要な抵抗値とE24系列目安・消費電力を算出。</p>
+          </a>
+
+          <a href="#rc" class="tool-card" data-tool="rc" data-keywords="rc フィルター カットオフ周波数 ローパス ハイパス 時定数 電子工作">
+            <div class="tool-card-top">
+              <h3>RCフィルター計算</h3>
+              <span class="tag">電子工作</span>
+            </div>
+            <p>抵抗(R)・容量(C)・カットオフ周波数(fc)のうち2つを入力して残りを自動計算。</p>
+          </a>
+
+          <a href="#multivideo" class="tool-card" data-tool="multivideo" data-keywords="動画 同時再生 比較 フレーム送り 倍速">
+            <div class="tool-card-top">
+              <h3>複数動画同時再生</h3>
+              <span class="tag">メディア</span>
+            </div>
+            <p>複数のローカル動画ファイルを並べて同時再生・先頭同期・コマ送り比較。</p>
+          </a>
+
+          <a href="#tonegen" class="tool-card" data-tool="tonegen" data-keywords="周波数 ジェネレーター 音 正弦波 矩形波 ドレミ スピーカー テスト">
+            <div class="tool-card-top">
+              <h3>周波数ジェネレーター</h3>
+              <span class="tag">オーディオ</span>
+            </div>
+            <p>任意の周波数・波形を複数音同時に発振。ドレミ音階やテスト周波数プリセット搭載。</p>
+          </a>
+
+          <a href="#keymouse" class="tool-card" data-tool="keymouse" data-keywords="キーボード マウス 動作確認 チャタリング ポーリングレート テスト">
+            <div class="tool-card-top">
+              <h3>キーボード・マウス確認</h3>
+              <span class="tag">デバイス確認</span>
+            </div>
+            <p>ビジュアル図で押下済みキーやマウスボタンの色保持確認・ポーリングレート計測。</p>
+          </a>
+
+          <a href="#gamepad" class="tool-card" data-tool="gamepad" data-keywords="コントローラー dualsense ps5 ゲームパッド ドリフト スティック トリガー ポーリングレート">
+            <div class="tool-card-top">
+              <h3>コントローラー確認</h3>
+              <span class="tag">デバイス確認</span>
+            </div>
+            <p>DualSense対応の視覚ボタン確認・L2/R2トリガーメーター・スティック軌道とドリフト診断。</p>
+          </a>
+
+          <a href="#device" class="tool-card" data-tool="device" data-keywords="端末 スペック cpu メモリ gpu 解像度 os ブラウザ useragent">
+            <div class="tool-card-top">
+              <h3>端末スペック</h3>
+              <span class="tag">システム</span>
+            </div>
+            <p>アクセス中のPC・スマホのCPUコア数・GPU・画面解像度・バッテリー等を一覧表示。</p>
+          </a>
+        </div>
+
+        <div id="home-no-result" class="card mt-1 hidden">
+          <p class="hint-text">条件に一致するツールが見つかりませんでした。</p>
+        </div>
+      </section>
+
       <!-- 1. デジタル時計 -->
-      <section id="panel-clock" class="tool-panel active">
+      <section id="panel-clock" class="tool-panel">
         <div class="panel-header">
           <h1>デジタル時計</h1>
           <button type="button" id="clock-fullscreen-btn" class="action-btn">全画面表示</button>
@@ -132,14 +249,12 @@
               <div class="calc-frac-sub" id="calc-frac-sub"></div>
             </div>
 
-            <!-- 変数代入バー（多機能モード時） -->
             <div class="var-bar" id="var-bar">
               <label>x = <input type="number" id="var-x" step="any" placeholder="未設定"></label>
               <label>y = <input type="number" id="var-y" step="any" placeholder="未設定"></label>
               <label>z = <input type="number" id="var-z" step="any" placeholder="未設定"></label>
             </div>
 
-            <!-- 分数・微積・方程式の専用入力ビルダー -->
             <div class="calc-builder hidden" id="calc-builder">
               <div class="builder-header">
                 <span id="builder-title">入力アシスト</span>
@@ -152,7 +267,6 @@
               </div>
             </div>
 
-            <!-- 関数電卓ボタン群 -->
             <div class="sci-grid" id="sci-grid">
               <button type="button" class="calc-btn sci" data-val="sin(">sin</button>
               <button type="button" class="calc-btn sci" data-val="cos(">cos</button>
@@ -167,7 +281,6 @@
               <button type="button" class="calc-btn sci" data-val="!">n!</button>
             </div>
 
-            <!-- 多機能ボタン群 -->
             <div class="adv-grid" id="adv-grid">
               <button type="button" class="calc-btn sci" data-val="asin(">sin⁻¹</button>
               <button type="button" class="calc-btn sci" data-val="acos(">cos⁻¹</button>
@@ -204,7 +317,6 @@
               <button type="button" class="calc-btn sci" data-val="=">＝(式)</button>
             </div>
 
-            <!-- 基本電卓ボタン群 -->
             <div class="calc-grid">
               <button type="button" class="calc-btn op" data-val="C">C</button>
               <button type="button" class="calc-btn op" data-val="(">(</button>
@@ -683,7 +795,6 @@
         </div>
 
         <div id="gp-active-area" class="hidden">
-          <!-- 1. DualSense ビジュアル図＆テストモード -->
           <div class="card">
             <div class="history-header">
               <h2>コントローラー ボタン視覚確認</h2>
@@ -706,32 +817,26 @@
 
             <div class="gp-visual-wrap mt-1">
               <svg viewBox="0 0 560 330" class="gp-svg" aria-label="DualSenseコントローラー図">
-                <!-- L2 / R2 トリガー -->
                 <rect id="gpsvg-6" x="85" y="14" width="76" height="24" rx="8" class="gp-svg-part" />
                 <text x="123" y="30" class="gp-svg-label">L2</text>
                 <rect id="gpsvg-7" x="399" y="14" width="76" height="24" rx="8" class="gp-svg-part" />
                 <text x="437" y="30" class="gp-svg-label">R2</text>
 
-                <!-- L1 / R1 バンパー -->
                 <rect id="gpsvg-4" x="80" y="44" width="86" height="22" rx="8" class="gp-svg-part" />
                 <text x="123" y="59" class="gp-svg-label">L1</text>
                 <rect id="gpsvg-5" x="394" y="44" width="86" height="22" rx="8" class="gp-svg-part" />
                 <text x="437" y="59" class="gp-svg-label">R1</text>
 
-                <!-- コントローラー本体シルエット -->
                 <path d="M 110 72 L 450 72 C 490 72 520 110 532 195 C 542 265 512 310 475 305 C 445 300 425 255 395 232 L 165 232 C 135 255 115 300 85 305 C 48 310 18 265 28 195 C 40 110 70 72 110 72 Z" class="gp-svg-body" />
 
-                <!-- タッチパッド (B17) -->
                 <rect id="gpsvg-17" x="195" y="80" width="170" height="76" rx="10" class="gp-svg-part" />
                 <text x="280" y="122" class="gp-svg-label">TOUCHPAD</text>
 
-                <!-- Create (B8) / Options (B9) -->
                 <rect id="gpsvg-8" x="166" y="92" width="16" height="28" rx="6" class="gp-svg-part" />
                 <text x="174" y="85" class="gp-svg-label small">CREATE</text>
                 <rect id="gpsvg-9" x="378" y="92" width="16" height="28" rx="6" class="gp-svg-part" />
                 <text x="386" y="85" class="gp-svg-label small">OPT</text>
 
-                <!-- 十字キー (B12, B13, B14, B15) -->
                 <rect id="gpsvg-12" x="111" y="106" width="24" height="26" rx="4" class="gp-svg-part" />
                 <text x="123" y="123" class="gp-svg-label">↑</text>
                 <rect id="gpsvg-13" x="111" y="158" width="24" height="26" rx="4" class="gp-svg-part" />
@@ -741,7 +846,6 @@
                 <rect id="gpsvg-15" x="135" y="132" width="26" height="24" rx="4" class="gp-svg-part" />
                 <text x="148" y="148" class="gp-svg-label">→</text>
 
-                <!-- 右フェイスボタン △(B3), ○(B1), ×(B0), □(B2) -->
                 <circle id="gpsvg-3" cx="437" cy="112" r="15" class="gp-svg-part" />
                 <text x="437" y="117" class="gp-svg-label">△</text>
                 <circle id="gpsvg-1" cx="471" cy="144" r="15" class="gp-svg-part" />
@@ -751,23 +855,19 @@
                 <circle id="gpsvg-2" cx="403" cy="144" r="15" class="gp-svg-part" />
                 <text x="403" y="149" class="gp-svg-label">□</text>
 
-                <!-- 左スティック / L3 (B10) -->
                 <circle cx="198" cy="196" r="30" class="gp-stick-ring" />
                 <circle id="gpsvg-10" cx="198" cy="196" r="16" class="gp-svg-part" />
                 <text x="198" y="200" class="gp-svg-label small">L3</text>
 
-                <!-- 右スティック / R3 (B11) -->
                 <circle cx="362" cy="196" r="30" class="gp-stick-ring" />
                 <circle id="gpsvg-11" cx="362" cy="196" r="16" class="gp-svg-part" />
                 <text x="362" y="200" class="gp-svg-label small">R3</text>
 
-                <!-- PSボタン (B16) -->
                 <circle id="gpsvg-16" cx="280" cy="192" r="14" class="gp-svg-part" />
                 <text x="280" y="196" class="gp-svg-label small">PS</text>
               </svg>
             </div>
 
-            <!-- DualSense L2 / R2 アナログトリガー押し込み量メーター -->
             <div class="gp-triggers-grid mt-1">
               <div class="trigger-meter-card">
                 <div class="trigger-meter-top">
@@ -791,7 +891,6 @@
             </div>
           </div>
 
-          <!-- 2. スティック軌道記録＆ドリフト診断専用欄 -->
           <div class="card mt-1">
             <div class="history-header">
               <h2>スティック軌道記録・ドリフト診断</h2>
@@ -802,31 +901,28 @@
             </p>
 
             <div class="gp-sticks-grid">
-              <!-- 左スティック診断 -->
               <div class="stick-card">
                 <div class="stick-title">左スティック (L)</div>
                 <canvas id="gp-canvas-l" width="180" height="180" class="stick-canvas"></canvas>
                 <div class="stick-coords mono" id="gp-stick-l-val">X: +0.00000 / Y: +0.00000</div>
                 <div class="drift-diag-box" id="gp-drift-l">
                   <div>中心ズレ量: <strong class="mono" id="gp-offset-l">0.00000</strong> ／ 最大到達: <strong class="mono" id="gp-max-l">0.0%</strong></div>
-                  <div class="drift-badge ok" id="gp-diag-l">診断: 正常（中心安定）</div>
+                  <div class="drift-badge ok" id="gp-diag-l">診断: 良好（一般的なデッドゾーン内）</div>
                 </div>
               </div>
 
-              <!-- 右スティック診断 -->
               <div class="stick-card">
                 <div class="stick-title">右スティック (R)</div>
                 <canvas id="gp-canvas-r" width="180" height="180" class="stick-canvas"></canvas>
                 <div class="stick-coords mono" id="gp-stick-r-val">X: +0.00000 / Y: +0.00000</div>
                 <div class="drift-diag-box" id="gp-drift-r">
                   <div>中心ズレ量: <strong class="mono" id="gp-offset-r">0.00000</strong> ／ 最大到達: <strong class="mono" id="gp-max-r">0.0%</strong></div>
-                  <div class="drift-badge ok" id="gp-diag-r">診断: 正常（中心安定）</div>
+                  <div class="drift-badge ok" id="gp-diag-r">診断: 良好（一般的なデッドゾーン内）</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 3. 全ボタン・全アナログ軸 詳細生データ -->
           <div class="card mt-1">
             <div class="history-header">
               <h2>詳細生データ（全ボタン・全アナログ軸）</h2>

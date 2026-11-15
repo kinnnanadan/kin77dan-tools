@@ -64,10 +64,10 @@ body {
   display: none !important;
 }
 
+.mt-half { margin-top: 0.35rem; }
 .mt-1 { margin-top: 1rem; }
 .mb-1 { margin-bottom: 1rem; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-.mt-half { margin-top: 0.35rem; }
 
 .layout {
   display: flex;
@@ -103,6 +103,11 @@ body {
   color: var(--text-main);
   text-decoration: none;
   display: block;
+  transition: color 0.15s;
+}
+
+.site-title:hover {
+  color: var(--accent);
 }
 
 .site-subtitle {
@@ -313,7 +318,6 @@ h2 {
   background-color: var(--bg-hover);
 }
 
-/* バックグラウンドトグルチップ */
 .toggle-chip {
   display: inline-flex;
   align-items: center;
@@ -342,7 +346,6 @@ h2 {
   cursor: pointer;
 }
 
-/* モード切替スイッチ */
 .mode-switch {
   display: inline-flex;
   background-color: var(--bg-surface);
@@ -381,6 +384,77 @@ h2 {
   margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
+}
+
+/* ==========================================
+   0. TOPページ（ツール一覧＆検索）
+========================================== */
+.home-hero h1 {
+  margin-bottom: 0.5rem;
+}
+
+.home-hero p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.home-search-bar {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.home-search-bar .tool-input {
+  background-color: var(--bg-surface);
+}
+
+.home-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 0.9rem;
+}
+
+.tool-card {
+  display: block;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.15rem 1.25rem;
+  text-decoration: none;
+  color: var(--text-main);
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.tool-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.tool-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.tool-card-top h3 {
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.tag {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background-color: var(--bg-hover);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.tool-card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 /* ==========================================
@@ -1577,7 +1651,6 @@ h2 {
   fill: var(--text-muted);
 }
 
-/* L2 / R2 トリガーメーター */
 .gp-triggers-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1615,7 +1688,6 @@ h2 {
   transition: width 0.03s linear;
 }
 
-/* スティック軌道Canvas＆ドリフト診断 */
 .gp-sticks-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1858,6 +1930,8 @@ h2 {
   .site-title-mobile {
     font-weight: 700;
     font-size: 1.15rem;
+    color: var(--text-main);
+    text-decoration: none;
   }
 
   .sidebar {

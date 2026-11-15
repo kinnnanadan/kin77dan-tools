@@ -7,6 +7,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById("sidebar-overlay");
   const toolLinks = document.querySelectorAll(".tool-link");
   const toolPanels = document.querySelectorAll(".tool-panel");
+  const sidebarHomeLink = document.getElementById("sidebar-home-link");
+  const mobileHomeLink = document.getElementById("mobile-home-link");
+
+  // 共通ユーティリティ
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function calcMedianHz(intervals) {
+    if (intervals.length < 3) return null;
+    const sorted = [...intervals].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    if (median <= 0) return null;
+    return Math.round(1000 / median);
+  }
 
   // ==========================================
   // 1. テーマ・文字サイズ設定
@@ -47,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   // 2. ツール切り替え＆バックグラウンド制御
   // ==========================================
-  let currentTool = "clock";
+  let currentTool = "home";
   const mvBgPlayCheck = document.getElementById("mv-bg-play");
   const tgBgPlayCheck = document.getElementById("tg-bg-play");
 
@@ -63,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
   overlay.addEventListener("click", closeSidebar);
 
   function switchTool(toolId) {
-    // ページを離れる際、バックグラウンド再生がOFFなら自動停止
     if (currentTool === "multivideo" && toolId !== "multivideo" && !mvBgPlayCheck.checked) {
       pauseAllMultiVideos();
     }
@@ -83,6 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // サイドメニューの「kin77dan Tools」クリックでTOPページへ移動
+  [sidebarHomeLink, mobileHomeLink].forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      history.replaceState(null, "", "#home");
+      switchTool("home");
+    });
+  });
+
   toolLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
@@ -92,11 +115,52 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  const allToolIds = ["clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "multivideo", "tonegen", "keymouse", "gamepad", "device"];
+  const allToolIds = ["home", "clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "multivideo", "tonegen", "keymouse", "gamepad", "device"];
   const initialHash = location.hash.replace("#", "");
   if (allToolIds.includes(initialHash)) {
     switchTool(initialHash);
+  } else {
+    switchTool("home");
   }
+
+  // ==========================================
+  // 0. TOPページ（検索＆カード遷移）
+  // ==========================================
+  const homeSearchInput = document.getElementById("home-search-input");
+  const homeSearchClear = document.getElementById("home-search-clear");
+  const homeToolCards = document.querySelectorAll("#home-tools-grid .tool-card");
+  const homeNoResult = document.getElementById("home-no-result");
+
+  function filterHomeTools() {
+    const q = homeSearchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    homeToolCards.forEach((card) => {
+      const text = (card.textContent + " " + (card.dataset.keywords || "")).toLowerCase();
+      const match = q === "" || text.includes(q);
+      card.classList.toggle("hidden", !match);
+      if (match) visibleCount++;
+    });
+
+    homeNoResult.classList.toggle("hidden", visibleCount > 0);
+  }
+
+  homeSearchInput.addEventListener("input", filterHomeTools);
+
+  homeSearchClear.addEventListener("click", () => {
+    homeSearchInput.value = "";
+    filterHomeTools();
+    homeSearchInput.focus();
+  });
+
+  homeToolCards.forEach((card) => {
+    card.addEventListener("click", (e) => {
+      e.preventDefault();
+      const id = card.dataset.tool;
+      history.replaceState(null, "", `#${id}`);
+      switchTool(id);
+    });
+  });
 
   // ==========================================
   // 3. デジタル時計（シンプル / 詳細・世界時計）
@@ -144,10 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (clockDetailOpen) renderWorldClocks(new Date());
     });
   });
-
-  function pad(n) {
-    return String(n).padStart(2, "0");
-  }
 
   function renderWorldClocks(now) {
     worldCities.forEach((city, idx) => {
@@ -1514,7 +1574,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 12. キーボード・マウス動作確認（Caps / RShift / PrtSc 修正版）
+  // 12. キーボード・マウス動作確認（ポーリングレート計測付き）
   // ==========================================
   const kbVisualEl = document.getElementById("kb-visual");
   const kmPreventCheck = document.getElementById("km-prevent-default");
@@ -1528,6 +1588,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const kmMousePad = document.getElementById("km-mouse-pad");
   const kmMousePosEl = document.getElementById("km-mouse-pos");
   const kmWheelCountEl = document.getElementById("km-wheel-count");
+  const kmMouseHzEl = document.getElementById("km-mouse-hz");
+  const kmMouseMaxHzEl = document.getElementById("km-mouse-max-hz");
   const mbtnWheelEl = document.getElementById("mbtn-wheel");
 
   const kbLayoutRows = [
@@ -1604,7 +1666,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const lastKeyDownTime = new Map();
   let wheelTotal = 0;
 
-  // JISキーボードや特殊キーの物理コード正規化
   function normalizeKeyCode(e) {
     if (e.code === "ShiftRight" || (e.key === "Shift" && e.location === 2)) return "ShiftRight";
     if (e.code === "ControlRight" || (e.key === "Control" && e.location === 2)) return "ControlRight";
@@ -1641,7 +1702,7 @@ document.addEventListener("DOMContentLoaded", () => {
       keyEl.classList.add("active", "tested");
     }
 
-    kmLastKeyEl.textContent = `${displayKey} (${code} / loc:${e.location})`;
+    kmLastKeyEl.textContent = `${displayKey} (${code})`;
 
     if (lastKeyDownTime.has(code)) {
       const diff = now - lastKeyDownTime.get(code);
@@ -1677,7 +1738,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const code = normalizeKeyCode(e);
     recordKeyPress(e, code);
 
-    // CapsLockは環境によってkeyupが来ないことがあるため自動リリース予約
     if (code === "CapsLock") {
       setTimeout(() => releaseKey("CapsLock"), 160);
     }
@@ -1689,7 +1749,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const code = normalizeKeyCode(e);
 
-    // WindowsのPrintScreenや一部環境のCapsLockのようにkeydownなしでkeyupのみ飛ぶキーを救済
     if (!activeKeyCodes.has(code)) {
       recordKeyPress(e, code);
       setTimeout(() => releaseKey(code), 160);
@@ -1713,14 +1772,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let mouseIntervals = [];
   let maxMouseHz = 0;
   let mouseIdleTimer = null;
-
-  function calcMedianHz(intervals) {
-    if (intervals.length < 3) return null;
-    const sorted = [...intervals].sort((a, b) => a - b);
-    const median = sorted[Math.floor(sorted.length / 2)];
-    if (median <= 0) return null;
-    return Math.round(1000 / median);
-  }
 
   kmMousePad.addEventListener("pointermove", (e) => {
     const rect = kmMousePad.getBoundingClientRect();
@@ -1811,7 +1862,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 13. コントローラー動作確認（DualSenseビジュアル・ドリフト診断・軌道記録）
+  // 13. コントローラー動作確認（DualSenseビジュアル・ドリフト診断・ポーリングレート）
   // ==========================================
   const gpSelect = document.getElementById("gp-select");
   const gpRescanBtn = document.getElementById("gp-rescan-btn");
@@ -1819,9 +1870,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const gpEmptyCard = document.getElementById("gp-empty-card");
   const gpEnvStatusEl = document.getElementById("gp-env-status");
   const gpActiveArea = document.getElementById("gp-active-area");
-  const gpNameEl = document.getElementById("gp-name");
-  const gpMappingEl = document.getElementById("gp-mapping");
-
   const gpNameEl = document.getElementById("gp-name");
   const gpHzEl = document.getElementById("gp-hz");
   const gpMaxHzEl = document.getElementById("gp-max-hz");
@@ -1862,7 +1910,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let renderedAxesCount = 0;
   const gpTestedButtons = new Set();
 
-  // スティック軌道履歴と最大到達度
   let trailL = [];
   let trailR = [];
   let maxReachL = 0;
@@ -1922,7 +1969,6 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("gamepaddisconnected", refreshGamepadList);
   gpRescanBtn.addEventListener("click", refreshGamepadList);
 
-  // テストモードの色リセット
   gpResetTestBtn.addEventListener("click", () => {
     gpTestedButtons.clear();
     document.querySelectorAll(".gp-svg-part").forEach((el) => el.classList.remove("tested"));
@@ -1939,7 +1985,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // スティック軌道クリア
   gpClearTrailBtn.addEventListener("click", () => {
     trailL = [];
     trailR = [];
@@ -1947,7 +1992,6 @@ document.addEventListener("DOMContentLoaded", () => {
     maxReachR = 0;
   });
 
-  // スティック軌道＆現在位置をCanvasへ描画
   function drawStickCanvas(canvas, x, y, trail) {
     const ctx = canvas.getContext("2d");
     const w = canvas.width;
@@ -1958,21 +2002,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.clearRect(0, 0, w, h);
 
-    // 外周円・デッドゾーン目安円・十字線
     ctx.strokeStyle = "rgba(148, 163, 184, 0.35)";
     ctx.lineWidth = 1;
 
-    // 外周 (1.0)
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.stroke();
 
-    // ドリフト警告ライン (0.12)
     ctx.beginPath();
-    ctx.arc(cx, cy, radius * 0.12, 0, Math.PI * 2);
+    ctx.arc(cx, cy, radius * 0.10, 0, Math.PI * 2);
     ctx.stroke();
 
-    // 十字線
     ctx.beginPath();
     ctx.moveTo(cx - radius, cy);
     ctx.lineTo(cx + radius, cy);
@@ -1980,7 +2020,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.lineTo(cx, cy + radius);
     ctx.stroke();
 
-    // 軌道の描画
     if (trail.length > 1) {
       ctx.strokeStyle = "rgba(16, 185, 129, 0.7)";
       ctx.lineWidth = 2;
@@ -1994,7 +2033,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.stroke();
     }
 
-    // 現在のスティック位置ドット
     const curX = cx + x * radius;
     const curY = cy + y * radius;
     ctx.fillStyle = "#38bdf8";
@@ -2040,14 +2078,12 @@ document.addEventListener("DOMContentLoaded", () => {
         gpMappingEl.textContent = pad.mapping || "non-standard (Raw HID)";
         gpVibrateBtn.disabled = !pad.vibrationActuator;
 
-        // スティック座標取得（DualSense Raw HID 接続時の軸補正含む）
         const lx = pad.axes[0] || 0;
         const ly = pad.axes[1] || 0;
         const rx = pad.axes[2] || 0;
         const useAxis5ForRy = pad.mapping !== "standard" && pad.axes.length >= 6 && Math.abs(pad.axes[5]) < 0.5 && Math.abs(pad.axes[3]) > 0.8;
         const ry = useAxis5ForRy ? (pad.axes[5] || 0) : (pad.axes[3] || 0);
 
-        // 軌道ポイント追加（前回位置から少しでも動いたら記録）
         const lastL = trailL[trailL.length - 1];
         if (!lastL || Math.hypot(lx - lastL.x, ly - lastL.y) > 0.005) {
           trailL.push({ x: lx, y: ly });
@@ -2068,7 +2104,6 @@ document.addEventListener("DOMContentLoaded", () => {
         maxReachL = updateDriftDiagnosis(lx, ly, gpOffsetLEl, gpMaxLEl, gpDiagLEl, maxReachL);
         maxReachR = updateDriftDiagnosis(rx, ry, gpOffsetREl, gpMaxREl, gpDiagREl, maxReachR);
 
-        // L2 / R2 アナログトリガー押し込み量メーター更新
         const l2Val = pad.buttons[6] ? pad.buttons[6].value : 0;
         const r2Val = pad.buttons[7] ? pad.buttons[7].value : 0;
         gpL2ValEl.textContent = `${(l2Val * 100).toFixed(1)}% (${l2Val.toFixed(5)})`;
@@ -2076,7 +2111,6 @@ document.addEventListener("DOMContentLoaded", () => {
         gpR2ValEl.textContent = `${(r2Val * 100).toFixed(1)}% (${r2Val.toFixed(5)})`;
         gpR2BarEl.style.width = `${r2Val * 100}%`;
 
-        // SVGコントローラー図の各ボタン更新
         pad.buttons.forEach((btn, idx) => {
           const isPressed = btn.pressed || btn.value > 0.05;
           const svgEl = document.getElementById(`gpsvg-${idx}`);
@@ -2091,7 +2125,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        // 全アナログ軸 (Axes) 詳細生値更新
         if (renderedAxesCount !== pad.axes.length) {
           renderedAxesCount = pad.axes.length;
           gpAxesGrid.innerHTML = "";
@@ -2107,7 +2140,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (el) el.textContent = formatSigned(val);
         });
 
-        // 全ボタン詳細生値更新
         if (renderedBtnCount !== pad.buttons.length) {
           renderedBtnCount = pad.buttons.length;
           gpButtonsGrid.innerHTML = "";
@@ -2145,7 +2177,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   requestAnimationFrame(pollGamepads);
 
-  // コントローラーのポーリングレート計測（pad.timestamp の更新間隔から算出）
+  // コントローラーのポーリングレート計測
   let lastPadTs = 0;
   let padIntervals = [];
   let maxPadHz = 0;
