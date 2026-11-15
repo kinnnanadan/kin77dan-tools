@@ -64,6 +64,10 @@ body {
   display: none !important;
 }
 
+.mt-1 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
 .layout {
   display: flex;
   min-height: 100vh;
@@ -126,12 +130,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.55rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 6px;
   color: var(--text-main);
   text-decoration: none;
-  font-size: 0.95rem;
-  margin-bottom: 0.2rem;
+  font-size: 0.92rem;
+  margin-bottom: 0.18rem;
   transition: background-color 0.15s;
 }
 
@@ -213,7 +217,7 @@ body {
   flex: 1;
   margin-left: var(--sidebar-width);
   padding: 2rem;
-  max-width: 960px;
+  max-width: 980px;
 }
 
 .tool-panel {
@@ -236,6 +240,7 @@ body {
 .header-controls {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -264,8 +269,8 @@ h2 {
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
+  padding: 0.48rem 0.95rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: background-color 0.15s, border-color 0.15s;
 }
@@ -305,6 +310,35 @@ h2 {
 .mini-btn:hover {
   color: var(--text-main);
   background-color: var(--bg-hover);
+}
+
+/* バックグラウンドトグルチップ */
+.toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.42rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-chip:has(input:checked) {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
 }
 
 /* モード切替スイッチ */
@@ -348,7 +382,9 @@ h2 {
   justify-content: flex-end;
 }
 
-/* 1. 時計スタイル */
+/* ==========================================
+   1. 時計スタイル
+========================================== */
 .clock-card {
   position: relative;
   text-align: center;
@@ -408,7 +444,6 @@ h2 {
   font-size: clamp(4rem, 15vw, 11rem);
 }
 
-/* 時計の詳細モードエリア */
 .clock-detail-area {
   display: none;
   margin-top: 1.75rem;
@@ -447,8 +482,6 @@ h2 {
 .wc-city {
   font-size: 0.8rem;
   color: var(--text-muted);
-  display: flex;
-  justify-content: space-between;
 }
 
 .wc-time {
@@ -463,7 +496,9 @@ h2 {
   color: var(--text-muted);
 }
 
-/* 2. 電卓スタイル */
+/* ==========================================
+   2. 電卓スタイル
+========================================== */
 .calc-layout {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
@@ -507,15 +542,6 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
-.sci-grid,
-.adv-grid {
-  display: none;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.45rem;
-  margin-bottom: 0.5rem;
-}
-
-/* 変数代入バー (x, y, z) */
 .var-bar {
   display: none;
   grid-template-columns: repeat(3, 1fr);
@@ -548,7 +574,6 @@ h2 {
   outline: none;
 }
 
-/* 専用入力ビルダー */
 .calc-builder {
   background-color: var(--bg-body);
   border: 1px solid var(--accent);
@@ -608,55 +633,12 @@ h2 {
   color: #0b1120;
 }
 
-/* 分数・微分・積分のボタンアイコン */
-.icon-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.3rem 0.2rem;
-}
-
-.frac-icon {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1;
-  font-size: 0.72rem;
-}
-
-.frac-icon .f-bar {
-  width: 100%;
-  min-width: 14px;
-  height: 1.5px;
-  background-color: currentColor;
-  margin: 1.5px 0;
-}
-
-.diff-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.82rem;
-}
-
-.int-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 0.82rem;
-}
-
-.int-sym {
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.int-bounds {
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: space-between;
-  font-size: 0.6rem;
-  line-height: 1.05;
+.sci-grid,
+.adv-grid {
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
 }
 
 .calc-card.sci-mode .sci-grid,
@@ -665,34 +647,6 @@ h2 {
 }
 
 .calc-card.adv-mode .adv-grid {
-  display: grid;
-}
-
-.adv-help {
-  display: none;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  background-color: var(--bg-body);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.45rem 0.6rem;
-  margin-bottom: 0.6rem;
-  line-height: 1.45;
-  word-break: break-all;
-}
-
-.calc-card.adv-mode .adv-help {
-  display: block;
-}
-
-.sci-grid {
-  display: none;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.45rem;
-  margin-bottom: 0.55rem;
-}
-
-.calc-card.sci-mode .sci-grid {
   display: grid;
 }
 
@@ -719,8 +673,8 @@ h2 {
 }
 
 .calc-btn.sci {
-  padding: 0.6rem 0.25rem;
-  font-size: 0.9rem;
+  padding: 0.55rem 0.25rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
 }
 
@@ -743,12 +697,58 @@ h2 {
   color: #0b1120;
 }
 
+.icon-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.2rem;
+}
+
+.frac-icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-size: 0.72rem;
+}
+
+.frac-icon .f-bar {
+  width: 100%;
+  min-width: 14px;
+  height: 1.5px;
+  background-color: currentColor;
+  margin: 1.5px 0;
+}
+
+.diff-icon,
+.int-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.82rem;
+}
+
+.int-sym {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.int-bounds {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.6rem;
+  line-height: 1.05;
+}
+
 .history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.45rem;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -781,7 +781,9 @@ h2 {
   padding: 0;
 }
 
-/* 3. ストップウォッチスタイル */
+/* ==========================================
+   3. ストップウォッチスタイル
+========================================== */
 .sw-card {
   text-align: center;
   padding: 2rem 1.5rem;
@@ -816,7 +818,9 @@ h2 {
   cursor: default;
 }
 
-/* 4. BPM測定スタイル */
+/* ==========================================
+   4. BPM測定スタイル
+========================================== */
 .bpm-card {
   text-align: center;
   padding: 2rem 1.5rem;
@@ -879,7 +883,7 @@ h2 {
 }
 
 .stat-val {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -923,90 +927,152 @@ h2 {
   flex-wrap: wrap;
 }
 
-.checkbox-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
+/* ==========================================
+   5〜7. 進数変換・LED・RCフィルター共通
+========================================== */
+.base-grid,
+.calc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+}
+
+.rc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field-group label {
+  font-size: 0.83rem;
   color: var(--text-muted);
+  font-weight: 600;
+}
+
+.tool-input {
+  width: 100%;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.tool-input:focus {
+  border-color: var(--accent);
+}
+
+.tool-input.computed {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+  font-weight: 700;
+}
+
+.input-unit-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.unit-select {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.88rem;
   cursor: pointer;
 }
 
-/* 5. 端末スペック表示 */
-.spec-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.spec-card {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 1.15rem 1.25rem;
-}
-
-.spec-card h2 {
-  font-size: 1rem;
-  color: var(--accent);
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.spec-list {
-  list-style: none;
+.preset-bar {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.45rem;
-  font-size: 0.88rem;
+  margin-bottom: 0.75rem;
 }
 
-.spec-list li {
+.result-box {
+  margin-top: 1.25rem;
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.result-main {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 0.75rem;
-  border-bottom: 1px dashed var(--border-color);
-  padding-bottom: 0.3rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.65rem;
 }
 
-.spec-list li:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.spec-key {
+.result-label {
+  font-size: 0.9rem;
   color: var(--text-muted);
-  white-space: nowrap;
 }
 
-.spec-val {
-  font-weight: 600;
-  text-align: right;
-  word-break: break-word;
+.result-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 
-.ua-card {
-  padding: 1.15rem 1.25rem;
+.result-sub-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
 }
 
-.ua-text {
-  display: block;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  word-break: break-all;
-  line-height: 1.5;
+.result-sub-grid strong {
+  color: var(--text-main);
 }
 
-.footer {
-  margin-top: 3rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
-  font-size: 0.85rem;
+.form-error {
+  margin-top: 0.6rem;
+  font-size: 0.83rem;
+  color: #ef4444;
+  min-height: 1.1rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.ref-table th,
+.ref-table td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ref-table th {
   color: var(--text-muted);
+  font-weight: 600;
+  background-color: var(--bg-body);
 }
 
 /* ==========================================
@@ -1040,10 +1106,6 @@ h2 {
   gap: 0.4rem;
   font-size: 0.85rem;
   color: var(--text-muted);
-}
-
-.inline-label .unit-select {
-  padding: 0.35rem 0.5rem;
 }
 
 .mv-grid {
@@ -1108,7 +1170,7 @@ h2 {
 }
 
 /* ==========================================
-   9. 周波数ジェネレーター（複数音対応）
+   9. 周波数ジェネレーター
 ========================================== */
 .tg-master-bar {
   display: flex;
@@ -1197,7 +1259,7 @@ h2 {
 }
 
 /* ==========================================
-   10. キーボード・マウス動作確認（ビジュアル図）
+   10. キーボード・マウス動作確認
 ========================================== */
 .km-legend {
   display: inline-flex;
@@ -1271,14 +1333,12 @@ h2 {
   pointer-events: none;
 }
 
-/* 一度押したキーの色 */
 .kb-key.tested {
   background-color: rgba(16, 185, 129, 0.24);
   border-color: #10b981;
   color: var(--text-main);
 }
 
-/* 現在押下中のキーの色 */
 .kb-key.active {
   background-color: var(--accent) !important;
   border-color: var(--accent) !important;
@@ -1325,7 +1385,6 @@ h2 {
   padding: 0.15rem 0.45rem;
 }
 
-/* マウス図・ステータス */
 .mouse-visual-layout {
   display: flex;
   align-items: center;
@@ -1437,7 +1496,7 @@ h2 {
 }
 
 /* ==========================================
-   11. コントローラー動作確認
+   11. コントローラー動作確認（DualSenseビジュアル＆診断）
 ========================================== */
 .gp-troubleshoot-list {
   margin-left: 1.25rem;
@@ -1458,6 +1517,104 @@ h2 {
   border-bottom: 1px solid var(--border-color);
 }
 
+.gp-visual-wrap {
+  display: flex;
+  justify-content: center;
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.gp-svg {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  display: block;
+}
+
+.gp-svg-body {
+  fill: var(--bg-surface);
+  stroke: var(--border-color);
+  stroke-width: 3;
+}
+
+.gp-stick-ring {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.gp-svg-part {
+  fill: var(--bg-body);
+  stroke: var(--border-color);
+  stroke-width: 2.2;
+  transition: fill 0.06s, stroke 0.06s;
+}
+
+.gp-svg-part.tested {
+  fill: rgba(16, 185, 129, 0.28);
+  stroke: #10b981;
+}
+
+.gp-svg-part.active {
+  fill: var(--accent) !important;
+  stroke: var(--accent) !important;
+}
+
+.gp-svg-label {
+  fill: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.gp-svg-label.small {
+  font-size: 9px;
+  fill: var(--text-muted);
+}
+
+/* L2 / R2 トリガーメーター */
+.gp-triggers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+.trigger-meter-card {
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+}
+
+.trigger-meter-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  margin-bottom: 0.45rem;
+}
+
+.trigger-bar-bg {
+  width: 100%;
+  height: 12px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.trigger-bar-fill {
+  height: 100%;
+  width: 0%;
+  background-color: var(--accent);
+  transition: width 0.03s linear;
+}
+
+/* スティック軌道Canvas＆ドリフト診断 */
 .gp-sticks-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1475,48 +1632,15 @@ h2 {
 }
 
 .stick-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
 }
 
-.stick-pad {
-  position: relative;
-  width: 140px;
-  height: 140px;
+.stick-canvas {
   border-radius: 50%;
-  border: 2px solid var(--border-color);
   background-color: var(--bg-surface);
-}
-
-.stick-crosshair-h {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: var(--border-color);
-}
-
-.stick-crosshair-v {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background-color: var(--border-color);
-}
-
-.stick-dot {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: var(--accent);
-  transform: translate(-50%, -50%);
+  border: 2px solid var(--border-color);
 }
 
 .stick-coords {
@@ -1525,9 +1649,44 @@ h2 {
   color: var(--text-muted);
 }
 
+.drift-diag-box {
+  width: 100%;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed var(--border-color);
+  text-align: center;
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.drift-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.drift-badge.ok {
+  background-color: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+}
+
+.drift-badge.warn {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.drift-badge.bad {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
 .gp-axes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 0.45rem;
 }
 
@@ -1535,8 +1694,8 @@ h2 {
   background-color: var(--bg-body);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  padding: 0.35rem 0.55rem;
-  font-size: 0.78rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
   display: flex;
   justify-content: space-between;
   font-variant-numeric: tabular-nums;
@@ -1544,7 +1703,7 @@ h2 {
 
 .gp-buttons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
   gap: 0.55rem;
 }
 
@@ -1553,7 +1712,7 @@ h2 {
   border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.5rem 0.6rem;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -1584,17 +1743,83 @@ h2 {
   background-color: var(--accent);
 }
 
-@media (max-width: 768px) {
-  .mv-grid.cols-2,
-  .km-detail-grid,
-  .mouse-btn-grid,
-  .gp-sticks-grid {
-    grid-template-columns: 1fr;
-  }
+/* ==========================================
+   12. 端末スペック表示
+========================================== */
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
 
-  .mouse-visual-layout {
-    flex-direction: column;
-  }
+.spec-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.15rem 1.25rem;
+}
+
+.spec-card h2 {
+  font-size: 1rem;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.spec-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+}
+
+.spec-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 0.3rem;
+}
+
+.spec-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.spec-key {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.spec-val {
+  font-weight: 600;
+  text-align: right;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
+}
+
+.ua-card {
+  padding: 1.15rem 1.25rem;
+}
+
+.ua-text {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 /* モバイル対応 */
@@ -1617,10 +1842,6 @@ h2 {
     background-color: var(--bg-sidebar);
     border-bottom: 1px solid var(--border-color);
     padding: 0.75rem 1rem;
-  }
-
-  .spec-grid {
-    grid-template-columns: 1fr;
   }
 
   .icon-btn {
@@ -1659,166 +1880,20 @@ h2 {
     padding: 1.25rem;
   }
 
-  .calc-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* 共通ユーティリティ・フォーム系ツール */
-.mt-1 { margin-top: 1rem; }
-.mb-1 { margin-bottom: 1rem; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-
-.base-grid,
-.calc-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.9rem;
-}
-
-.rc-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.9rem;
-}
-
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.field-group label {
-  font-size: 0.83rem;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-.tool-input {
-  width: 100%;
-  background-color: var(--bg-body);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.55rem 0.75rem;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.15s, background-color 0.15s;
-}
-
-.tool-input:focus {
-  border-color: var(--accent);
-}
-
-.tool-input.computed {
-  border-color: var(--accent);
-  background-color: var(--accent-soft);
-  font-weight: 700;
-}
-
-.input-unit-row {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.unit-select {
-  background-color: var(--bg-body);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0 0.55rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.preset-bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-bottom: 0.75rem;
-}
-
-.result-box {
-  margin-top: 1.25rem;
-  background-color: var(--bg-body);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-}
-
-.result-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-bottom: 0.65rem;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 0.65rem;
-}
-
-.result-label {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-.result-value {
-  font-size: 1.65rem;
-  font-weight: 700;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-
-.result-sub-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.88rem;
-  color: var(--text-muted);
-}
-
-.result-sub-grid strong {
-  color: var(--text-main);
-}
-
-.form-error {
-  margin-top: 0.6rem;
-  font-size: 0.83rem;
-  color: #ef4444;
-  min-height: 1.1rem;
-}
-
-/* 進数早見表 */
-.table-wrap {
-  overflow-x: auto;
-}
-
-.ref-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.ref-table th,
-.ref-table td {
-  padding: 0.45rem 0.6rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.ref-table th {
-  color: var(--text-muted);
-  font-weight: 600;
-  background-color: var(--bg-body);
-}
-
-@media (max-width: 768px) {
+  .calc-layout,
   .base-grid,
   .calc-form-grid,
-  .rc-grid {
+  .rc-grid,
+  .mv-grid.cols-2,
+  .km-detail-grid,
+  .mouse-btn-grid,
+  .gp-triggers-grid,
+  .gp-sticks-grid,
+  .spec-grid {
     grid-template-columns: 1fr;
+  }
+
+  .mouse-visual-layout {
+    flex-direction: column;
   }
 }

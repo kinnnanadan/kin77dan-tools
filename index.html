@@ -88,13 +88,11 @@
         </div>
 
         <div class="card clock-card" id="clock-display-box">
-          <!-- 全画面中のみ右上に表示される解除ボタン -->
           <button type="button" id="clock-exit-fs-btn" class="exit-fs-btn">✕ 全画面解除</button>
 
           <div class="clock-date" id="clock-date">----/--/-- (---)</div>
           <div class="clock-time" id="clock-time">00:00:00</div>
 
-          <!-- 詳細モード時のみ表示される情報 -->
           <div id="clock-detail-area" class="clock-detail-area">
             <div class="clock-sub">
               <span>UNIX: <code id="clock-unix">0</code></span>
@@ -169,7 +167,7 @@
               <button type="button" class="calc-btn sci" data-val="!">n!</button>
             </div>
 
-            <!-- 多機能ボタン群（アイコン表示対応） -->
+            <!-- 多機能ボタン群 -->
             <div class="adv-grid" id="adv-grid">
               <button type="button" class="calc-btn sci" data-val="asin(">sin⁻¹</button>
               <button type="button" class="calc-btn sci" data-val="acos(">cos⁻¹</button>
@@ -177,12 +175,10 @@
               <button type="button" class="calc-btn sci" data-val="P">nPr</button>
               <button type="button" class="calc-btn sci" data-val="C">nCr</button>
 
-              <!-- 分数アイコン（-の上に■、下に□） -->
               <button type="button" class="calc-btn sci icon-key" data-builder="frac" title="分数入力">
                 <span class="frac-icon"><span>■</span><span class="f-bar"></span><span>□</span></span>
               </button>
 
-              <!-- 微分アイコン（d/dx上下表示 + ■） -->
               <button type="button" class="calc-btn sci icon-key" data-builder="diff" title="微分 d/dx">
                 <span class="diff-icon">
                   <span class="frac-icon"><span>d</span><span class="f-bar"></span><span>dx</span></span>
@@ -190,7 +186,6 @@
                 </span>
               </button>
 
-              <!-- 積分アイコン（∫の上下に□、右に■） -->
               <button type="button" class="calc-btn sci icon-key" data-builder="int" title="定積分 ∫">
                 <span class="int-icon">
                   <span class="int-sym">∫</span>
@@ -476,31 +471,15 @@
         </div>
       </section>
 
-      <!-- 12. 端末スペック -->
-      <section id="panel-device" class="tool-panel">
-        <div class="panel-header">
-          <h1>端末スペック</h1>
-          <div class="header-controls">
-            <button type="button" id="device-refresh-btn" class="action-btn">再取得</button>
-            <button type="button" id="device-copy-btn" class="action-btn primary">情報をコピー</button>
-          </div>
-        </div>
-
-        <div class="spec-grid" id="device-spec-grid"></div>
-
-        <div class="card ua-card">
-          <div class="history-header">
-            <h2>User-Agent</h2>
-          </div>
-          <code class="ua-text" id="device-ua">---</code>
-        </div>
-      </section>
-
       <!-- 8. 複数動画同時再生 -->
       <section id="panel-multivideo" class="tool-panel">
         <div class="panel-header">
           <h1>複数動画同時再生</h1>
           <div class="header-controls">
+            <label class="toggle-chip" title="OFFの場合、別ページへ移動すると自動で一時停止します">
+              <input type="checkbox" id="mv-bg-play">
+              <span>バックグラウンド再生</span>
+            </label>
             <label class="action-btn primary file-label">
               動画を追加選択
               <input type="file" id="mv-file-input" accept="video/*" multiple hidden>
@@ -549,6 +528,10 @@
         <div class="panel-header">
           <h1>周波数ジェネレーター</h1>
           <div class="header-controls">
+            <label class="toggle-chip" title="OFFの場合、別ページへ移動すると自動で音を停止します">
+              <input type="checkbox" id="tg-bg-play">
+              <span>バックグラウンド再生</span>
+            </label>
             <button type="button" id="tg-add-btn" class="action-btn">+ 音を追加</button>
             <button type="button" id="tg-toggle-btn" class="action-btn primary">▶ すべて再生</button>
           </div>
@@ -585,7 +568,6 @@
             <button type="button" class="mini-btn tg-preset" data-freq="15000">15kHz</button>
           </div>
 
-          <!-- 複数音スロット一覧 -->
           <div id="tg-channels" class="tg-channels mt-1"></div>
         </div>
       </section>
@@ -610,7 +592,6 @@
             </div>
           </div>
 
-          <!-- ビジュアルキーボード図 -->
           <div class="kb-scroll-wrap">
             <div id="kb-visual" class="kb-visual"></div>
           </div>
@@ -641,25 +622,16 @@
           </div>
 
           <div class="mouse-visual-layout" id="km-mouse-pad" tabindex="0">
-            <!-- マウス形状のSVGアイコン -->
             <div class="mouse-svg-wrap">
               <svg viewBox="0 0 180 260" class="mouse-svg" aria-label="マウス形状テスト図">
-                <!-- 本体ベース -->
                 <rect x="25" y="10" width="130" height="240" rx="65" class="m-body" />
-                <!-- 左クリック (0) -->
                 <path id="msvg-0" d="M 90 10 L 90 105 L 25 105 L 25 75 A 65 65 0 0 1 90 10 Z" class="m-part" />
-                <!-- 右クリック (2) -->
                 <path id="msvg-2" d="M 90 10 A 65 65 0 0 1 155 75 L 155 105 L 90 105 Z" class="m-part" />
-                <!-- 中央仕切り線 -->
                 <line x1="25" y1="105" x2="155" y2="105" class="m-line" />
                 <line x1="90" y1="10" x2="90" y2="105" class="m-line" />
-                <!-- ホイール / 中クリック (1) -->
                 <rect id="msvg-1" x="80" y="34" width="20" height="46" rx="10" class="m-part m-wheel-part" />
-                <!-- サイドボタン: 進む (4) -->
                 <rect id="msvg-4" x="15" y="112" width="12" height="36" rx="5" class="m-part" />
-                <!-- サイドボタン: 戻る (3) -->
                 <rect id="msvg-3" x="15" y="156" width="12" height="36" rx="5" class="m-part" />
-                <!-- ラベル -->
                 <text x="56" y="75" class="m-svg-text">左</text>
                 <text x="124" y="75" class="m-svg-text">右</text>
                 <text x="90" y="61" class="m-svg-text small">中</text>
@@ -708,45 +680,179 @@
         </div>
 
         <div id="gp-active-area" class="hidden">
+          <!-- 1. DualSense ビジュアル図＆テストモード -->
           <div class="card">
+            <div class="history-header">
+              <h2>コントローラー ボタン視覚確認</h2>
+              <div class="header-controls">
+                <span class="km-legend"><i class="leg-box active"></i>押下中</span>
+                <span class="km-legend"><i class="leg-box tested"></i>確認済</span>
+                <label class="toggle-chip">
+                  <input type="checkbox" id="gp-test-mode" checked>
+                  <span>テストモード（押下済色保持）</span>
+                </label>
+                <button type="button" id="gp-reset-test-btn" class="mini-btn">色リセット</button>
+              </div>
+            </div>
+
             <div class="gp-info-bar">
-              <div><strong>デバイス名:</strong> <span id="gp-name">---</span></div>
+              <div><strong>デバイス:</strong> <span id="gp-name">---</span></div>
               <div><strong>マッピング:</strong> <code id="gp-mapping">---</code></div>
             </div>
 
-            <div class="gp-sticks-grid mt-1">
-              <div class="stick-card">
-                <div class="stick-title">左スティック</div>
-                <div class="stick-pad">
-                  <div class="stick-crosshair-h"></div>
-                  <div class="stick-crosshair-v"></div>
-                  <div class="stick-dot" id="gp-stick-l"></div>
-                </div>
-                <div class="stick-coords mono" id="gp-stick-l-val">X: 0.000 / Y: 0.000</div>
-              </div>
+            <div class="gp-visual-wrap mt-1">
+              <svg viewBox="0 0 560 330" class="gp-svg" aria-label="DualSenseコントローラー図">
+                <!-- L2 / R2 トリガー -->
+                <rect id="gpsvg-6" x="85" y="14" width="76" height="24" rx="8" class="gp-svg-part" />
+                <text x="123" y="30" class="gp-svg-label">L2</text>
+                <rect id="gpsvg-7" x="399" y="14" width="76" height="24" rx="8" class="gp-svg-part" />
+                <text x="437" y="30" class="gp-svg-label">R2</text>
 
-              <div class="stick-card">
-                <div class="stick-title">右スティック</div>
-                <div class="stick-pad">
-                  <div class="stick-crosshair-h"></div>
-                  <div class="stick-crosshair-v"></div>
-                  <div class="stick-dot" id="gp-stick-r"></div>
-                </div>
-                <div class="stick-coords mono" id="gp-stick-r-val">X: 0.000 / Y: 0.000</div>
-              </div>
+                <!-- L1 / R1 バンパー -->
+                <rect id="gpsvg-4" x="80" y="44" width="86" height="22" rx="8" class="gp-svg-part" />
+                <text x="123" y="59" class="gp-svg-label">L1</text>
+                <rect id="gpsvg-5" x="394" y="44" width="86" height="22" rx="8" class="gp-svg-part" />
+                <text x="437" y="59" class="gp-svg-label">R1</text>
+
+                <!-- コントローラー本体シルエット -->
+                <path d="M 110 72 L 450 72 C 490 72 520 110 532 195 C 542 265 512 310 475 305 C 445 300 425 255 395 232 L 165 232 C 135 255 115 300 85 305 C 48 310 18 265 28 195 C 40 110 70 72 110 72 Z" class="gp-svg-body" />
+
+                <!-- タッチパッド (B17) -->
+                <rect id="gpsvg-17" x="195" y="80" width="170" height="76" rx="10" class="gp-svg-part" />
+                <text x="280" y="122" class="gp-svg-label">TOUCHPAD</text>
+
+                <!-- Create (B8) / Options (B9) -->
+                <rect id="gpsvg-8" x="166" y="92" width="16" height="28" rx="6" class="gp-svg-part" />
+                <text x="174" y="85" class="gp-svg-label small">CREATE</text>
+                <rect id="gpsvg-9" x="378" y="92" width="16" height="28" rx="6" class="gp-svg-part" />
+                <text x="386" y="85" class="gp-svg-label small">OPT</text>
+
+                <!-- 十字キー (B12, B13, B14, B15) -->
+                <rect id="gpsvg-12" x="111" y="106" width="24" height="26" rx="4" class="gp-svg-part" />
+                <text x="123" y="123" class="gp-svg-label">↑</text>
+                <rect id="gpsvg-13" x="111" y="158" width="24" height="26" rx="4" class="gp-svg-part" />
+                <text x="123" y="175" class="gp-svg-label">↓</text>
+                <rect id="gpsvg-14" x="85" y="132" width="26" height="24" rx="4" class="gp-svg-part" />
+                <text x="98" y="148" class="gp-svg-label">←</text>
+                <rect id="gpsvg-15" x="135" y="132" width="26" height="24" rx="4" class="gp-svg-part" />
+                <text x="148" y="148" class="gp-svg-label">→</text>
+
+                <!-- 右フェイスボタン △(B3), ○(B1), ×(B0), □(B2) -->
+                <circle id="gpsvg-3" cx="437" cy="112" r="15" class="gp-svg-part" />
+                <text x="437" y="117" class="gp-svg-label">△</text>
+                <circle id="gpsvg-1" cx="471" cy="144" r="15" class="gp-svg-part" />
+                <text x="471" y="149" class="gp-svg-label">○</text>
+                <circle id="gpsvg-0" cx="437" cy="176" r="15" class="gp-svg-part" />
+                <text x="437" y="181" class="gp-svg-label">×</text>
+                <circle id="gpsvg-2" cx="403" cy="144" r="15" class="gp-svg-part" />
+                <text x="403" y="149" class="gp-svg-label">□</text>
+
+                <!-- 左スティック / L3 (B10) -->
+                <circle cx="198" cy="196" r="30" class="gp-stick-ring" />
+                <circle id="gpsvg-10" cx="198" cy="196" r="16" class="gp-svg-part" />
+                <text x="198" y="200" class="gp-svg-label small">L3</text>
+
+                <!-- 右スティック / R3 (B11) -->
+                <circle cx="362" cy="196" r="30" class="gp-stick-ring" />
+                <circle id="gpsvg-11" cx="362" cy="196" r="16" class="gp-svg-part" />
+                <text x="362" y="200" class="gp-svg-label small">R3</text>
+
+                <!-- PSボタン (B16) -->
+                <circle id="gpsvg-16" cx="280" cy="192" r="14" class="gp-svg-part" />
+                <text x="280" y="196" class="gp-svg-label small">PS</text>
+              </svg>
             </div>
 
-            <!-- 全アナログ軸（DualSenseのBluetooth接続時の軸ズレ確認用） -->
-            <div class="km-section-label mt-1">アナログ軸 (Axes) 生データ</div>
-            <div id="gp-axes-grid" class="gp-axes-grid"></div>
+            <!-- DualSense L2 / R2 アナログトリガー押し込み量メーター -->
+            <div class="gp-triggers-grid mt-1">
+              <div class="trigger-meter-card">
+                <div class="trigger-meter-top">
+                  <span>L2 アナログ押し込み量</span>
+                  <strong class="mono" id="gp-l2-val">0.0% (0.00000)</strong>
+                </div>
+                <div class="trigger-bar-bg">
+                  <div class="trigger-bar-fill" id="gp-l2-bar"></div>
+                </div>
+              </div>
+
+              <div class="trigger-meter-card">
+                <div class="trigger-meter-top">
+                  <span>R2 アナログ押し込み量</span>
+                  <strong class="mono" id="gp-r2-val">0.0% (0.00000)</strong>
+                </div>
+                <div class="trigger-bar-bg">
+                  <div class="trigger-bar-fill" id="gp-r2-bar"></div>
+                </div>
+              </div>
+            </div>
           </div>
 
+          <!-- 2. スティック軌道記録＆ドリフト診断専用欄 -->
           <div class="card mt-1">
             <div class="history-header">
-              <h2>ボタン・トリガー入力状態</h2>
+              <h2>スティック軌道記録・ドリフト診断</h2>
+              <button type="button" id="gp-clear-trail-btn" class="action-btn">軌道をクリア</button>
             </div>
+            <p class="hint-text mb-1">
+              スティックを離した状態での中心ズレ（ドリフト）を自動診断します。スティックを大きく1周回すと、外周への到達度と軌跡の歪みを確認できます。
+            </p>
+
+            <div class="gp-sticks-grid">
+              <!-- 左スティック診断 -->
+              <div class="stick-card">
+                <div class="stick-title">左スティック (L)</div>
+                <canvas id="gp-canvas-l" width="180" height="180" class="stick-canvas"></canvas>
+                <div class="stick-coords mono" id="gp-stick-l-val">X: +0.00000 / Y: +0.00000</div>
+                <div class="drift-diag-box" id="gp-drift-l">
+                  <div>中心ズレ量: <strong class="mono" id="gp-offset-l">0.00000</strong> ／ 最大到達: <strong class="mono" id="gp-max-l">0.0%</strong></div>
+                  <div class="drift-badge ok" id="gp-diag-l">診断: 正常（中心安定）</div>
+                </div>
+              </div>
+
+              <!-- 右スティック診断 -->
+              <div class="stick-card">
+                <div class="stick-title">右スティック (R)</div>
+                <canvas id="gp-canvas-r" width="180" height="180" class="stick-canvas"></canvas>
+                <div class="stick-coords mono" id="gp-stick-r-val">X: +0.00000 / Y: +0.00000</div>
+                <div class="drift-diag-box" id="gp-drift-r">
+                  <div>中心ズレ量: <strong class="mono" id="gp-offset-r">0.00000</strong> ／ 最大到達: <strong class="mono" id="gp-max-r">0.0%</strong></div>
+                  <div class="drift-badge ok" id="gp-diag-r">診断: 正常（中心安定）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 全ボタン・全アナログ軸 詳細生データ -->
+          <div class="card mt-1">
+            <div class="history-header">
+              <h2>詳細生データ（全ボタン・全アナログ軸）</h2>
+            </div>
+            <div class="km-section-label">アナログ軸 (Axes)</div>
+            <div id="gp-axes-grid" class="gp-axes-grid mb-1"></div>
+
+            <div class="km-section-label">デジタル / アナログボタン (Buttons)</div>
             <div id="gp-buttons-grid" class="gp-buttons-grid"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- 12. 端末スペック -->
+      <section id="panel-device" class="tool-panel">
+        <div class="panel-header">
+          <h1>端末スペック</h1>
+          <div class="header-controls">
+            <button type="button" id="device-refresh-btn" class="action-btn">再取得</button>
+            <button type="button" id="device-copy-btn" class="action-btn primary">情報をコピー</button>
+          </div>
+        </div>
+
+        <div class="spec-grid" id="device-spec-grid"></div>
+
+        <div class="card ua-card">
+          <div class="history-header">
+            <h2>User-Agent</h2>
+          </div>
+          <code class="ua-text" id="device-ua">---</code>
         </div>
       </section>
 

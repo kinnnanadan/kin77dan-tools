@@ -45,9 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 2. ツール切り替え＆モバイルメニュー
+  // 2. ツール切り替え＆バックグラウンド制御
   // ==========================================
   let currentTool = "clock";
+  const mvBgPlayCheck = document.getElementById("mv-bg-play");
+  const tgBgPlayCheck = document.getElementById("tg-bg-play");
 
   function closeSidebar() {
     sidebar.classList.remove("open");
@@ -61,6 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
   overlay.addEventListener("click", closeSidebar);
 
   function switchTool(toolId) {
+    // ページを離れる際、バックグラウンド再生がOFFなら自動停止
+    if (currentTool === "multivideo" && toolId !== "multivideo" && !mvBgPlayCheck.checked) {
+      pauseAllMultiVideos();
+    }
+    if (currentTool === "tonegen" && toolId !== "tonegen" && !tgBgPlayCheck.checked) {
+      stopAllToneGen();
+    }
+
     currentTool = toolId;
     toolLinks.forEach((link) => {
       link.classList.toggle("active", link.dataset.tool === toolId);
@@ -82,8 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  const allToolIds = ["clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "multivideo", "tonegen", "keymouse", "gamepad", "device"];
   const initialHash = location.hash.replace("#", "");
-  if (["clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "multivideo", "tonegen", "keymouse", "gamepad", "device"].includes(initialHash)) {
+  if (allToolIds.includes(initialHash)) {
     switchTool(initialHash);
   }
 
@@ -113,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "シドニー", tz: "Australia/Sydney" }
   ];
 
-  // 世界時計のカード枠を生成
   worldCities.forEach((city, idx) => {
     const div = document.createElement("div");
     div.className = "world-clock-item";
@@ -244,7 +254,6 @@ document.addEventListener("DOMContentLoaded", () => {
     calcAngleBtn.textContent = angleUnit;
   });
 
-  // 専用入力ビルダーを開く処理
   function openBuilder(type) {
     activeBuilderType = type;
     calcBuilder.classList.remove("hidden");
@@ -342,7 +351,6 @@ document.addEventListener("DOMContentLoaded", () => {
     handleCalcAction("EVAL");
   });
 
-  // 閉じ括弧の自動補完
   function autoCloseParens(expr) {
     let openCount = 0;
     for (const ch of expr) {
@@ -832,7 +840,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function triggerBpmTap() {
     const now = performance.now();
 
-    // 2秒以上空いたら自動リセット
     if (bpmAutoResetCheck.checked && tapTimes.length > 0) {
       if (now - tapTimes[tapTimes.length - 1] > 2000) {
         tapTimes = [];
@@ -841,7 +848,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tapTimes.push(now);
 
-    // ランプ点灯
     bpmIndicatorEl.classList.add("flash");
     clearTimeout(flashTimer);
     flashTimer = setTimeout(() => bpmIndicatorEl.classList.remove("flash"), 90);
@@ -864,7 +870,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 押した瞬間に反応させる（pointerdownでマウス・タッチ両対応）
   bpmTapBtn.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
     triggerBpmTap();
@@ -872,7 +877,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   bpmResetBtn.addEventListener("click", resetBpm);
 
-  // BPMタブ表示中のキーボードショートカット（Spaceでタップ、R/Escでリセット）
   document.addEventListener("keydown", (e) => {
     if (currentTool !== "bpm") return;
     if (e.repeat) return;
@@ -892,181 +896,9 @@ document.addEventListener("DOMContentLoaded", () => {
       bpmTapBtn.classList.remove("pressed");
     }
   });
-  // ==========================================
-  // 7. 端末スペック表示（PC・スマホ対応）
-  // ==========================================
-  const specGridEl = document.getElementById("device-spec-grid");
-  const deviceUaEl = document.getElementById("device-ua");
-  const deviceRefreshBtn = document.getElementById("device-refresh-btn");
-  const deviceCopyBtn = document.getElementById("device-copy-btn");
-  let latestSpecText = "";
-
-  function detectOS(ua) {
-    if (/Windows NT 10\.0/.test(ua)) return "Windows 10 / 11";
-    if (/Windows NT/.test(ua)) return "Windows";
-    if (/Android/.test(ua)) {
-      const m = ua.match(/Android\s([0-9.]+)/);
-      return m ? `Android ${m[1]}` : "Android";
-    }
-    if (/iPhone|iPad|iPod/.test(ua)) {
-      const m = ua.match(/OS\s([0-9_]+)/);
-      return m ? `iOS / iPadOS ${m[1].replace(/_/g, ".")}` : "iOS / iPadOS";
-    }
-    if (/Mac OS X/.test(ua)) {
-      const m = ua.match(/Mac OS X\s([0-9_]+)/);
-      return m ? `macOS ${m[1].replace(/_/g, ".")}` : "macOS";
-    }
-    if (/CrOS/.test(ua)) return "ChromeOS";
-    if (/Linux/.test(ua)) return "Linux";
-    return "不明";
-  }
-
-  function detectDeviceType(ua) {
-    if (/iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua))) return "タブレット";
-    if (/Mobi|iPhone|iPod|Android/i.test(ua)) return "スマートフォン";
-    return "PC / デスクトップ";
-  }
-
-  function detectBrowser(ua) {
-    if (/Edg\/([0-9.]+)/.test(ua)) return `Microsoft Edge ${RegExp.$1}`;
-    if (/OPR\/([0-9.]+)/.test(ua)) return `Opera ${RegExp.$1}`;
-    if (/Chrome\/([0-9.]+)/.test(ua) && !/Edg/.test(ua)) return `Google Chrome ${RegExp.$1}`;
-    if (/Firefox\/([0-9.]+)/.test(ua)) return `Mozilla Firefox ${RegExp.$1}`;
-    if (/Version\/([0-9.]+).*Safari/.test(ua)) return `Safari ${RegExp.$1}`;
-    return "不明";
-  }
-
-  function getGpuInfo() {
-    try {
-      const canvas = document.createElement("canvas");
-      const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      if (!gl) return { vendor: "非対応", renderer: "WebGL非対応" };
-      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-      let vendor = "非公開";
-      let renderer = gl.getParameter(gl.RENDERER) || "不明";
-      if (debugInfo) {
-        vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || vendor;
-        renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || renderer;
-      }
-      const loseExt = gl.getExtension("WEBGL_lose_context");
-      if (loseExt) loseExt.loseContext();
-      return { vendor, renderer };
-    } catch {
-      return { vendor: "取得エラー", renderer: "取得エラー" };
-    }
-  }
-
-  async function renderDeviceSpecs() {
-    const ua = navigator.userAgent;
-    const gpu = getGpuInfo();
-    const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} スレッド (論理コア)` : "非公開 / 不明";
-    const ram = navigator.deviceMemory ? `約 ${navigator.deviceMemory} GB (ブラウザ上限値含む)` : "非公開（Safari/Firefox等は非対応）";
-    const dpr = window.devicePixelRatio || 1;
-    const physW = Math.round(screen.width * dpr);
-    const physH = Math.round(screen.height * dpr);
-    const touchPoints = navigator.maxTouchPoints || 0;
-
-    // ネットワーク情報
-    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    const netType = conn ? `${conn.effectiveType || "不明"} (下り推定: ${conn.downlink ? conn.downlink + " Mbps" : "不明"})` : (navigator.onLine ? "オンライン（詳細非対応）" : "オフライン");
-
-    // バッテリー情報
-    let batteryStr = "非対応（ブラウザ制限）";
-    if (navigator.getBattery) {
-      try {
-        const bat = await navigator.getBattery();
-        const pct = Math.round(bat.level * 100);
-        batteryStr = `${pct}%（${bat.charging ? "充電中" : "バッテリー駆動"}）`;
-      } catch {
-        batteryStr = "取得不可";
-      }
-    }
-
-    const categories = [
-      {
-        title: "システム・ブラウザ",
-        items: [
-          ["デバイス種別", detectDeviceType(ua)],
-          ["OS", detectOS(ua)],
-          ["ブラウザ", detectBrowser(ua)],
-          ["言語 / タイムゾーン", `${navigator.language} / ${Intl.DateTimeFormat().resolvedOptions().timeZone}`]
-        ]
-      },
-      {
-        title: "CPU・メモリ・GPU",
-        items: [
-          ["CPU論理コア数", cores],
-          ["メモリ (RAM)", ram],
-          ["GPUレンダラー", gpu.renderer],
-          ["GPUベンダー", gpu.vendor]
-        ]
-      },
-      {
-        title: "画面・ディスプレイ",
-        items: [
-          ["論理画面解像度", `${screen.width} × ${screen.height} px`],
-          ["物理解像度 (換算)", `${physW} × ${physH} px (倍率 ${dpr}x)`],
-          ["ブラウザ表示領域", `${window.innerWidth} × ${window.innerHeight} px`],
-          ["色深度 / タッチ入力", `${screen.colorDepth} bit / ${touchPoints > 0 ? `対応 (${touchPoints}点)` : "非対応"}`]
-        ]
-      },
-      {
-        title: "通信・電源状態",
-        items: [
-          ["オンライン状態", navigator.onLine ? "オンライン" : "オフライン"],
-          ["回線種別・速度目安", netType],
-          ["バッテリー", batteryStr],
-          ["Cookie / Storage", navigator.cookieEnabled ? "有効" : "無効"]
-        ]
-      }
-    ];
-
-    specGridEl.innerHTML = "";
-    const textLines = [];
-
-    categories.forEach((cat) => {
-      const card = document.createElement("div");
-      card.className = "spec-card";
-      const h2 = document.createElement("h2");
-      h2.textContent = cat.title;
-      card.appendChild(h2);
-
-      const ul = document.createElement("ul");
-      ul.className = "spec-list";
-      textLines.push(`[${cat.title}]`);
-
-      cat.items.forEach(([k, v]) => {
-        const li = document.createElement("li");
-        li.innerHTML = `<span class="spec-key">${k}</span><span class="spec-val">${v}</span>`;
-        ul.appendChild(li);
-        textLines.push(`${k}: ${v}`);
-      });
-
-      textLines.push("");
-      card.appendChild(ul);
-      specGridEl.appendChild(card);
-    });
-
-    deviceUaEl.textContent = ua;
-    textLines.push(`[User-Agent]\n${ua}`);
-    latestSpecText = textLines.join("\n");
-  }
-
-  renderDeviceSpecs();
-  deviceRefreshBtn.addEventListener("click", renderDeviceSpecs);
-  window.addEventListener("resize", () => {
-    if (currentTool === "device") renderDeviceSpecs();
-  });
-
-  deviceCopyBtn.addEventListener("click", () => {
-    navigator.clipboard.writeText(latestSpecText).then(() => {
-      deviceCopyBtn.textContent = "コピー完了";
-      setTimeout(() => (deviceCopyBtn.textContent = "情報をコピー"), 1200);
-    });
-  });
 
   // ==========================================
-  // 8. 2・8・10・16進数変換
+  // 7. 2・8・10・16進数変換
   // ==========================================
   const baseInputs = {
     bin: document.getElementById("base-bin"),
@@ -1078,7 +910,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const baseClearBtn = document.getElementById("base-clear-btn");
   const baseRefBody = document.querySelector("#base-ref-table tbody");
 
-  // 簡易対応表 (0〜15) を生成
   for (let i = 0; i <= 15; i++) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -1145,7 +976,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 9. LED 電流制限抵抗計算
+  // 8. LED 電流制限抵抗計算
   // ==========================================
   const ledVccEl = document.getElementById("led-vcc");
   const ledVfEl = document.getElementById("led-vf");
@@ -1244,7 +1075,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 10. RCフィルター計算（3値のうち2入力で自動算出）
+  // 9. RCフィルター計算（3値のうち2入力で自動算出）
   // ==========================================
   const rcFields = {
     r: { input: document.getElementById("rc-r"), unit: document.getElementById("rc-r-unit") },
@@ -1254,7 +1085,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const rcTauEl = document.getElementById("rc-tau");
   const rcClearBtn = document.getElementById("rc-clear-btn");
 
-  // 直近にユーザーが手入力した最大2つのキーを保持
   let rcEditedOrder = [];
 
   function formatTau(sec) {
@@ -1266,7 +1096,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateRcFilter() {
-    // 入力が空になったキーを履歴から除外
     rcEditedOrder = rcEditedOrder.filter((k) => {
       const v = parseFloat(rcFields[k].input.value);
       return !Number.isNaN(v) && v > 0;
@@ -1334,7 +1163,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 11. 複数動画同時再生
+  // 10. 複数動画同時再生
   // ==========================================
   const mvFileInput = document.getElementById("mv-file-input");
   const mvClearAllBtn = document.getElementById("mv-clear-all-btn");
@@ -1346,10 +1175,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const mvGrid = document.getElementById("mv-grid");
   const mvEmptyMsg = document.getElementById("mv-empty-msg");
 
-  let mvItems = []; // { id, url, card, video }
+  let mvItems = [];
 
   function updateMvEmptyState() {
     mvEmptyMsg.classList.toggle("hidden", mvItems.length > 0);
+  }
+
+  function pauseAllMultiVideos() {
+    mvItems.forEach((item) => item.video.pause());
   }
 
   mvFileInput.addEventListener("change", (e) => {
@@ -1435,9 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mvItems.forEach((item) => item.video.play().catch(() => {}));
   });
 
-  mvPauseAllBtn.addEventListener("click", () => {
-    mvItems.forEach((item) => item.video.pause());
-  });
+  mvPauseAllBtn.addEventListener("click", pauseAllMultiVideos);
 
   mvSyncBtn.addEventListener("click", () => {
     mvItems.forEach((item) => {
@@ -1469,7 +1300,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 12. 周波数ジェネレーター（複数音同時出力・音階プリセット対応）
+  // 11. 周波数ジェネレーター（複数音同時出力・音階プリセット対応）
   // ==========================================
   const tgChannelsEl = document.getElementById("tg-channels");
   const tgAddBtn = document.getElementById("tg-add-btn");
@@ -1482,7 +1313,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let tgPlaying = false;
   let nextChannelId = 1;
   let selectedChannelId = null;
-  let tgChannels = []; // { id, freq, wave, enabled, osc, gain }
+  let tgChannels = [];
 
   function sliderToFreq(val) {
     const minLog = Math.log10(20);
@@ -1528,6 +1359,19 @@ document.addEventListener("DOMContentLoaded", () => {
         ch.gain = null;
       }
     });
+  }
+
+  function stopAllToneGen() {
+    tgChannels.forEach((ch) => {
+      if (ch.osc) {
+        ch.osc.stop();
+        ch.osc.disconnect();
+        ch.osc = null;
+        ch.gain = null;
+      }
+    });
+    tgPlaying = false;
+    tgToggleBtn.textContent = "▶ すべて再生";
   }
 
   function renderTgChannels() {
@@ -1624,11 +1468,9 @@ document.addEventListener("DOMContentLoaded", () => {
     syncAudioNodes();
   }
 
-  // 初期1音目（440Hz）を作成
   addTgChannel(440, "sine");
 
   tgAddBtn.addEventListener("click", () => {
-    // 2音目以降は和音になりやすいようデフォルト周波数を少し変えて追加
     const defaultNotes = [440, 523.25, 659.25, 783.99];
     const freq = defaultNotes[tgChannels.length % defaultNotes.length];
     addTgChannel(freq, "sine");
@@ -1667,21 +1509,12 @@ document.addEventListener("DOMContentLoaded", () => {
       syncAudioNodes();
       tgToggleBtn.textContent = "⏹ すべて停止";
     } else {
-      tgChannels.forEach((ch) => {
-        if (ch.osc) {
-          ch.osc.stop();
-          ch.osc.disconnect();
-          ch.osc = null;
-          ch.gain = null;
-        }
-      });
-      tgPlaying = false;
-      tgToggleBtn.textContent = "▶ すべて再生";
+      stopAllToneGen();
     }
   });
 
   // ==========================================
-  // 13. キーボード・マウス動作確認（ビジュアル図・押下済色変化）
+  // 12. キーボード・マウス動作確認（Caps / RShift / PrtSc 修正版）
   // ==========================================
   const kbVisualEl = document.getElementById("kb-visual");
   const kmPreventCheck = document.getElementById("km-prevent-default");
@@ -1697,7 +1530,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const kmWheelCountEl = document.getElementById("km-wheel-count");
   const mbtnWheelEl = document.getElementById("mbtn-wheel");
 
-  // キーボード配列定義（JIS / US 共通物理コード対応）
   const kbLayoutRows = [
     [
       { code: "Escape", label: "Esc", w: 1.2 }, { spacer: 0.5 },
@@ -1734,7 +1566,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { code: "KeyZ", label: "Z" }, { code: "KeyX", label: "X" }, { code: "KeyC", label: "C" }, { code: "KeyV", label: "V" },
       { code: "KeyB", label: "B" }, { code: "KeyN", label: "N" }, { code: "KeyM", label: "M" }, { code: "Comma", label: "," },
       { code: "Period", label: "." }, { code: "Slash", label: "/" }, { code: "IntlRo", label: "ろ" },
-      { code: "ShiftRight", label: "Shift", w: 1.9 }, { spacer: 0.3 },
+      { code: "ShiftRight", label: "R-Shift", w: 1.9 }, { spacer: 0.3 },
       { spacer: 1 }, { code: "ArrowUp", label: "↑" }, { spacer: 1 }
     ],
     [
@@ -1772,55 +1604,92 @@ document.addEventListener("DOMContentLoaded", () => {
   const lastKeyDownTime = new Map();
   let wheelTotal = 0;
 
+  // JISキーボードや特殊キーの物理コード正規化
+  function normalizeKeyCode(e) {
+    if (e.key === "Shift" && e.location === 2) return "ShiftRight";
+    if (e.key === "Control" && e.location === 2) return "ControlRight";
+    if (e.key === "Alt" && e.location === 2) return "AltRight";
+    if (e.key === "CapsLock" || e.key === "Alphanumeric") return "CapsLock";
+    if (e.key === "PrintScreen") return "PrintScreen";
+    if (e.code) return e.code;
+    return e.key;
+  }
+
   function updateKeyCounts() {
     kmActiveCountEl.textContent = String(activeKeyCodes.size);
     kmTestedCountEl.textContent = String(testedKeyCodes.size);
   }
 
-  document.addEventListener("keydown", (e) => {
-    if (currentTool !== "keymouse") return;
-    if (kmPreventCheck.checked) e.preventDefault();
-    if (e.repeat) return;
-
+  function recordKeyPress(e, code) {
     const now = performance.now();
     const displayKey = e.key === " " ? "Space" : e.key;
 
-    activeKeyCodes.add(e.code);
-    testedKeyCodes.add(e.code);
+    activeKeyCodes.add(code);
+    testedKeyCodes.add(code);
     updateKeyCounts();
 
-    const keyEl = keyDomMap.get(e.code);
+    const keyEl = keyDomMap.get(code);
     if (keyEl) {
       keyEl.classList.add("active", "tested");
     }
 
-    kmLastKeyEl.textContent = `${displayKey} (${e.code})`;
+    kmLastKeyEl.textContent = `${displayKey} (${code})`;
 
-    if (lastKeyDownTime.has(e.code)) {
-      const diff = now - lastKeyDownTime.get(e.code);
+    if (lastKeyDownTime.has(code)) {
+      const diff = now - lastKeyDownTime.get(code);
       kmLastIntervalEl.textContent = `${diff.toFixed(1)} ms`;
     } else {
       kmLastIntervalEl.textContent = "初回";
     }
-    lastKeyDownTime.set(e.code, now);
+    lastKeyDownTime.set(code, now);
 
     const chip = document.createElement("span");
     chip.className = "key-hist-chip";
-    chip.textContent = `${displayKey} [${e.code}]`;
+    chip.textContent = `${displayKey} [${code}]`;
     kmHistoryEl.prepend(chip);
     if (kmHistoryEl.children.length > 40) {
       kmHistoryEl.lastChild.remove();
     }
-  });
+  }
 
-  document.addEventListener("keyup", (e) => {
-    activeKeyCodes.delete(e.code);
+  function releaseKey(code) {
+    activeKeyCodes.delete(code);
     updateKeyCounts();
-    const keyEl = keyDomMap.get(e.code);
+    const keyEl = keyDomMap.get(code);
     if (keyEl) {
       keyEl.classList.remove("active");
     }
-  });
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (currentTool !== "keymouse") return;
+    if (kmPreventCheck.checked) e.preventDefault();
+    if (e.repeat) return;
+
+    const code = normalizeKeyCode(e);
+    recordKeyPress(e, code);
+
+    // CapsLockは環境によってkeyupが来ないことがあるため自動リリース予約
+    if (code === "CapsLock") {
+      setTimeout(() => releaseKey("CapsLock"), 160);
+    }
+  }, true);
+
+  window.addEventListener("keyup", (e) => {
+    if (currentTool !== "keymouse") return;
+    if (kmPreventCheck.checked) e.preventDefault();
+
+    const code = normalizeKeyCode(e);
+
+    // WindowsのPrintScreenや一部環境のCapsLockのようにkeydownなしでkeyupのみ飛ぶキーを救済
+    if (!activeKeyCodes.has(code)) {
+      recordKeyPress(e, code);
+      setTimeout(() => releaseKey(code), 160);
+      return;
+    }
+
+    releaseKey(code);
+  }, true);
 
   window.addEventListener("blur", () => {
     activeKeyCodes.forEach((code) => {
@@ -1886,7 +1755,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 14. コントローラー動作確認（DualSense対応強化）
+  // 13. コントローラー動作確認（DualSenseビジュアル・ドリフト診断・軌道記録）
   // ==========================================
   const gpSelect = document.getElementById("gp-select");
   const gpRescanBtn = document.getElementById("gp-rescan-btn");
@@ -1896,14 +1765,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const gpActiveArea = document.getElementById("gp-active-area");
   const gpNameEl = document.getElementById("gp-name");
   const gpMappingEl = document.getElementById("gp-mapping");
-  const gpStickLEl = document.getElementById("gp-stick-l");
-  const gpStickREl = document.getElementById("gp-stick-r");
+
+  const gpTestModeCheck = document.getElementById("gp-test-mode");
+  const gpResetTestBtn = document.getElementById("gp-reset-test-btn");
+  const gpClearTrailBtn = document.getElementById("gp-clear-trail-btn");
+
+  const gpL2ValEl = document.getElementById("gp-l2-val");
+  const gpL2BarEl = document.getElementById("gp-l2-bar");
+  const gpR2ValEl = document.getElementById("gp-r2-val");
+  const gpR2BarEl = document.getElementById("gp-r2-bar");
+
+  const gpCanvasL = document.getElementById("gp-canvas-l");
+  const gpCanvasR = document.getElementById("gp-canvas-r");
   const gpStickLValEl = document.getElementById("gp-stick-l-val");
   const gpStickRValEl = document.getElementById("gp-stick-r-val");
+  const gpOffsetLEl = document.getElementById("gp-offset-l");
+  const gpOffsetREl = document.getElementById("gp-offset-r");
+  const gpMaxLEl = document.getElementById("gp-max-l");
+  const gpMaxREl = document.getElementById("gp-max-r");
+  const gpDiagLEl = document.getElementById("gp-diag-l");
+  const gpDiagREl = document.getElementById("gp-diag-r");
+
   const gpAxesGrid = document.getElementById("gp-axes-grid");
   const gpButtonsGrid = document.getElementById("gp-buttons-grid");
 
-  // DualSense / 標準コントローラー両対応ラベル
   const psBtnNames = [
     "B0 (× / A)", "B1 (○ / B)", "B2 (□ / X)", "B3 (△ / Y)",
     "B4 (L1)", "B5 (R1)", "B6 (L2)", "B7 (R2)",
@@ -1914,6 +1799,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let renderedBtnCount = 0;
   let renderedAxesCount = 0;
+  const gpTestedButtons = new Set();
+
+  // スティック軌道履歴と最大到達度
+  let trailL = [];
+  let trailR = [];
+  let maxReachL = 0;
+  let maxReachR = 0;
+
+  function formatSigned(val) {
+    const sign = val >= 0 ? "+" : "";
+    return `${sign}${val.toFixed(5)}`;
+  }
 
   function getConnectedPads() {
     if (!navigator.getGamepads) return [];
@@ -1964,6 +1861,107 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("gamepaddisconnected", refreshGamepadList);
   gpRescanBtn.addEventListener("click", refreshGamepadList);
 
+  // テストモードの色リセット
+  gpResetTestBtn.addEventListener("click", () => {
+    gpTestedButtons.clear();
+    document.querySelectorAll(".gp-svg-part").forEach((el) => el.classList.remove("tested"));
+  });
+
+  gpTestModeCheck.addEventListener("change", () => {
+    if (!gpTestModeCheck.checked) {
+      document.querySelectorAll(".gp-svg-part").forEach((el) => el.classList.remove("tested"));
+    } else {
+      gpTestedButtons.forEach((idx) => {
+        const el = document.getElementById(`gpsvg-${idx}`);
+        if (el) el.classList.add("tested");
+      });
+    }
+  });
+
+  // スティック軌道クリア
+  gpClearTrailBtn.addEventListener("click", () => {
+    trailL = [];
+    trailR = [];
+    maxReachL = 0;
+    maxReachR = 0;
+  });
+
+  // スティック軌道＆現在位置をCanvasへ描画
+  function drawStickCanvas(canvas, x, y, trail) {
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    const cx = w / 2;
+    const cy = h / 2;
+    const radius = 78;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // 外周円・デッドゾーン目安円・十字線
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.35)";
+    ctx.lineWidth = 1;
+
+    // 外周 (1.0)
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // ドリフト警告ライン (0.12)
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.12, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 十字線
+    ctx.beginPath();
+    ctx.moveTo(cx - radius, cy);
+    ctx.lineTo(cx + radius, cy);
+    ctx.moveTo(cx, cy - radius);
+    ctx.lineTo(cx, cy + radius);
+    ctx.stroke();
+
+    // 軌道の描画
+    if (trail.length > 1) {
+      ctx.strokeStyle = "rgba(16, 185, 129, 0.7)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      trail.forEach((pt, i) => {
+        const px = cx + pt.x * radius;
+        const py = cy + pt.y * radius;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+    }
+
+    // 現在のスティック位置ドット
+    const curX = cx + x * radius;
+    const curY = cy + y * radius;
+    ctx.fillStyle = "#38bdf8";
+    ctx.beginPath();
+    ctx.arc(curX, curY, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function updateDriftDiagnosis(x, y, offsetEl, maxEl, diagEl, currentMax) {
+    const dist = Math.hypot(x, y);
+    const newMax = Math.max(currentMax, dist);
+
+    offsetEl.textContent = dist.toFixed(5);
+    maxEl.textContent = `${Math.min(100, newMax * 100).toFixed(1)}%`;
+
+    if (dist < 0.05) {
+      diagEl.textContent = "診断: 正常（中心安定）";
+      diagEl.className = "drift-badge ok";
+    } else if (dist < 0.12) {
+      diagEl.textContent = "診断: わずかな中心ズレ（軽微）";
+      diagEl.className = "drift-badge warn";
+    } else {
+      diagEl.textContent = "診断: 中心ズレ大（ドリフトの可能性あり）";
+      diagEl.className = "drift-badge bad";
+    }
+    return newMax;
+  }
+
   function pollGamepads() {
     if (currentTool === "gamepad") {
       const pads = getConnectedPads();
@@ -1981,35 +1979,74 @@ document.addEventListener("DOMContentLoaded", () => {
         gpMappingEl.textContent = pad.mapping || "non-standard (Raw HID)";
         gpVibrateBtn.disabled = !pad.vibrationActuator;
 
-        // DualSense Bluetooth/Raw HID 接続時は右スティックYが axes[5] に割り当てられる場合があるための自動補正
+        // スティック座標取得（DualSense Raw HID 接続時の軸補正含む）
         const lx = pad.axes[0] || 0;
         const ly = pad.axes[1] || 0;
         const rx = pad.axes[2] || 0;
         const useAxis5ForRy = pad.mapping !== "standard" && pad.axes.length >= 6 && Math.abs(pad.axes[5]) < 0.5 && Math.abs(pad.axes[3]) > 0.8;
         const ry = useAxis5ForRy ? (pad.axes[5] || 0) : (pad.axes[3] || 0);
 
-        gpStickLEl.style.transform = `translate(calc(-50% + ${lx * 58}px), calc(-50% + ${ly * 58}px))`;
-        gpStickREl.style.transform = `translate(calc(-50% + ${rx * 58}px), calc(-50% + ${ry * 58}px))`;
-        gpStickLValEl.textContent = `X: ${lx.toFixed(3)} / Y: ${ly.toFixed(3)}`;
-        gpStickRValEl.textContent = `X: ${rx.toFixed(3)} / Y: ${ry.toFixed(3)}`;
+        // 軌道ポイント追加（前回位置から少しでも動いたら記録）
+        const lastL = trailL[trailL.length - 1];
+        if (!lastL || Math.hypot(lx - lastL.x, ly - lastL.y) > 0.005) {
+          trailL.push({ x: lx, y: ly });
+          if (trailL.length > 1500) trailL.shift();
+        }
+        const lastR = trailR[trailR.length - 1];
+        if (!lastR || Math.hypot(rx - lastR.x, ry - lastR.y) > 0.005) {
+          trailR.push({ x: rx, y: ry });
+          if (trailR.length > 1500) trailR.shift();
+        }
 
-        // 全アナログ軸 (Axes) の生値更新
+        drawStickCanvas(gpCanvasL, lx, ly, trailL);
+        drawStickCanvas(gpCanvasR, rx, ry, trailR);
+
+        gpStickLValEl.textContent = `X: ${formatSigned(lx)} / Y: ${formatSigned(ly)}`;
+        gpStickRValEl.textContent = `X: ${formatSigned(rx)} / Y: ${formatSigned(ry)}`;
+
+        maxReachL = updateDriftDiagnosis(lx, ly, gpOffsetLEl, gpMaxLEl, gpDiagLEl, maxReachL);
+        maxReachR = updateDriftDiagnosis(rx, ry, gpOffsetREl, gpMaxREl, gpDiagREl, maxReachR);
+
+        // L2 / R2 アナログトリガー押し込み量メーター更新
+        const l2Val = pad.buttons[6] ? pad.buttons[6].value : 0;
+        const r2Val = pad.buttons[7] ? pad.buttons[7].value : 0;
+        gpL2ValEl.textContent = `${(l2Val * 100).toFixed(1)}% (${l2Val.toFixed(5)})`;
+        gpL2BarEl.style.width = `${l2Val * 100}%`;
+        gpR2ValEl.textContent = `${(r2Val * 100).toFixed(1)}% (${r2Val.toFixed(5)})`;
+        gpR2BarEl.style.width = `${r2Val * 100}%`;
+
+        // SVGコントローラー図の各ボタン更新
+        pad.buttons.forEach((btn, idx) => {
+          const isPressed = btn.pressed || btn.value > 0.05;
+          const svgEl = document.getElementById(`gpsvg-${idx}`);
+          if (svgEl) {
+            svgEl.classList.toggle("active", isPressed);
+            if (isPressed) {
+              gpTestedButtons.add(idx);
+              if (gpTestModeCheck.checked) {
+                svgEl.classList.add("tested");
+              }
+            }
+          }
+        });
+
+        // 全アナログ軸 (Axes) 詳細生値更新
         if (renderedAxesCount !== pad.axes.length) {
           renderedAxesCount = pad.axes.length;
           gpAxesGrid.innerHTML = "";
           pad.axes.forEach((_, idx) => {
             const div = document.createElement("div");
             div.className = "gp-axis-cell";
-            div.innerHTML = `<span>Axis ${idx}</span><strong id="gp-axis-val-${idx}">0.000</strong>`;
+            div.innerHTML = `<span>Axis ${idx}</span><strong class="mono" id="gp-axis-val-${idx}">+0.00000</strong>`;
             gpAxesGrid.appendChild(div);
           });
         }
         pad.axes.forEach((val, idx) => {
           const el = document.getElementById(`gp-axis-val-${idx}`);
-          if (el) el.textContent = val.toFixed(3);
+          if (el) el.textContent = formatSigned(val);
         });
 
-        // ボタン枠の生成
+        // 全ボタン詳細生値更新
         if (renderedBtnCount !== pad.buttons.length) {
           renderedBtnCount = pad.buttons.length;
           gpButtonsGrid.innerHTML = "";
@@ -2021,7 +2058,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cell.innerHTML = `
               <div class="gp-btn-top">
                 <span>${label}</span>
-                <span id="gp-btn-val-${idx}">0%</span>
+                <span class="mono" id="gp-btn-val-${idx}">0.00000</span>
               </div>
               <div class="gp-btn-bar-bg">
                 <div class="gp-btn-bar-fill" id="gp-btn-bar-${idx}"></div>
@@ -2031,17 +2068,15 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
 
-        // 各ボタンの値更新
         pad.buttons.forEach((btn, idx) => {
           const cell = document.getElementById(`gp-btn-cell-${idx}`);
           const valEl = document.getElementById(`gp-btn-val-${idx}`);
           const barEl = document.getElementById(`gp-btn-bar-${idx}`);
           if (!cell) return;
 
-          const pct = Math.round(btn.value * 100);
           cell.classList.toggle("pressed", btn.pressed || btn.value > 0.05);
-          valEl.textContent = `${pct}%`;
-          barEl.style.width = `${pct}%`;
+          valEl.textContent = btn.value.toFixed(5);
+          barEl.style.width = `${btn.value * 100}%`;
         });
       }
     }
@@ -2061,5 +2096,176 @@ document.addEventListener("DOMContentLoaded", () => {
         strongMagnitude: 0.7
       }).catch(() => {});
     }
+  });
+
+  // ==========================================
+  // 14. 端末スペック表示（PC・スマホ対応）
+  // ==========================================
+  const specGridEl = document.getElementById("device-spec-grid");
+  const deviceUaEl = document.getElementById("device-ua");
+  const deviceRefreshBtn = document.getElementById("device-refresh-btn");
+  const deviceCopyBtn = document.getElementById("device-copy-btn");
+  let latestSpecText = "";
+
+  function detectOS(ua) {
+    if (/Windows NT 10\.0/.test(ua)) return "Windows 10 / 11";
+    if (/Windows NT/.test(ua)) return "Windows";
+    if (/Android/.test(ua)) {
+      const m = ua.match(/Android\s([0-9.]+)/);
+      return m ? `Android ${m[1]}` : "Android";
+    }
+    if (/iPhone|iPad|iPod/.test(ua)) {
+      const m = ua.match(/OS\s([0-9_]+)/);
+      return m ? `iOS / iPadOS ${m[1].replace(/_/g, ".")}` : "iOS / iPadOS";
+    }
+    if (/Mac OS X/.test(ua)) {
+      const m = ua.match(/Mac OS X\s([0-9_]+)/);
+      return m ? `macOS ${m[1].replace(/_/g, ".")}` : "macOS";
+    }
+    if (/CrOS/.test(ua)) return "ChromeOS";
+    if (/Linux/.test(ua)) return "Linux";
+    return "不明";
+  }
+
+  function detectDeviceType(ua) {
+    if (/iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua))) return "タブレット";
+    if (/Mobi|iPhone|iPod|Android/i.test(ua)) return "スマートフォン";
+    return "PC / デスクトップ";
+  }
+
+  function detectBrowser(ua) {
+    if (/Edg\/([0-9.]+)/.test(ua)) return `Microsoft Edge ${RegExp.$1}`;
+    if (/OPR\/([0-9.]+)/.test(ua)) return `Opera ${RegExp.$1}`;
+    if (/Chrome\/([0-9.]+)/.test(ua) && !/Edg/.test(ua)) return `Google Chrome ${RegExp.$1}`;
+    if (/Firefox\/([0-9.]+)/.test(ua)) return `Mozilla Firefox ${RegExp.$1}`;
+    if (/Version\/([0-9.]+).*Safari/.test(ua)) return `Safari ${RegExp.$1}`;
+    return "不明";
+  }
+
+  function getGpuInfo() {
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      if (!gl) return { vendor: "非対応", renderer: "WebGL非対応" };
+      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+      let vendor = "非公開";
+      let renderer = gl.getParameter(gl.RENDERER) || "不明";
+      if (debugInfo) {
+        vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || vendor;
+        renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || renderer;
+      }
+      const loseExt = gl.getExtension("WEBGL_lose_context");
+      if (loseExt) loseExt.loseContext();
+      return { vendor, renderer };
+    } catch {
+      return { vendor: "取得エラー", renderer: "取得エラー" };
+    }
+  }
+
+  async function renderDeviceSpecs() {
+    const ua = navigator.userAgent;
+    const gpu = getGpuInfo();
+    const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} スレッド (論理コア)` : "非公開 / 不明";
+    const ram = navigator.deviceMemory ? `約 ${navigator.deviceMemory} GB (ブラウザ上限値含む)` : "非公開（Safari/Firefox等は非対応）";
+    const dpr = window.devicePixelRatio || 1;
+    const physW = Math.round(screen.width * dpr);
+    const physH = Math.round(screen.height * dpr);
+    const touchPoints = navigator.maxTouchPoints || 0;
+
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const netType = conn ? `${conn.effectiveType || "不明"} (下り推定: ${conn.downlink ? conn.downlink + " Mbps" : "不明"})` : (navigator.onLine ? "オンライン（詳細非対応）" : "オフライン");
+
+    let batteryStr = "非対応（ブラウザ制限）";
+    if (navigator.getBattery) {
+      try {
+        const bat = await navigator.getBattery();
+        const pct = Math.round(bat.level * 100);
+        batteryStr = `${pct}%（${bat.charging ? "充電中" : "バッテリー駆動"}）`;
+      } catch {
+        batteryStr = "取得不可";
+      }
+    }
+
+    const categories = [
+      {
+        title: "システム・ブラウザ",
+        items: [
+          ["デバイス種別", detectDeviceType(ua)],
+          ["OS", detectOS(ua)],
+          ["ブラウザ", detectBrowser(ua)],
+          ["言語 / タイムゾーン", `${navigator.language} / ${Intl.DateTimeFormat().resolvedOptions().timeZone}`]
+        ]
+      },
+      {
+        title: "CPU・メモリ・GPU",
+        items: [
+          ["CPU論理コア数", cores],
+          ["メモリ (RAM)", ram],
+          ["GPUレンダラー", gpu.renderer],
+          ["GPUベンダー", gpu.vendor]
+        ]
+      },
+      {
+        title: "画面・ディスプレイ",
+        items: [
+          ["論理画面解像度", `${screen.width} × ${screen.height} px`],
+          ["物理解像度 (換算)", `${physW} × ${physH} px (倍率 ${dpr}x)`],
+          ["ブラウザ表示領域", `${window.innerWidth} × ${window.innerHeight} px`],
+          ["色深度 / タッチ入力", `${screen.colorDepth} bit / ${touchPoints > 0 ? `対応 (${touchPoints}点)` : "非対応"}`]
+        ]
+      },
+      {
+        title: "通信・電源状態",
+        items: [
+          ["オンライン状態", navigator.onLine ? "オンライン" : "オフライン"],
+          ["回線種別・速度目安", netType],
+          ["バッテリー", batteryStr],
+          ["Cookie / Storage", navigator.cookieEnabled ? "有効" : "無効"]
+        ]
+      }
+    ];
+
+    specGridEl.innerHTML = "";
+    const textLines = [];
+
+    categories.forEach((cat) => {
+      const card = document.createElement("div");
+      card.className = "spec-card";
+      const h2 = document.createElement("h2");
+      h2.textContent = cat.title;
+      card.appendChild(h2);
+
+      const ul = document.createElement("ul");
+      ul.className = "spec-list";
+      textLines.push(`[${cat.title}]`);
+
+      cat.items.forEach(([k, v]) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="spec-key">${k}</span><span class="spec-val">${v}</span>`;
+        ul.appendChild(li);
+        textLines.push(`${k}: ${v}`);
+      });
+
+      textLines.push("");
+      card.appendChild(ul);
+      specGridEl.appendChild(card);
+    });
+
+    deviceUaEl.textContent = ua;
+    textLines.push(`[User-Agent]\n${ua}`);
+    latestSpecText = textLines.join("\n");
+  }
+
+  renderDeviceSpecs();
+  deviceRefreshBtn.addEventListener("click", renderDeviceSpecs);
+  window.addEventListener("resize", () => {
+    if (currentTool === "device") renderDeviceSpecs();
+  });
+
+  deviceCopyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(latestSpecText).then(() => {
+      deviceCopyBtn.textContent = "コピー完了";
+      setTimeout(() => (deviceCopyBtn.textContent = "情報をコピー"), 1200);
+    });
   });
 });
