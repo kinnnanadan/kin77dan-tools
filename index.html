@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kin77dan Tools - 日常ツール集</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- モバイル用ヘッダー -->
+  <header class="mobile-header">
+    <button id="menu-toggle" class="icon-btn" aria-label="メニューを開く">☰</button>
+    <span class="site-title-mobile">kin77dan Tools</span>
+  </header>
+
+  <!-- オーバーレイ（モバイル時） -->
+  <div id="sidebar-overlay" class="overlay"></div>
+
+  <div class="layout">
+    <!-- サイドメニュー -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <a href="./" class="site-title">kin77dan Tools</a>
+        <p class="site-subtitle">Daily Utilities / Web Tools</p>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-label">TOOLS</div>
+        <ul class="nav-list">
+          <li><a href="#clock" class="nav-link tool-link active" data-tool="clock">デジタル時計</a></li>
+          <li><a href="#calc" class="nav-link tool-link" data-tool="calc">電卓</a></li>
+          <li><a href="#stopwatch" class="nav-link tool-link" data-tool="stopwatch">ストップウォッチ</a></li>
+        </ul>
+
+        <div class="nav-label">LINKS</div>
+        <ul class="nav-list">
+          <li>
+            <a href="https://kinnnanadan.github.io/kin77dan/" class="nav-link external">
+              ← メインサイトへ戻る
+            </a>
+          </li>
+          <li>
+            <a href="https://kinnnanadan.github.io/ps3-syscon-lookup/#home" target="_blank" rel="noopener noreferrer" class="nav-link external">
+              PS3 Dev / Syscon <span class="badge">別サイト</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 表示設定（テーマ・文字サイズ） -->
+      <div class="sidebar-settings">
+        <div class="setting-group">
+          <span class="setting-label">テーマ</span>
+          <div class="option-group" role="group" aria-label="テーマ変更">
+            <button type="button" class="control-btn theme-btn" data-theme-val="light">ライト</button>
+            <button type="button" class="control-btn theme-btn active" data-theme-val="blue">ブルー</button>
+            <button type="button" class="control-btn theme-btn" data-theme-val="dark">ブラック</button>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <span class="setting-label">文字サイズ</span>
+          <div class="option-group" role="group" aria-label="文字サイズ変更">
+            <button type="button" class="control-btn size-btn" data-size="small">小</button>
+            <button type="button" class="control-btn size-btn active" data-size="medium">中</button>
+            <button type="button" class="control-btn size-btn" data-size="large">大</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <!-- 1. デジタル時計 -->
+      <section id="panel-clock" class="tool-panel active">
+        <div class="panel-header">
+          <h1>デジタル時計</h1>
+          <button type="button" id="clock-fullscreen-btn" class="action-btn">全画面表示</button>
+        </div>
+
+        <div class="card clock-card" id="clock-display-box">
+          <div class="clock-date" id="clock-date">----/--/-- (---)</div>
+          <div class="clock-time" id="clock-time">00:00:00</div>
+          <div class="clock-sub">
+            <span>UNIX: <code id="clock-unix">0</code></span>
+            <button type="button" id="copy-unix-btn" class="mini-btn">コピー</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 電卓 -->
+      <section id="panel-calc" class="tool-panel">
+        <div class="panel-header">
+          <h1>電卓</h1>
+          <span class="hint-text">キーボード入力対応（Enterで計算 / Escでクリア）</span>
+        </div>
+
+        <div class="calc-layout">
+          <div class="card calc-card">
+            <div class="calc-screen">
+              <div class="calc-expr" id="calc-expr"></div>
+              <input type="text" id="calc-input" class="calc-input" value="0" aria-label="計算式入力">
+            </div>
+
+            <div class="calc-grid">
+              <button type="button" class="calc-btn op" data-val="C">C</button>
+              <button type="button" class="calc-btn op" data-val="(">(</button>
+              <button type="button" class="calc-btn op" data-val=")">)</button>
+              <button type="button" class="calc-btn op" data-val="/">÷</button>
+
+              <button type="button" class="calc-btn" data-val="7">7</button>
+              <button type="button" class="calc-btn" data-val="8">8</button>
+              <button type="button" class="calc-btn" data-val="9">9</button>
+              <button type="button" class="calc-btn op" data-val="*">×</button>
+
+              <button type="button" class="calc-btn" data-val="4">4</button>
+              <button type="button" class="calc-btn" data-val="5">5</button>
+              <button type="button" class="calc-btn" data-val="6">6</button>
+              <button type="button" class="calc-btn op" data-val="-">−</button>
+
+              <button type="button" class="calc-btn" data-val="1">1</button>
+              <button type="button" class="calc-btn" data-val="2">2</button>
+              <button type="button" class="calc-btn" data-val="3">3</button>
+              <button type="button" class="calc-btn op" data-val="+">+</button>
+
+              <button type="button" class="calc-btn" data-val="0">0</button>
+              <button type="button" class="calc-btn" data-val=".">.</button>
+              <button type="button" class="calc-btn op" data-val="BS">⌫</button>
+              <button type="button" class="calc-btn eq" data-val="=">=</button>
+            </div>
+          </div>
+
+          <div class="card history-card">
+            <div class="history-header">
+              <h2>計算履歴</h2>
+              <button type="button" id="clear-history-btn" class="mini-btn">消去</button>
+            </div>
+            <ul id="calc-history" class="history-list">
+              <li class="empty-msg">履歴はありません</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. ストップウォッチ -->
+      <section id="panel-stopwatch" class="tool-panel">
+        <div class="panel-header">
+          <h1>ストップウォッチ</h1>
+        </div>
+
+        <div class="card sw-card">
+          <div class="sw-time" id="sw-display">00:00.00</div>
+          <div class="sw-controls">
+            <button type="button" id="sw-start-btn" class="action-btn primary">スタート</button>
+            <button type="button" id="sw-lap-btn" class="action-btn" disabled>ラップ</button>
+            <button type="button" id="sw-reset-btn" class="action-btn">リセット</button>
+          </div>
+          <ul id="sw-laps" class="history-list sw-laps"></ul>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>&copy; 2026 kin77dan</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

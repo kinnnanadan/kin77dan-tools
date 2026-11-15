@@ -1,0 +1,558 @@
+/* 1. ライトテーマ */
+:root {
+  --font-size-base: 16px;
+  --bg-body: #f5f7fa;
+  --bg-surface: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-hover: #eef2f7;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --sidebar-width: 260px;
+}
+
+/* 2. ブルーダークテーマ */
+[data-theme="blue"] {
+  --bg-body: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-sidebar: #162032;
+  --bg-hover: #273549;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --accent-soft: #1e3a5f;
+}
+
+/* 3. ブラックテーマ（ピュアブラック） */
+[data-theme="dark"] {
+  --bg-body: #000000;
+  --bg-surface: #111111;
+  --bg-sidebar: #0a0a0a;
+  --bg-hover: #1f1f1f;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --border-color: #262626;
+  --accent: #38bdf8;
+  --accent-hover: #7dd3fc;
+  --accent-soft: #172533;
+}
+
+html {
+  font-size: var(--font-size-base);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  line-height: 1.65;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* サイドバー */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 1.25rem 1rem;
+  overflow-y: auto;
+  transition: transform 0.25s ease, background-color 0.2s;
+}
+
+.sidebar-header {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+}
+
+.site-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-decoration: none;
+  display: block;
+}
+
+.site-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.nav-section {
+  flex: 1;
+}
+
+.nav-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 1rem 0 0.4rem 0.5rem;
+}
+
+.nav-list {
+  list-style: none;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+  transition: background-color 0.15s;
+}
+
+.nav-link:hover {
+  background-color: var(--bg-hover);
+}
+
+.nav-link.active {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 表示設定エリア */
+.sidebar-settings {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.setting-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.option-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+}
+
+.control-btn {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.45rem 0.35rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.control-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.theme-btn.active,
+.size-btn.active {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+[data-theme="blue"] .theme-btn.active,
+[data-theme="blue"] .size-btn.active,
+[data-theme="dark"] .theme-btn.active,
+[data-theme="dark"] .size-btn.active {
+  color: #0b1120;
+}
+
+/* メインコンテンツ */
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  max-width: 960px;
+}
+
+.tool-panel {
+  display: none;
+}
+
+.tool-panel.active {
+  display: block;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.05rem;
+}
+
+.hint-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.action-btn {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.action-btn:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.action-btn.primary {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+[data-theme="blue"] .action-btn.primary,
+[data-theme="dark"] .action-btn.primary {
+  color: #0b1120;
+}
+
+.mini-btn {
+  background-color: var(--bg-body);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.mini-btn:hover {
+  color: var(--text-main);
+  background-color: var(--bg-hover);
+}
+
+/* 1. 時計スタイル */
+.clock-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.clock-card:fullscreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-body);
+}
+
+.clock-date {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-time {
+  font-size: clamp(2.8rem, 8vw, 5.2rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.clock-card:fullscreen .clock-time {
+  font-size: clamp(4rem, 15vw, 11rem);
+}
+
+.clock-sub {
+  margin-top: 1.25rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 2. 電卓スタイル */
+.calc-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.calc-screen {
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  text-align: right;
+}
+
+.calc-expr {
+  min-height: 1.3rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.calc-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 1.85rem;
+  font-weight: 700;
+  text-align: right;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.calc-btn {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.9rem 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.calc-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.calc-btn.op {
+  color: var(--accent);
+}
+
+.calc-btn.eq {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+[data-theme="blue"] .calc-btn.eq,
+[data-theme="dark"] .calc-btn.eq {
+  color: #0b1120;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.history-list {
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.history-list li {
+  padding: 0.45rem 0.65rem;
+  background-color: var(--bg-body);
+  border-radius: 6px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-list li:hover:not(.empty-msg) {
+  background-color: var(--bg-hover);
+}
+
+.history-list li.empty-msg {
+  color: var(--text-muted);
+  cursor: default;
+  background: transparent;
+  padding: 0;
+}
+
+/* 3. ストップウォッチスタイル */
+.sw-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.sw-time {
+  font-size: clamp(2.5rem, 7vw, 4.2rem);
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 1.5rem;
+}
+
+.sw-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sw-laps {
+  margin-top: 1.5rem;
+  text-align: left;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sw-laps li {
+  display: flex;
+  justify-content: space-between;
+  cursor: default;
+}
+
+.footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* モバイル対応 */
+.mobile-header {
+  display: none;
+}
+
+.overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    background-color: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+  }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 1.2rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .site-title-mobile {
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .overlay.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 95;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1.25rem;
+  }
+
+  .calc-layout {
+    grid-template-columns: 1fr;
+  }
+}
