@@ -31,6 +31,7 @@
           <li><a href="#calc" class="nav-link tool-link" data-tool="calc">電卓</a></li>
           <li><a href="#stopwatch" class="nav-link tool-link" data-tool="stopwatch">ストップウォッチ</a></li>
           <li><a href="#bpm" class="nav-link tool-link" data-tool="bpm">BPM測定</a></li>
+          <li><a href="#device" class="nav-link tool-link" data-tool="device">端末スペック</a></li>
         </ul>
 
         <div class="nav-label">LINKS</div>
@@ -113,6 +114,7 @@
             <div class="mode-switch" role="group" aria-label="電卓モード切替">
               <button type="button" class="mode-btn calc-mode-btn active" data-calc-mode="simple">シンプル</button>
               <button type="button" class="mode-btn calc-mode-btn" data-calc-mode="sci">関数電卓</button>
+              <button type="button" class="mode-btn calc-mode-btn" data-calc-mode="adv">関数電卓（多機能）</button>
             </div>
           </div>
         </div>
@@ -122,9 +124,10 @@
             <div class="calc-screen">
               <div class="calc-expr" id="calc-expr"></div>
               <input type="text" id="calc-input" class="calc-input" value="0" aria-label="計算式入力">
+              <div class="calc-frac-sub" id="calc-frac-sub"></div>
             </div>
 
-            <!-- 関数電卓ボタン群（関数モード時のみ表示） -->
+            <!-- 関数電卓ボタン群（関数・多機能モード時） -->
             <div class="sci-grid" id="sci-grid">
               <button type="button" class="calc-btn sci" data-val="sin(">sin</button>
               <button type="button" class="calc-btn sci" data-val="cos(">cos</button>
@@ -137,6 +140,31 @@
               <button type="button" class="calc-btn sci" data-val="π">π</button>
               <button type="button" class="calc-btn sci" data-val="e">e</button>
               <button type="button" class="calc-btn sci" data-val="!">n!</button>
+            </div>
+
+            <!-- 多機能ボタン群（多機能モード時のみ） -->
+            <div class="adv-grid" id="adv-grid">
+              <button type="button" class="calc-btn sci" data-val="asin(">sin⁻¹</button>
+              <button type="button" class="calc-btn sci" data-val="acos(">cos⁻¹</button>
+              <button type="button" class="calc-btn sci" data-val="atan(">tan⁻¹</button>
+              <button type="button" class="calc-btn sci" data-val="P">nPr</button>
+              <button type="button" class="calc-btn sci" data-val="C">nCr</button>
+
+              <button type="button" class="calc-btn sci" data-val="frac(">分数</button>
+              <button type="button" class="calc-btn sci" data-val="d/dx(">微分</button>
+              <button type="button" class="calc-btn sci" data-val="∫(">積分</button>
+              <button type="button" class="calc-btn sci" data-val="solve(">方程式</button>
+              <button type="button" class="calc-btn sci" data-val="x">x</button>
+
+              <button type="button" class="calc-btn sci" data-val=",">,</button>
+              <button type="button" class="calc-btn sci" data-val="=">＝(式)</button>
+              <button type="button" class="calc-btn sci" data-val="x^2">x²</button>
+              <button type="button" class="calc-btn sci" data-val="abs(">|x|</button>
+              <button type="button" class="calc-btn sci" data-val="1/">1/x</button>
+            </div>
+
+            <div class="adv-help" id="adv-help">
+              書き方: <code>frac(分子,分母)</code> / <code>5P2</code> / <code>5C2</code> / <code>d/dx(x^2, 3)</code> / <code>∫(x^2, 0, 1)</code> / <code>solve(x^2-2=0, 1)</code>
             </div>
 
             <!-- 基本電卓ボタン群 -->
@@ -164,7 +192,7 @@
               <button type="button" class="calc-btn" data-val="0">0</button>
               <button type="button" class="calc-btn" data-val=".">.</button>
               <button type="button" class="calc-btn op" data-val="BS">⌫</button>
-              <button type="button" class="calc-btn eq" data-val="=">=</button>
+              <button type="button" class="calc-btn eq" data-val="EVAL">=</button>
             </div>
           </div>
 
@@ -237,6 +265,26 @@
               2秒以上空いたら自動リセット
             </label>
           </div>
+        </div>
+      </section>
+
+      <!-- 5. 端末スペック -->
+      <section id="panel-device" class="tool-panel">
+        <div class="panel-header">
+          <h1>端末スペック</h1>
+          <div class="header-controls">
+            <button type="button" id="device-refresh-btn" class="action-btn">再取得</button>
+            <button type="button" id="device-copy-btn" class="action-btn primary">情報をコピー</button>
+          </div>
+        </div>
+
+        <div class="spec-grid" id="device-spec-grid"></div>
+
+        <div class="card ua-card">
+          <div class="history-header">
+            <h2>User-Agent</h2>
+          </div>
+          <code class="ua-text" id="device-ua">---</code>
         </div>
       </section>
 

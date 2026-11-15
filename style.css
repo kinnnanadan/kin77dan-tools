@@ -499,6 +499,48 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
+.calc-frac-sub {
+  min-height: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-top: 0.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sci-grid,
+.adv-grid {
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+}
+
+.calc-card.sci-mode .sci-grid,
+.calc-card.adv-mode .sci-grid {
+  display: grid;
+}
+
+.calc-card.adv-mode .adv-grid {
+  display: grid;
+}
+
+.adv-help {
+  display: none;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  margin-bottom: 0.6rem;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.calc-card.adv-mode .adv-help {
+  display: block;
+}
+
 .sci-grid {
   display: none;
   grid-template-columns: repeat(5, 1fr);
@@ -746,6 +788,75 @@ h2 {
   cursor: pointer;
 }
 
+/* 5. 端末スペック表示 */
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.spec-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.15rem 1.25rem;
+}
+
+.spec-card h2 {
+  font-size: 1rem;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.spec-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+}
+
+.spec-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 0.3rem;
+}
+
+.spec-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.spec-key {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.spec-val {
+  font-weight: 600;
+  text-align: right;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
+}
+
+.ua-card {
+  padding: 1.15rem 1.25rem;
+}
+
+.ua-text {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  line-height: 1.5;
+}
+
 .footer {
   margin-top: 3rem;
   padding-top: 1rem;
@@ -774,6 +885,10 @@ h2 {
     background-color: var(--bg-sidebar);
     border-bottom: 1px solid var(--border-color);
     padding: 0.75rem 1rem;
+  }
+
+  .spec-grid {
+    grid-template-columns: 1fr;
   }
 
   .icon-btn {
