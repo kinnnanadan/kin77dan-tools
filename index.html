@@ -30,6 +30,7 @@
           <li><a href="#clock" class="nav-link tool-link active" data-tool="clock">デジタル時計</a></li>
           <li><a href="#calc" class="nav-link tool-link" data-tool="calc">電卓</a></li>
           <li><a href="#stopwatch" class="nav-link tool-link" data-tool="stopwatch">ストップウォッチ</a></li>
+          <li><a href="#bpm" class="nav-link tool-link" data-tool="bpm">BPM測定</a></li>
         </ul>
 
         <div class="nav-label">LINKS</div>
@@ -79,11 +80,26 @@
         </div>
 
         <div class="card clock-card" id="clock-display-box">
+          <!-- 全画面中のみ右上に表示される解除ボタン -->
+          <button type="button" id="clock-exit-fs-btn" class="exit-fs-btn">✕ 全画面解除</button>
+
           <div class="clock-date" id="clock-date">----/--/-- (---)</div>
           <div class="clock-time" id="clock-time">00:00:00</div>
-          <div class="clock-sub">
-            <span>UNIX: <code id="clock-unix">0</code></span>
-            <button type="button" id="copy-unix-btn" class="mini-btn">コピー</button>
+
+          <!-- 詳細モード時のみ表示される情報 -->
+          <div id="clock-detail-area" class="clock-detail-area">
+            <div class="clock-sub">
+              <span>UNIX: <code id="clock-unix">0</code></span>
+              <button type="button" id="copy-unix-btn" class="mini-btn">コピー</button>
+            </div>
+            <div class="world-clock-grid" id="world-clock-grid"></div>
+          </div>
+        </div>
+
+        <div class="panel-footer-controls">
+          <div class="mode-switch" role="group" aria-label="時計表示モード">
+            <button type="button" class="mode-btn clock-mode-btn active" data-clock-mode="simple">シンプル</button>
+            <button type="button" class="mode-btn clock-mode-btn" data-clock-mode="detail">詳細（世界時計）</button>
           </div>
         </div>
       </section>
@@ -92,16 +108,38 @@
       <section id="panel-calc" class="tool-panel">
         <div class="panel-header">
           <h1>電卓</h1>
-          <span class="hint-text">キーボード入力対応（Enterで計算 / Escでクリア）</span>
+          <div class="header-controls">
+            <button type="button" id="calc-angle-btn" class="mini-btn hidden" title="角度単位の切り替え">DEG</button>
+            <div class="mode-switch" role="group" aria-label="電卓モード切替">
+              <button type="button" class="mode-btn calc-mode-btn active" data-calc-mode="simple">シンプル</button>
+              <button type="button" class="mode-btn calc-mode-btn" data-calc-mode="sci">関数電卓</button>
+            </div>
+          </div>
         </div>
 
         <div class="calc-layout">
-          <div class="card calc-card">
+          <div class="card calc-card" id="calc-card">
             <div class="calc-screen">
               <div class="calc-expr" id="calc-expr"></div>
               <input type="text" id="calc-input" class="calc-input" value="0" aria-label="計算式入力">
             </div>
 
+            <!-- 関数電卓ボタン群（関数モード時のみ表示） -->
+            <div class="sci-grid" id="sci-grid">
+              <button type="button" class="calc-btn sci" data-val="sin(">sin</button>
+              <button type="button" class="calc-btn sci" data-val="cos(">cos</button>
+              <button type="button" class="calc-btn sci" data-val="tan(">tan</button>
+              <button type="button" class="calc-btn sci" data-val="log(">log</button>
+              <button type="button" class="calc-btn sci" data-val="ln(">ln</button>
+
+              <button type="button" class="calc-btn sci" data-val="√(">√</button>
+              <button type="button" class="calc-btn sci" data-val="^">x^y</button>
+              <button type="button" class="calc-btn sci" data-val="π">π</button>
+              <button type="button" class="calc-btn sci" data-val="e">e</button>
+              <button type="button" class="calc-btn sci" data-val="!">n!</button>
+            </div>
+
+            <!-- 基本電卓ボタン群 -->
             <div class="calc-grid">
               <button type="button" class="calc-btn op" data-val="C">C</button>
               <button type="button" class="calc-btn op" data-val="(">(</button>
@@ -156,6 +194,49 @@
             <button type="button" id="sw-reset-btn" class="action-btn">リセット</button>
           </div>
           <ul id="sw-laps" class="history-list sw-laps"></ul>
+        </div>
+      </section>
+
+      <!-- 4. BPM測定 -->
+      <section id="panel-bpm" class="tool-panel">
+        <div class="panel-header">
+          <h1>BPM測定</h1>
+          <span class="hint-text">Spaceキー または 下のボタンをタップ</span>
+        </div>
+
+        <div class="card bpm-card">
+          <div class="bpm-display-wrap">
+            <div class="bpm-indicator" id="bpm-indicator" aria-hidden="true"></div>
+            <div class="bpm-value" id="bpm-value">---</div>
+            <div class="bpm-unit">BPM（平均）</div>
+          </div>
+
+          <div class="bpm-stats">
+            <div class="bpm-stat-item">
+              <span class="stat-label">直近BPM</span>
+              <span class="stat-val" id="bpm-instant">---</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">間隔</span>
+              <span class="stat-val" id="bpm-interval">--- ms</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">タップ数</span>
+              <span class="stat-val" id="bpm-count">0</span>
+            </div>
+          </div>
+
+          <button type="button" id="bpm-tap-btn" class="bpm-tap-btn">
+            TAP（クリック / Space）
+          </button>
+
+          <div class="bpm-controls">
+            <button type="button" id="bpm-reset-btn" class="action-btn">リセット (R / Esc)</button>
+            <label class="checkbox-label">
+              <input type="checkbox" id="bpm-auto-reset" checked>
+              2秒以上空いたら自動リセット
+            </label>
+          </div>
         </div>
       </section>
 

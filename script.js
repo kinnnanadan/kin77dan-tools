@@ -47,6 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================
   // 2. ツール切り替え＆モバイルメニュー
   // ==========================================
+  let currentTool = "clock";
+
   function closeSidebar() {
     sidebar.classList.remove("open");
     overlay.classList.remove("open");
@@ -59,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   overlay.addEventListener("click", closeSidebar);
 
   function switchTool(toolId) {
+    currentTool = toolId;
     toolLinks.forEach((link) => {
       link.classList.toggle("active", link.dataset.tool === toolId);
     });
@@ -80,23 +83,81 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const initialHash = location.hash.replace("#", "");
-  if (["clock", "calc", "stopwatch"].includes(initialHash)) {
+  if (["clock", "calc", "stopwatch", "bpm"].includes(initialHash)) {
     switchTool(initialHash);
   }
 
   // ==========================================
-  // 3. デジタル時計
+  // 3. デジタル時計（シンプル / 詳細・世界時計）
   // ==========================================
   const clockDateEl = document.getElementById("clock-date");
   const clockTimeEl = document.getElementById("clock-time");
   const clockUnixEl = document.getElementById("clock-unix");
   const clockBox = document.getElementById("clock-display-box");
   const fullscreenBtn = document.getElementById("clock-fullscreen-btn");
+  const exitFsBtn = document.getElementById("clock-exit-fs-btn");
   const copyUnixBtn = document.getElementById("copy-unix-btn");
+  const clockDetailArea = document.getElementById("clock-detail-area");
+  const worldClockGrid = document.getElementById("world-clock-grid");
+  const clockModeBtns = document.querySelectorAll(".clock-mode-btn");
   const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
+
+  let clockDetailOpen = false;
+
+  const worldCities = [
+    { name: "UTC（協定世界時）", tz: "UTC" },
+    { name: "ロンドン", tz: "Europe/London" },
+    { name: "ニューヨーク", tz: "America/New_York" },
+    { name: "ロサンゼルス", tz: "America/Los_Angeles" },
+    { name: "台北 / 北京", tz: "Asia/Taipei" },
+    { name: "シドニー", tz: "Australia/Sydney" }
+  ];
+
+  // 世界時計のカード枠を生成
+  worldCities.forEach((city, idx) => {
+    const div = document.createElement("div");
+    div.className = "world-clock-item";
+    div.innerHTML = `
+      <div class="wc-city"><span>${city.name}</span></div>
+      <div class="wc-time" id="wc-time-${idx}">--:--:--</div>
+      <div class="wc-date" id="wc-date-${idx}">----/--/--</div>
+    `;
+    worldClockGrid.appendChild(div);
+  });
+
+  clockModeBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.clockMode;
+      clockDetailOpen = mode === "detail";
+      clockDetailArea.classList.toggle("open", clockDetailOpen);
+      clockModeBtns.forEach((b) => b.classList.toggle("active", b === btn));
+      if (clockDetailOpen) renderWorldClocks(new Date());
+    });
+  });
 
   function pad(n) {
     return String(n).padStart(2, "0");
+  }
+
+  function renderWorldClocks(now) {
+    worldCities.forEach((city, idx) => {
+      const timeFmt = new Intl.DateTimeFormat("ja-JP", {
+        timeZone: city.tz,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+      const dateFmt = new Intl.DateTimeFormat("ja-JP", {
+        timeZone: city.tz,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        weekday: "short"
+      });
+      document.getElementById(`wc-time-${idx}`).textContent = timeFmt.format(now);
+      document.getElementById(`wc-date-${idx}`).textContent = dateFmt.format(now);
+    });
   }
 
   function updateClock() {
@@ -111,17 +172,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     clockDateEl.textContent = `${y}/${m}/${d} (${w})`;
     clockTimeEl.textContent = `${hh}:${mm}:${ss}`;
-    clockUnixEl.textContent = Math.floor(now.getTime() / 1000);
 
-    setTimeout(updateClock, 1000 - (now.getMilliseconds()));
+    if (clockDetailOpen) {
+      clockUnixEl.textContent = Math.floor(now.getTime() / 1000);
+      renderWorldClocks(now);
+    }
+
+    setTimeout(updateClock, 1000 - now.getMilliseconds());
   }
   updateClock();
 
   fullscreenBtn.addEventListener("click", () => {
     if (!document.fullscreenElement) {
       clockBox.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen();
+    }
+  });
+
+  exitFsBtn.addEventListener("click", () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
     }
   });
 
@@ -133,19 +202,55 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==========================================
-  // 4. 電卓（安全な数式パーサー搭載）
+  // 4. 電卓（シンプル / 関数電卓モード）
   // ==========================================
+  const calcCard = document.getElementById("calc-card");
   const calcInput = document.getElementById("calc-input");
   const calcExpr = document.getElementById("calc-expr");
   const calcHistoryEl = document.getElementById("calc-history");
   const clearHistoryBtn = document.getElementById("clear-history-btn");
+  const calcModeBtns = document.querySelectorAll(".calc-mode-btn");
+  const calcAngleBtn = document.getElementById("calc-angle-btn");
+
   let justEvaluated = false;
+  let angleUnit = "DEG"; // "DEG" or "RAD"
+
+  calcModeBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const isSci = btn.dataset.calcMode === "sci";
+      calcCard.classList.toggle("sci-mode", isSci);
+      calcAngleBtn.classList.toggle("hidden", !isSci);
+      calcModeBtns.forEach((b) => b.classList.toggle("active", b === btn));
+    });
+  });
+
+  calcAngleBtn.addEventListener("click", () => {
+    angleUnit = angleUnit === "DEG" ? "RAD" : "DEG";
+    calcAngleBtn.textContent = angleUnit;
+  });
+
+  function factorial(n) {
+    if (!Number.isInteger(n) || n < 0 || n > 170) throw new Error("Fact");
+    let res = 1;
+    for (let i = 2; i <= n; i++) res *= i;
+    return res;
+  }
 
   function safeEvaluate(expr) {
-    const cleaned = expr.replace(/\s+/g, "").replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
-    if (!/^[0-9+\-*/().]+$/.test(cleaned)) throw new Error("Invalid");
+    let cleaned = expr
+      .replace(/\s+/g, "")
+      .replace(/×/g, "*")
+      .replace(/÷/g, "/")
+      .replace(/−/g, "-")
+      .replace(/√\(/g, "sqrt(");
+
+    // 暗黙の乗算を補完（例: 2π -> 2*π, 2(3+4) -> 2*(3+4), )2 -> )*2）
+    cleaned = cleaned
+      .replace(/(\d)(π|e|\(|sin|cos|tan|log|ln|sqrt)/g, "$1*$2")
+      .replace(/(\)|π|e)(\d|\(|π|e)/g, "$1*$2");
 
     let pos = 0;
+
     function parseExpr() {
       let val = parseTerm();
       while (cleaned[pos] === "+" || cleaned[pos] === "-") {
@@ -155,25 +260,86 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       return val;
     }
+
     function parseTerm() {
-      let val = parseFactor();
+      let val = parsePower();
       while (cleaned[pos] === "*" || cleaned[pos] === "/") {
         const op = cleaned[pos++];
-        const right = parseFactor();
+        const right = parsePower();
         if (op === "/" && right === 0) throw new Error("ZeroDiv");
         val = op === "*" ? val * right : val / right;
       }
       return val;
     }
-    function parseFactor() {
-      if (cleaned[pos] === "+") { pos++; return parseFactor(); }
-      if (cleaned[pos] === "-") { pos++; return -parseFactor(); }
+
+    function parsePower() {
+      let base = parseUnary();
+      if (cleaned[pos] === "^") {
+        pos++;
+        const exp = parsePower(); // 右結合
+        base = Math.pow(base, exp);
+      }
+      return base;
+    }
+
+    function parseUnary() {
+      if (cleaned[pos] === "+") { pos++; return parseUnary(); }
+      if (cleaned[pos] === "-") { pos++; return -parseUnary(); }
+      return parsePostfix();
+    }
+
+    function parsePostfix() {
+      let val = parsePrimary();
+      while (cleaned[pos] === "!") {
+        pos++;
+        val = factorial(val);
+      }
+      return val;
+    }
+
+    function parsePrimary() {
       if (cleaned[pos] === "(") {
         pos++;
         const val = parseExpr();
         if (cleaned[pos++] !== ")") throw new Error("Paren");
         return val;
       }
+      if (cleaned[pos] === "π") {
+        pos++;
+        return Math.PI;
+      }
+      if (cleaned[pos] === "e") {
+        pos++;
+        return Math.E;
+      }
+
+      // 関数判定
+      const fnMatch = cleaned.slice(pos).match(/^(sin|cos|tan|log|ln|sqrt)\(/);
+      if (fnMatch) {
+        const fnName = fnMatch[1];
+        pos += fnName.length + 1;
+        const arg = parseExpr();
+        if (cleaned[pos++] !== ")") throw new Error("Paren");
+
+        const toRad = (v) => (angleUnit === "DEG" ? (v * Math.PI) / 180 : v);
+        switch (fnName) {
+          case "sin": return Math.sin(toRad(arg));
+          case "cos": return Math.cos(toRad(arg));
+          case "tan":
+            if (angleUnit === "DEG" && Math.abs(arg % 180) === 90) throw new Error("TanInf");
+            return Math.tan(toRad(arg));
+          case "log":
+            if (arg <= 0) throw new Error("Domain");
+            return Math.log10(arg);
+          case "ln":
+            if (arg <= 0) throw new Error("Domain");
+            return Math.log(arg);
+          case "sqrt":
+            if (arg < 0) throw new Error("Domain");
+            return Math.sqrt(arg);
+        }
+      }
+
       const start = pos;
       while (/[0-9.]/.test(cleaned[pos])) pos++;
       if (start === pos) throw new Error("Num");
@@ -237,9 +403,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (justEvaluated && /[0-9.(]/.test(val)) {
-      calcInput.value = val;
-    } else if (calcInput.value === "0" && /[0-9(]/.test(val)) {
+    const isStartToken = /^[0-9.(πe]|^(sin|cos|tan|log|ln|√)\(/.test(val);
+    if ((justEvaluated && isStartToken) || (calcInput.value === "0" && isStartToken && val !== ".")) {
       calcInput.value = val;
     } else {
       calcInput.value += val;
@@ -329,5 +494,96 @@ document.addEventListener("DOMContentLoaded", () => {
     swStartBtn.textContent = "スタート";
     swLapBtn.disabled = true;
     swLaps.innerHTML = "";
+  });
+
+  // ==========================================
+  // 6. BPM測定（タップテンポ）
+  // ==========================================
+  const bpmValueEl = document.getElementById("bpm-value");
+  const bpmInstantEl = document.getElementById("bpm-instant");
+  const bpmIntervalEl = document.getElementById("bpm-interval");
+  const bpmCountEl = document.getElementById("bpm-count");
+  const bpmIndicatorEl = document.getElementById("bpm-indicator");
+  const bpmTapBtn = document.getElementById("bpm-tap-btn");
+  const bpmResetBtn = document.getElementById("bpm-reset-btn");
+  const bpmAutoResetCheck = document.getElementById("bpm-auto-reset");
+
+  let tapTimes = [];
+  let flashTimer = null;
+
+  function resetBpm() {
+    tapTimes = [];
+    bpmValueEl.textContent = "---";
+    bpmInstantEl.textContent = "---";
+    bpmIntervalEl.textContent = "--- ms";
+    bpmCountEl.textContent = "0";
+  }
+
+  function triggerBpmTap() {
+    const now = performance.now();
+
+    // 2秒以上空いたら自動リセット
+    if (bpmAutoResetCheck.checked && tapTimes.length > 0) {
+      if (now - tapTimes[tapTimes.length - 1] > 2000) {
+        tapTimes = [];
+      }
+    }
+
+    tapTimes.push(now);
+    // 直近16タップを保持して計算（テンポ変化にも追従しやすくする）
+    if (tapTimes.length > 16) {
+      tapTimes.shift();
+    }
+
+    // ランプ点灯
+    bpmIndicatorEl.classList.add("flash");
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => bpmIndicatorEl.classList.remove("flash"), 90);
+
+    bpmCountEl.textContent = String(tapTimes.length);
+
+    if (tapTimes.length >= 2) {
+      const lastDiff = tapTimes[tapTimes.length - 1] - tapTimes[tapTimes.length - 2];
+      const instantBpm = 60000 / lastDiff;
+
+      const totalSpan = tapTimes[tapTimes.length - 1] - tapTimes[0];
+      const avgInterval = totalSpan / (tapTimes.length - 1);
+      const avgBpm = 60000 / avgInterval;
+
+      bpmValueEl.textContent = avgBpm.toFixed(1);
+      bpmInstantEl.textContent = instantBpm.toFixed(1);
+      bpmIntervalEl.textContent = `${Math.round(avgInterval)} ms`;
+    } else {
+      bpmValueEl.textContent = "計測中...";
+    }
+  }
+
+  // 押した瞬間に反応させる（pointerdownでマウス・タッチ両対応）
+  bpmTapBtn.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    triggerBpmTap();
+  });
+
+  bpmResetBtn.addEventListener("click", resetBpm);
+
+  // BPMタブ表示中のキーボードショートカット（Spaceでタップ、R/Escでリセット）
+  document.addEventListener("keydown", (e) => {
+    if (currentTool !== "bpm") return;
+    if (e.repeat) return;
+
+    if (e.code === "Space") {
+      e.preventDefault();
+      bpmTapBtn.classList.add("pressed");
+      triggerBpmTap();
+    } else if (e.key === "r" || e.key === "R" || e.key === "Escape") {
+      e.preventDefault();
+      resetBpm();
+    }
+  });
+
+  document.addEventListener("keyup", (e) => {
+    if (e.code === "Space") {
+      bpmTapBtn.classList.remove("pressed");
+    }
   });
 });

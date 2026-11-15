@@ -60,6 +60,10 @@ body {
   transition: background-color 0.2s, color 0.2s;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .layout {
   display: flex;
   min-height: 100vh;
@@ -229,6 +233,12 @@ body {
   margin-bottom: 1.25rem;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 h1 {
   font-size: 1.5rem;
 }
@@ -287,8 +297,8 @@ h2 {
   color: var(--text-muted);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 0.2rem 0.55rem;
-  font-size: 0.78rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
   cursor: pointer;
 }
 
@@ -297,10 +307,73 @@ h2 {
   background-color: var(--bg-hover);
 }
 
+/* モード切替スイッチ */
+.mode-switch {
+  display: inline-flex;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.mode-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 4px;
+  padding: 0.32rem 0.75rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mode-btn:hover {
+  color: var(--text-main);
+}
+
+.mode-btn.active {
+  background-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+[data-theme="blue"] .mode-btn.active,
+[data-theme="dark"] .mode-btn.active {
+  color: #0b1120;
+}
+
+.panel-footer-controls {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* 1. 時計スタイル */
 .clock-card {
+  position: relative;
   text-align: center;
-  padding: 2.5rem 1.5rem;
+  padding: 2.75rem 1.5rem;
+}
+
+.exit-fs-btn {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+
+.exit-fs-btn:hover {
+  opacity: 1;
+  color: var(--text-main);
 }
 
 .clock-card:fullscreen {
@@ -309,6 +382,10 @@ h2 {
   justify-content: center;
   align-items: center;
   background-color: var(--bg-body);
+}
+
+.clock-card:fullscreen .exit-fs-btn {
+  display: inline-block;
 }
 
 .clock-date {
@@ -331,19 +408,65 @@ h2 {
   font-size: clamp(4rem, 15vw, 11rem);
 }
 
+/* 時計の詳細モードエリア */
+.clock-detail-area {
+  display: none;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.clock-detail-area.open {
+  display: block;
+}
+
 .clock-sub {
-  margin-top: 1.25rem;
   font-size: 0.88rem;
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.world-clock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.world-clock-item {
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+}
+
+.wc-city {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.wc-time {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 0.15rem;
+}
+
+.wc-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 /* 2. 電卓スタイル */
 .calc-layout {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.25fr 1fr;
   gap: 1.25rem;
   align-items: start;
 }
@@ -376,6 +499,17 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
+.sci-grid {
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.calc-card.sci-mode .sci-grid {
+  display: grid;
+}
+
 .calc-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -387,8 +521,8 @@ h2 {
   color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 0.9rem 0.5rem;
-  font-size: 1.15rem;
+  padding: 0.85rem 0.4rem;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.1s;
@@ -396,6 +530,16 @@ h2 {
 
 .calc-btn:hover {
   background-color: var(--bg-hover);
+}
+
+.calc-btn.sci {
+  padding: 0.6rem 0.25rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.calc-btn.sci:hover {
+  color: var(--text-main);
 }
 
 .calc-btn.op {
@@ -424,7 +568,7 @@ h2 {
 
 .history-list {
   list-style: none;
-  max-height: 320px;
+  max-height: 360px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -484,6 +628,122 @@ h2 {
   display: flex;
   justify-content: space-between;
   cursor: default;
+}
+
+/* 4. BPM測定スタイル */
+.bpm-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.bpm-display-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.bpm-indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--border-color);
+  margin-bottom: 0.5rem;
+  transition: transform 0.06s, background-color 0.06s;
+}
+
+.bpm-indicator.flash {
+  background-color: var(--accent);
+  transform: scale(1.45);
+}
+
+.bpm-value {
+  font-size: clamp(3rem, 8vw, 4.8rem);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bpm-unit {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.bpm-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  max-width: 480px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.bpm-stat-item {
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem 0.5rem;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.stat-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.bpm-tap-btn {
+  width: 100%;
+  max-width: 480px;
+  padding: 1.6rem 1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.05s, background-color 0.1s;
+}
+
+.bpm-tap-btn:active,
+.bpm-tap-btn.pressed {
+  transform: scale(0.98);
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+[data-theme="blue"] .bpm-tap-btn:active,
+[data-theme="blue"] .bpm-tap-btn.pressed,
+[data-theme="dark"] .bpm-tap-btn:active,
+[data-theme="dark"] .bpm-tap-btn.pressed {
+  color: #0b1120;
+}
+
+.bpm-controls {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
 }
 
 .footer {
