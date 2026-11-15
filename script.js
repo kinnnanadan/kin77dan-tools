@@ -1606,11 +1606,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // JISキーボードや特殊キーの物理コード正規化
   function normalizeKeyCode(e) {
-    if (e.key === "Shift" && e.location === 2) return "ShiftRight";
-    if (e.key === "Control" && e.location === 2) return "ControlRight";
-    if (e.key === "Alt" && e.location === 2) return "AltRight";
-    if (e.key === "CapsLock" || e.key === "Alphanumeric") return "CapsLock";
-    if (e.key === "PrintScreen") return "PrintScreen";
+    if (e.code === "ShiftRight" || (e.key === "Shift" && e.location === 2)) return "ShiftRight";
+    if (e.code === "ControlRight" || (e.key === "Control" && e.location === 2)) return "ControlRight";
+    if (e.code === "AltRight" || (e.key === "Alt" && e.location === 2)) return "AltRight";
+    if (
+      e.code === "CapsLock" ||
+      e.key === "CapsLock" ||
+      e.key === "Alphanumeric" ||
+      e.keyCode === 20 ||
+      e.keyCode === 240
+    ) {
+      return "CapsLock";
+    }
+    if (e.code === "PrintScreen" || e.key === "PrintScreen" || e.keyCode === 44) return "PrintScreen";
     if (e.code) return e.code;
     return e.key;
   }
@@ -1633,7 +1641,7 @@ document.addEventListener("DOMContentLoaded", () => {
       keyEl.classList.add("active", "tested");
     }
 
-    kmLastKeyEl.textContent = `${displayKey} (${code})`;
+    kmLastKeyEl.textContent = `${displayKey} (${code} / loc:${e.location})`;
 
     if (lastKeyDownTime.has(code)) {
       const diff = now - lastKeyDownTime.get(code);
@@ -1700,11 +1708,54 @@ document.addEventListener("DOMContentLoaded", () => {
     updateKeyCounts();
   });
 
-  kmMousePad.addEventListener("mousemove", (e) => {
+  // マウス移動＆ポーリングレート計測
+  let lastMouseTs = 0;
+  let mouseIntervals = [];
+  let maxMouseHz = 0;
+  let mouseIdleTimer = null;
+
+  function calcMedianHz(intervals) {
+    if (intervals.length < 3) return null;
+    const sorted = [...intervals].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    if (median <= 0) return null;
+    return Math.round(1000 / median);
+  }
+
+  kmMousePad.addEventListener("pointermove", (e) => {
     const rect = kmMousePad.getBoundingClientRect();
     const x = Math.round(e.clientX - rect.left);
     const y = Math.round(e.clientY - rect.top);
     kmMousePosEl.textContent = `X: ${x}, Y: ${y}`;
+
+    const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ev of events) {
+      const ts = ev.timeStamp;
+      if (lastMouseTs > 0) {
+        const diff = ts - lastMouseTs;
+        if (diff >= 0.1 && diff <= 50) {
+          mouseIntervals.push(diff);
+          if (mouseIntervals.length > 60) mouseIntervals.shift();
+        }
+      }
+      lastMouseTs = ts;
+    }
+
+    const hz = calcMedianHz(mouseIntervals);
+    if (hz) {
+      kmMouseHzEl.textContent = `${hz} Hz`;
+      if (hz > maxMouseHz) {
+        maxMouseHz = hz;
+        kmMouseMaxHzEl.textContent = `${maxMouseHz} Hz`;
+      }
+    }
+
+    clearTimeout(mouseIdleTimer);
+    mouseIdleTimer = setTimeout(() => {
+      kmMouseHzEl.textContent = "待機中";
+      lastMouseTs = 0;
+      mouseIntervals = [];
+    }, 400);
   });
 
   kmMousePad.addEventListener("mousedown", (e) => {
@@ -1752,6 +1803,11 @@ document.addEventListener("DOMContentLoaded", () => {
     wheelTotal = 0;
     kmWheelCountEl.textContent = "0";
     mbtnWheelEl.textContent = "ホイール: 待機中";
+    maxMouseHz = 0;
+    mouseIntervals = [];
+    lastMouseTs = 0;
+    kmMouseHzEl.textContent = "--- Hz";
+    kmMouseMaxHzEl.textContent = "--- Hz";
   });
 
   // ==========================================
@@ -1764,6 +1820,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const gpEnvStatusEl = document.getElementById("gp-env-status");
   const gpActiveArea = document.getElementById("gp-active-area");
   const gpNameEl = document.getElementById("gp-name");
+  const gpMappingEl = document.getElementById("gp-mapping");
+
+  const gpNameEl = document.getElementById("gp-name");
+  const gpHzEl = document.getElementById("gp-hz");
+  const gpMaxHzEl = document.getElementById("gp-max-hz");
   const gpMappingEl = document.getElementById("gp-mapping");
 
   const gpTestModeCheck = document.getElementById("gp-test-mode");
@@ -1949,11 +2010,11 @@ document.addEventListener("DOMContentLoaded", () => {
     offsetEl.textContent = dist.toFixed(5);
     maxEl.textContent = `${Math.min(100, newMax * 100).toFixed(1)}%`;
 
-    if (dist < 0.05) {
-      diagEl.textContent = "診断: 正常（中心安定）";
+    if (dist < 0.10) {
+      diagEl.textContent = "診断: 良好（一般的なデッドゾーン内）";
       diagEl.className = "drift-badge ok";
-    } else if (dist < 0.12) {
-      diagEl.textContent = "診断: わずかな中心ズレ（軽微）";
+    } else if (dist < 0.18) {
+      diagEl.textContent = "診断: わずかな中心ズレ（デッドゾーン調整推奨）";
       diagEl.className = "drift-badge warn";
     } else {
       diagEl.textContent = "診断: 中心ズレ大（ドリフトの可能性あり）";
@@ -2083,6 +2144,48 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(pollGamepads);
   }
   requestAnimationFrame(pollGamepads);
+
+  // コントローラーのポーリングレート計測（pad.timestamp の更新間隔から算出）
+  let lastPadTs = 0;
+  let padIntervals = [];
+  let maxPadHz = 0;
+  let padIdleCount = 0;
+
+  setInterval(() => {
+    if (currentTool !== "gamepad") return;
+    const pads = getConnectedPads();
+    const selectedIdx = parseInt(gpSelect.value, 10);
+    const pad = pads.find((p) => p.index === selectedIdx) || pads[0];
+    if (!pad) return;
+
+    if (pad.timestamp && pad.timestamp !== lastPadTs) {
+      if (lastPadTs > 0) {
+        const diff = pad.timestamp - lastPadTs;
+        if (diff >= 0.2 && diff <= 50) {
+          padIntervals.push(diff);
+          if (padIntervals.length > 60) padIntervals.shift();
+        }
+      }
+      lastPadTs = pad.timestamp;
+      padIdleCount = 0;
+
+      const hz = calcMedianHz(padIntervals);
+      if (hz) {
+        gpHzEl.textContent = `${hz} Hz`;
+        if (hz > maxPadHz) {
+          maxPadHz = hz;
+          gpMaxHzEl.textContent = `${maxPadHz} Hz`;
+        }
+      }
+    } else {
+      padIdleCount++;
+      if (padIdleCount > 120) {
+        gpHzEl.textContent = "入力待ち";
+        padIntervals = [];
+        lastPadTs = 0;
+      }
+    }
+  }, 1);
 
   gpVibrateBtn.addEventListener("click", () => {
     const pads = getConnectedPads();

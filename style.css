@@ -67,6 +67,7 @@ body {
 .mt-1 { margin-top: 1rem; }
 .mb-1 { margin-bottom: 1rem; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.mt-half { margin-top: 0.35rem; }
 
 .layout {
   display: flex;
