@@ -31,6 +31,9 @@
           <li><a href="#calc" class="nav-link tool-link" data-tool="calc">電卓</a></li>
           <li><a href="#stopwatch" class="nav-link tool-link" data-tool="stopwatch">ストップウォッチ</a></li>
           <li><a href="#bpm" class="nav-link tool-link" data-tool="bpm">BPM測定</a></li>
+          <li><a href="#base" class="nav-link tool-link" data-tool="base">進数変換</a></li>
+          <li><a href="#led" class="nav-link tool-link" data-tool="led">LED抵抗計算</a></li>
+          <li><a href="#rc" class="nav-link tool-link" data-tool="rc">RCフィルター計算</a></li>
           <li><a href="#device" class="nav-link tool-link" data-tool="device">端末スペック</a></li>
         </ul>
 
@@ -127,7 +130,27 @@
               <div class="calc-frac-sub" id="calc-frac-sub"></div>
             </div>
 
-            <!-- 関数電卓ボタン群（関数・多機能モード時） -->
+            <!-- 変数代入バー（多機能モード時） -->
+            <div class="var-bar" id="var-bar">
+              <label>x = <input type="number" id="var-x" step="any" placeholder="未設定"></label>
+              <label>y = <input type="number" id="var-y" step="any" placeholder="未設定"></label>
+              <label>z = <input type="number" id="var-z" step="any" placeholder="未設定"></label>
+            </div>
+
+            <!-- 分数・微積・方程式の専用入力ビルダー -->
+            <div class="calc-builder hidden" id="calc-builder">
+              <div class="builder-header">
+                <span id="builder-title">入力アシスト</span>
+                <button type="button" id="builder-close-btn" class="mini-btn">✕</button>
+              </div>
+              <div class="builder-body" id="builder-body"></div>
+              <div class="builder-actions">
+                <button type="button" id="builder-insert-btn" class="mini-btn">式に挿入</button>
+                <button type="button" id="builder-eval-btn" class="mini-btn primary-mini">このまま計算</button>
+              </div>
+            </div>
+
+            <!-- 関数電卓ボタン群 -->
             <div class="sci-grid" id="sci-grid">
               <button type="button" class="calc-btn sci" data-val="sin(">sin</button>
               <button type="button" class="calc-btn sci" data-val="cos(">cos</button>
@@ -142,7 +165,7 @@
               <button type="button" class="calc-btn sci" data-val="!">n!</button>
             </div>
 
-            <!-- 多機能ボタン群（多機能モード時のみ） -->
+            <!-- 多機能ボタン群（アイコン表示対応） -->
             <div class="adv-grid" id="adv-grid">
               <button type="button" class="calc-btn sci" data-val="asin(">sin⁻¹</button>
               <button type="button" class="calc-btn sci" data-val="acos(">cos⁻¹</button>
@@ -150,21 +173,36 @@
               <button type="button" class="calc-btn sci" data-val="P">nPr</button>
               <button type="button" class="calc-btn sci" data-val="C">nCr</button>
 
-              <button type="button" class="calc-btn sci" data-val="frac(">分数</button>
-              <button type="button" class="calc-btn sci" data-val="d/dx(">微分</button>
-              <button type="button" class="calc-btn sci" data-val="∫(">積分</button>
-              <button type="button" class="calc-btn sci" data-val="solve(">方程式</button>
-              <button type="button" class="calc-btn sci" data-val="x">x</button>
+              <!-- 分数アイコン（-の上に■、下に□） -->
+              <button type="button" class="calc-btn sci icon-key" data-builder="frac" title="分数入力">
+                <span class="frac-icon"><span>■</span><span class="f-bar"></span><span>□</span></span>
+              </button>
 
+              <!-- 微分アイコン（d/dx上下表示 + ■） -->
+              <button type="button" class="calc-btn sci icon-key" data-builder="diff" title="微分 d/dx">
+                <span class="diff-icon">
+                  <span class="frac-icon"><span>d</span><span class="f-bar"></span><span>dx</span></span>
+                  <span>■</span>
+                </span>
+              </button>
+
+              <!-- 積分アイコン（∫の上下に□、右に■） -->
+              <button type="button" class="calc-btn sci icon-key" data-builder="int" title="定積分 ∫">
+                <span class="int-icon">
+                  <span class="int-sym">∫</span>
+                  <span class="int-bounds"><span>□</span><span>□</span></span>
+                  <span>■</span>
+                </span>
+              </button>
+
+              <button type="button" class="calc-btn sci" data-builder="solve" title="方程式を解く">方程式</button>
+              <button type="button" class="calc-btn sci" data-val="abs(">|x|</button>
+
+              <button type="button" class="calc-btn sci" data-val="x">x</button>
+              <button type="button" class="calc-btn sci" data-val="y">y</button>
+              <button type="button" class="calc-btn sci" data-val="z">z</button>
               <button type="button" class="calc-btn sci" data-val=",">,</button>
               <button type="button" class="calc-btn sci" data-val="=">＝(式)</button>
-              <button type="button" class="calc-btn sci" data-val="x^2">x²</button>
-              <button type="button" class="calc-btn sci" data-val="abs(">|x|</button>
-              <button type="button" class="calc-btn sci" data-val="1/">1/x</button>
-            </div>
-
-            <div class="adv-help" id="adv-help">
-              書き方: <code>frac(分子,分母)</code> / <code>5P2</code> / <code>5C2</code> / <code>d/dx(x^2, 3)</code> / <code>∫(x^2, 0, 1)</code> / <code>solve(x^2-2=0, 1)</code>
             </div>
 
             <!-- 基本電卓ボタン群 -->
@@ -268,7 +306,173 @@
         </div>
       </section>
 
-      <!-- 5. 端末スペック -->
+      <!-- 5. 進数変換 -->
+      <section id="panel-base" class="tool-panel">
+        <div class="panel-header">
+          <h1>2・8・10・16進数変換</h1>
+          <button type="button" id="base-clear-btn" class="action-btn">数値クリア</button>
+        </div>
+
+        <div class="card form-card">
+          <p class="hint-text mb-1">いずれか1つに入力すると、他の進数へリアルタイムに変換されます。</p>
+          <div class="base-grid">
+            <div class="field-group">
+              <label for="base-bin">2進数 (BIN)</label>
+              <input type="text" id="base-bin" class="tool-input mono" placeholder="例: 10101100" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label for="base-oct">8進数 (OCT)</label>
+              <input type="text" id="base-oct" class="tool-input mono" placeholder="例: 254" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label for="base-dec">10進数 (DEC)</label>
+              <input type="text" id="base-dec" class="tool-input mono" placeholder="例: 172" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label for="base-hex">16進数 (HEX)</label>
+              <input type="text" id="base-hex" class="tool-input mono" placeholder="例: AC" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-error" id="base-error"></div>
+        </div>
+
+        <div class="card mt-1">
+          <div class="history-header">
+            <h2>簡易対応表（0〜15）</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="ref-table" id="base-ref-table">
+              <thead>
+                <tr>
+                  <th>10進 (DEC)</th>
+                  <th>16進 (HEX)</th>
+                  <th>2進 (BIN / 4bit)</th>
+                  <th>8進 (OCT)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. LED抵抗計算 -->
+      <section id="panel-led" class="tool-panel">
+        <div class="panel-header">
+          <h1>LED 電流制限抵抗計算</h1>
+          <button type="button" id="led-clear-btn" class="action-btn">数値クリア</button>
+        </div>
+
+        <div class="card form-card">
+          <div class="preset-bar">
+            <span class="hint-text">電源プリセット:</span>
+            <button type="button" class="mini-btn led-vcc-preset" data-vcc="3.3">3.3V</button>
+            <button type="button" class="mini-btn led-vcc-preset" data-vcc="5">5V</button>
+            <button type="button" class="mini-btn led-vcc-preset" data-vcc="9">9V</button>
+            <button type="button" class="mini-btn led-vcc-preset" data-vcc="12">12V</button>
+          </div>
+
+          <div class="preset-bar">
+            <span class="hint-text">LED色目安 (Vf):</span>
+            <button type="button" class="mini-btn led-vf-preset" data-vf="2.0">赤/黄 (2.0V)</button>
+            <button type="button" class="mini-btn led-vf-preset" data-vf="2.1">緑 (2.1V)</button>
+            <button type="button" class="mini-btn led-vf-preset" data-vf="3.2">青/白 (3.2V)</button>
+          </div>
+
+          <div class="calc-form-grid">
+            <div class="field-group">
+              <label for="led-vcc">電源電圧 Vcc (V)</label>
+              <input type="number" id="led-vcc" class="tool-input" step="any" placeholder="例: 5">
+            </div>
+            <div class="field-group">
+              <label for="led-vf">LED順方向電圧 Vf (V)</label>
+              <input type="number" id="led-vf" class="tool-input" step="any" placeholder="例: 2.0">
+            </div>
+            <div class="field-group">
+              <label for="led-if">目標電流 If (mA)</label>
+              <input type="number" id="led-if" class="tool-input" step="any" placeholder="例: 20">
+            </div>
+            <div class="field-group">
+              <label for="led-count">直列LED個数 (個)</label>
+              <input type="number" id="led-count" class="tool-input" min="1" step="1" value="1">
+            </div>
+          </div>
+
+          <div class="result-box" id="led-result-box">
+            <div class="result-main">
+              <span class="result-label">必要な抵抗値 R</span>
+              <span class="result-value" id="led-res-ohm">--- Ω</span>
+            </div>
+            <div class="result-sub-grid">
+              <div><span>E24標準系列目安:</span> <strong id="led-res-e24">---</strong></div>
+              <div><span>抵抗の消費電力:</span> <strong id="led-res-watt">--- mW</strong></div>
+            </div>
+            <div class="form-error" id="led-error"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. RCフィルター計算 -->
+      <section id="panel-rc" class="tool-panel">
+        <div class="panel-header">
+          <h1>RCフィルター計算</h1>
+          <button type="button" id="rc-clear-btn" class="action-btn">数値クリア</button>
+        </div>
+
+        <div class="card form-card">
+          <p class="hint-text mb-1">
+            抵抗 (R)・静電容量 (C)・カットオフ周波数 (fc) のうち<strong>2つを入力</strong>すると、残りの1つを自動計算します。
+          </p>
+
+          <div class="rc-grid">
+            <div class="field-group">
+              <label for="rc-r">抵抗値 (R)</label>
+              <div class="input-unit-row">
+                <input type="number" id="rc-r" class="tool-input" step="any" placeholder="数値を入力">
+                <select id="rc-r-unit" class="unit-select" aria-label="抵抗の単位">
+                  <option value="1">Ω</option>
+                  <option value="1000" selected>kΩ</option>
+                  <option value="1000000">MΩ</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="rc-c">静電容量 (C)</label>
+              <div class="input-unit-row">
+                <input type="number" id="rc-c" class="tool-input" step="any" placeholder="数値を入力">
+                <select id="rc-c-unit" class="unit-select" aria-label="静電容量の単位">
+                  <option value="1e-12">pF</option>
+                  <option value="1e-9">nF</option>
+                  <option value="1e-6" selected>μF</option>
+                  <option value="1e-3">mF</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="rc-fc">カットオフ周波数 (fc)</label>
+              <div class="input-unit-row">
+                <input type="number" id="rc-fc" class="tool-input" step="any" placeholder="数値を入力">
+                <select id="rc-fc-unit" class="unit-select" aria-label="周波数の単位">
+                  <option value="1" selected>Hz</option>
+                  <option value="1000">kHz</option>
+                  <option value="1000000">MHz</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-box mt-1">
+            <div class="result-sub-grid">
+              <div><span>時定数 τ (= R×C):</span> <strong id="rc-tau">---</strong></div>
+              <div><span>計算式:</span> <code>fc = 1 / (2πRC)</code></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. 端末スペック -->
       <section id="panel-device" class="tool-panel">
         <div class="panel-header">
           <h1>端末スペック</h1>

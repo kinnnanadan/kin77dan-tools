@@ -515,6 +515,150 @@ h2 {
   margin-bottom: 0.5rem;
 }
 
+/* 変数代入バー (x, y, z) */
+.var-bar {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.calc-card.adv-mode .var-bar {
+  display: grid;
+}
+
+.var-bar label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.var-bar input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+/* 専用入力ビルダー */
+.calc-builder {
+  background-color: var(--bg-body);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.45rem;
+}
+
+.builder-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.builder-body input {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.88rem;
+  width: 90px;
+}
+
+.builder-body input.wide {
+  width: 150px;
+}
+
+.builder-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.primary-mini {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+[data-theme="blue"] .primary-mini,
+[data-theme="dark"] .primary-mini {
+  color: #0b1120;
+}
+
+/* 分数・微分・積分のボタンアイコン */
+.icon-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.2rem;
+}
+
+.frac-icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-size: 0.72rem;
+}
+
+.frac-icon .f-bar {
+  width: 100%;
+  min-width: 14px;
+  height: 1.5px;
+  background-color: currentColor;
+  margin: 1.5px 0;
+}
+
+.diff-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.82rem;
+}
+
+.int-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.82rem;
+}
+
+.int-sym {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.int-bounds {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.6rem;
+  line-height: 1.05;
+}
+
 .calc-card.sci-mode .sci-grid,
 .calc-card.adv-mode .sci-grid {
   display: grid;
@@ -928,6 +1072,165 @@ h2 {
   }
 
   .calc-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 共通ユーティリティ・フォーム系ツール */
+.mt-1 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.base-grid,
+.calc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+}
+
+.rc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field-group label {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.tool-input {
+  width: 100%;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.tool-input:focus {
+  border-color: var(--accent);
+}
+
+.tool-input.computed {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+  font-weight: 700;
+}
+
+.input-unit-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.unit-select {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0 0.55rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.preset-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+.result-box {
+  margin-top: 1.25rem;
+  background-color: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.result-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.65rem;
+}
+
+.result-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.result-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-sub-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.result-sub-grid strong {
+  color: var(--text-main);
+}
+
+.form-error {
+  margin-top: 0.6rem;
+  font-size: 0.83rem;
+  color: #ef4444;
+  min-height: 1.1rem;
+}
+
+/* 進数早見表 */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.ref-table th,
+.ref-table td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ref-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  background-color: var(--bg-body);
+}
+
+@media (max-width: 768px) {
+  .base-grid,
+  .calc-form-grid,
+  .rc-grid {
     grid-template-columns: 1fr;
   }
 }

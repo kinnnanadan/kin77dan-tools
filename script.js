@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const initialHash = location.hash.replace("#", "");
-  if (["clock", "calc", "stopwatch", "bpm", "device"].includes(initialHash)) {
+  if (["clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "device"].includes(initialHash)) {
     switchTool(initialHash);
   }
 
@@ -213,8 +213,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const calcModeBtns = document.querySelectorAll(".calc-mode-btn");
   const calcAngleBtn = document.getElementById("calc-angle-btn");
 
+  const varXInput = document.getElementById("var-x");
+  const varYInput = document.getElementById("var-y");
+  const varZInput = document.getElementById("var-z");
+
+  const calcBuilder = document.getElementById("calc-builder");
+  const builderTitle = document.getElementById("builder-title");
+  const builderBody = document.getElementById("builder-body");
+  const builderCloseBtn = document.getElementById("builder-close-btn");
+  const builderInsertBtn = document.getElementById("builder-insert-btn");
+  const builderEvalBtn = document.getElementById("builder-eval-btn");
+
   let justEvaluated = false;
-  let angleUnit = "DEG"; // "DEG" or "RAD"
+  let angleUnit = "DEG";
+  let activeBuilderType = null;
 
   calcModeBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -222,6 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
       calcCard.classList.toggle("sci-mode", mode === "sci");
       calcCard.classList.toggle("adv-mode", mode === "adv");
       calcAngleBtn.classList.toggle("hidden", mode === "simple");
+      if (mode !== "adv") calcBuilder.classList.add("hidden");
       calcModeBtns.forEach((b) => b.classList.toggle("active", b === btn));
     });
   });
@@ -230,6 +243,117 @@ document.addEventListener("DOMContentLoaded", () => {
     angleUnit = angleUnit === "DEG" ? "RAD" : "DEG";
     calcAngleBtn.textContent = angleUnit;
   });
+
+  // 専用入力ビルダーを開く処理
+  function openBuilder(type) {
+    activeBuilderType = type;
+    calcBuilder.classList.remove("hidden");
+
+    if (type === "frac") {
+      builderTitle.textContent = "分数入力（分子 / 分母）";
+      builderBody.innerHTML = `
+        <input type="text" id="b-num" placeholder="分子 (■)">
+        <span>/</span>
+        <input type="text" id="b-den" placeholder="分母 (□)">
+      `;
+    } else if (type === "diff") {
+      builderTitle.textContent = "微分計算（d/dx ■）";
+      builderBody.innerHTML = `
+        <span>d/dx (</span>
+        <input type="text" id="b-fn" class="wide" placeholder="式 例: x^2">
+        <span>) で x =</span>
+        <input type="text" id="b-val" placeholder="値 例: 3">
+      `;
+    } else if (type === "int") {
+      builderTitle.textContent = "定積分計算（∫ □～□ ■ dx）";
+      builderBody.innerHTML = `
+        <span>下端:</span>
+        <input type="text" id="b-a" placeholder="下端 (□)">
+        <span>上端:</span>
+        <input type="text" id="b-b" placeholder="上端 (□)">
+        <span>式:</span>
+        <input type="text" id="b-fn" class="wide" placeholder="式 (■) 例: x^2">
+      `;
+    } else if (type === "solve") {
+      builderTitle.textContent = "方程式（左辺 = 右辺）";
+      builderBody.innerHTML = `
+        <input type="text" id="b-lhs" placeholder="左辺 例: x^2-2">
+        <span>=</span>
+        <input type="text" id="b-rhs" value="0" placeholder="右辺">
+        <span>初期値:</span>
+        <input type="text" id="b-init" value="1">
+      `;
+    }
+    const firstInput = builderBody.querySelector("input");
+    if (firstInput) firstInput.focus();
+  }
+
+  function buildExpressionFromForm() {
+    if (activeBuilderType === "frac") {
+      const num = document.getElementById("b-num").value.trim() || "0";
+      const den = document.getElementById("b-den").value.trim() || "1";
+      return `frac(${num},${den})`;
+    }
+    if (activeBuilderType === "diff") {
+      const fn = document.getElementById("b-fn").value.trim() || "x";
+      const val = document.getElementById("b-val").value.trim() || "0";
+      return `d/dx(${fn},${val})`;
+    }
+    if (activeBuilderType === "int") {
+      const a = document.getElementById("b-a").value.trim() || "0";
+      const b = document.getElementById("b-b").value.trim() || "1";
+      const fn = document.getElementById("b-fn").value.trim() || "x";
+      return `∫(${fn},${a},${b})`;
+    }
+    if (activeBuilderType === "solve") {
+      const lhs = document.getElementById("b-lhs").value.trim() || "x";
+      const rhs = document.getElementById("b-rhs").value.trim() || "0";
+      const init = document.getElementById("b-init").value.trim() || "1";
+      return `solve(${lhs}=${rhs},${init})`;
+    }
+    return "";
+  }
+
+  document.querySelectorAll("[data-builder]").forEach((btn) => {
+    btn.addEventListener("click", () => openBuilder(btn.dataset.builder));
+  });
+
+  builderCloseBtn.addEventListener("click", () => {
+    calcBuilder.classList.add("hidden");
+  });
+
+  builderInsertBtn.addEventListener("click", () => {
+    const built = buildExpressionFromForm();
+    if (!built) return;
+    if (calcInput.value === "0" || calcInput.value === "エラー" || justEvaluated) {
+      calcInput.value = built;
+    } else {
+      calcInput.value += built;
+    }
+    justEvaluated = false;
+    calcBuilder.classList.add("hidden");
+  });
+
+  builderEvalBtn.addEventListener("click", () => {
+    const built = buildExpressionFromForm();
+    if (!built) return;
+    calcInput.value = built;
+    calcBuilder.classList.add("hidden");
+    handleCalcAction("EVAL");
+  });
+
+  // 閉じ括弧の自動補完
+  function autoCloseParens(expr) {
+    let openCount = 0;
+    for (const ch of expr) {
+      if (ch === "(") openCount++;
+      else if (ch === ")") openCount--;
+    }
+    if (openCount > 0) {
+      return expr + ")".repeat(openCount);
+    }
+    return expr;
+  }
 
   function factorial(n) {
     if (!Number.isInteger(n) || n < 0 || n > 170) throw new Error("Fact");
@@ -255,7 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.round(res);
   }
 
-  // 小数を既約分数文字列へ変換（連分数展開）
   function toFractionString(num) {
     if (!Number.isFinite(num) || Number.isInteger(num)) return "";
     const sign = num < 0 ? "-" : "";
@@ -282,7 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  // 括弧のネストを考慮してトップレベルのカンマで引数を分割
   function splitTopLevelArgs(str) {
     const args = [];
     let depth = 0;
@@ -302,7 +424,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return args;
   }
 
-  // 括弧の対応する閉じ位置を返す
   function findMatchingParen(str, openIdx) {
     let depth = 0;
     for (let i = openIdx; i < str.length; i++) {
@@ -315,8 +436,16 @@ document.addEventListener("DOMContentLoaded", () => {
     throw new Error("Paren");
   }
 
-  function safeEvaluate(expr, xVal = null) {
-    let cleaned = expr
+  function getCurrentVars() {
+    return {
+      x: varXInput.value !== "" ? Number(varXInput.value) : null,
+      y: varYInput.value !== "" ? Number(varYInput.value) : null,
+      z: varZInput.value !== "" ? Number(varZInput.value) : null
+    };
+  }
+
+  function safeEvaluate(expr, vars = getCurrentVars()) {
+    let cleaned = autoCloseParens(expr)
       .replace(/\s+/g, "")
       .replace(/×/g, "*")
       .replace(/÷/g, "/")
@@ -325,10 +454,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/d\/dx\(/g, "diff(")
       .replace(/∫\(/g, "int(");
 
-    // 暗黙の乗算を補完
     cleaned = cleaned
-      .replace(/(\d)(π|e|x|\(|asin|acos|atan|sin|cos|tan|log|ln|sqrt|abs|frac|diff|int|solve)/g, "$1*$2")
-      .replace(/(\)|π|e|x)(\d|\(|π|e|x)/g, "$1*$2");
+      .replace(/(\d)(π|e|x|y|z|\(|asin|acos|atan|sin|cos|tan|log|ln|sqrt|abs|frac|diff|int|solve)/g, "$1*$2")
+      .replace(/(\)|π|e|x|y|z)(\d|\(|π|e|x|y|z)/g, "$1*$2");
 
     let pos = 0;
 
@@ -397,13 +525,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (cleaned[pos] === "π") { pos++; return Math.PI; }
       if (cleaned[pos] === "e") { pos++; return Math.E; }
-      if (cleaned[pos] === "x") {
-        if (xVal === null) throw new Error("UnboundX");
+      if (cleaned[pos] === "x" || cleaned[pos] === "y" || cleaned[pos] === "z") {
+        const vName = cleaned[pos];
+        if (vars[vName] === null || Number.isNaN(vars[vName])) throw new Error("UnboundVar");
         pos++;
-        return xVal;
+        return vars[vName];
       }
 
-      // 多引数・特殊解析関数（frac, diff, int, solve）
       const multiFnMatch = cleaned.slice(pos).match(/^(frac|diff|int|solve)\(/);
       if (multiFnMatch) {
         const fnName = multiFnMatch[1];
@@ -416,32 +544,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (fnName === "frac") {
           if (args.length !== 2) throw new Error("Args");
-          const num = safeEvaluate(args[0], xVal);
-          const den = safeEvaluate(args[1], xVal);
+          const num = safeEvaluate(args[0], vars);
+          const den = safeEvaluate(args[1], vars);
           if (den === 0) throw new Error("ZeroDiv");
           return num / den;
         }
 
         if (fnName === "diff") {
           if (args.length !== 2) throw new Error("Args");
-          const x0 = safeEvaluate(args[1], xVal);
+          const x0 = safeEvaluate(args[1], vars);
           const h = 1e-6;
-          const fPlus = safeEvaluate(args[0], x0 + h);
-          const fMinus = safeEvaluate(args[0], x0 - h);
+          const fPlus = safeEvaluate(args[0], { ...vars, x: x0 + h });
+          const fMinus = safeEvaluate(args[0], { ...vars, x: x0 - h });
           return (fPlus - fMinus) / (2 * h);
         }
 
         if (fnName === "int") {
           if (args.length !== 3) throw new Error("Args");
-          const a = safeEvaluate(args[1], xVal);
-          const b = safeEvaluate(args[2], xVal);
+          const a = safeEvaluate(args[1], vars);
+          const b = safeEvaluate(args[2], vars);
           if (a === b) return 0;
           const n = 1000;
           const h = (b - a) / n;
-          let sum = safeEvaluate(args[0], a) + safeEvaluate(args[0], b);
+          let sum = safeEvaluate(args[0], { ...vars, x: a }) + safeEvaluate(args[0], { ...vars, x: b });
           for (let i = 1; i < n; i++) {
             const xi = a + i * h;
-            sum += (i % 2 === 0 ? 2 : 4) * safeEvaluate(args[0], xi);
+            sum += (i % 2 === 0 ? 2 : 4) * safeEvaluate(args[0], { ...vars, x: xi });
           }
           return (sum * h) / 3;
         }
@@ -456,26 +584,25 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error("EqSyntax");
           }
 
-          let x = args.length === 2 ? safeEvaluate(args[1], xVal) : 1;
+          let x = args.length === 2 ? safeEvaluate(args[1], vars) : 1;
           const h = 1e-7;
           for (let iter = 0; iter < 100; iter++) {
-            const fx = safeEvaluate(eqStr, x);
+            const fx = safeEvaluate(eqStr, { ...vars, x });
             if (Math.abs(fx) < 1e-11) return x;
-            const dfx = (safeEvaluate(eqStr, x + h) - safeEvaluate(eqStr, x - h)) / (2 * h);
+            const dfx = (safeEvaluate(eqStr, { ...vars, x: x + h }) - safeEvaluate(eqStr, { ...vars, x: x - h })) / (2 * h);
             if (!Number.isFinite(dfx) || Math.abs(dfx) < 1e-14) {
-              x += 0.1; // 停滞時に初期値を少しずらして再探索
+              x += 0.1;
               continue;
             }
             const step = fx / dfx;
             x -= step;
             if (Math.abs(step) < 1e-12) return x;
           }
-          if (Math.abs(safeEvaluate(eqStr, x)) < 1e-5) return x;
+          if (Math.abs(safeEvaluate(eqStr, { ...vars, x })) < 1e-5) return x;
           throw new Error("NoRoot");
         }
       }
 
-      // 1引数関数（三角・逆三角・対数・平方根・絶対値）
       const fnMatch = cleaned.slice(pos).match(/^(asin|acos|atan|sin|cos|tan|log|ln|sqrt|abs)\(/);
       if (fnMatch) {
         const fnName = fnMatch[1];
@@ -542,6 +669,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function handleCalcAction(val) {
+    if (!val) return;
     if (val === "C") {
       calcInput.value = "0";
       calcExpr.textContent = "";
@@ -560,14 +688,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     if (val === "EVAL") {
-      const raw = calcInput.value;
+      const completed = autoCloseParens(calcInput.value);
       try {
-        const result = safeEvaluate(raw);
+        const result = safeEvaluate(completed);
         const fracText = toFractionString(result);
-        calcExpr.textContent = `${raw} =`;
+        calcExpr.textContent = `${completed} =`;
         calcInput.value = String(result);
         calcFracSub.textContent = fracText;
-        addHistory(raw, result, fracText);
+        addHistory(completed, result, fracText);
         justEvaluated = true;
       } catch {
         calcInput.value = "エラー";
@@ -584,7 +712,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const isStartToken = /^[0-9.(πex]|^(asin|acos|atan|sin|cos|tan|log|ln|√|abs|frac|d\/dx|∫|solve)\(/.test(val);
+    const isStartToken = /^[0-9.(πexyz]|^(asin|acos|atan|sin|cos|tan|log|ln|√|abs|frac|d\/dx|∫|solve)\(/.test(val);
     if ((justEvaluated && isStartToken) || (calcInput.value === "0" && isStartToken && val !== ".")) {
       calcInput.value = val;
     } else {
@@ -594,7 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
     justEvaluated = false;
   }
 
-  document.querySelectorAll(".calc-btn").forEach((btn) => {
+  document.querySelectorAll(".calc-btn[data-val]").forEach((btn) => {
     btn.addEventListener("click", () => handleCalcAction(btn.dataset.val));
   });
 
@@ -935,5 +1063,273 @@ document.addEventListener("DOMContentLoaded", () => {
       deviceCopyBtn.textContent = "コピー完了";
       setTimeout(() => (deviceCopyBtn.textContent = "情報をコピー"), 1200);
     });
+  });
+
+  // ==========================================
+  // 8. 2・8・10・16進数変換
+  // ==========================================
+  const baseInputs = {
+    bin: document.getElementById("base-bin"),
+    oct: document.getElementById("base-oct"),
+    dec: document.getElementById("base-dec"),
+    hex: document.getElementById("base-hex")
+  };
+  const baseErrorEl = document.getElementById("base-error");
+  const baseClearBtn = document.getElementById("base-clear-btn");
+  const baseRefBody = document.querySelector("#base-ref-table tbody");
+
+  // 簡易対応表 (0〜15) を生成
+  for (let i = 0; i <= 15; i++) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i}</td>
+      <td>${i.toString(16).toUpperCase()}</td>
+      <td>${i.toString(2).padStart(4, "0")}</td>
+      <td>${i.toString(8)}</td>
+    `;
+    baseRefBody.appendChild(tr);
+  }
+
+  function parseBigIntByRadix(str, radix) {
+    const validChars = {
+      2: /^[01]+$/,
+      8: /^[0-7]+$/,
+      10: /^[0-9]+$/,
+      16: /^[0-9a-fA-F]+$/
+    }[radix];
+    if (!validChars.test(str)) return null;
+
+    let result = 0n;
+    const base = BigInt(radix);
+    for (const ch of str) {
+      const digit = BigInt(parseInt(ch, radix));
+      result = result * base + digit;
+    }
+    return result;
+  }
+
+  function handleBaseInput(sourceKey) {
+    let raw = baseInputs[sourceKey].value.trim().replace(/\s+/g, "");
+    if (sourceKey === "hex") raw = raw.replace(/^0x/i, "");
+    if (sourceKey === "bin") raw = raw.replace(/^0b/i, "");
+    if (sourceKey === "oct") raw = raw.replace(/^0o/i, "");
+
+    if (raw === "") {
+      Object.values(baseInputs).forEach((el) => (el.value = ""));
+      baseErrorEl.textContent = "";
+      return;
+    }
+
+    const radixMap = { bin: 2, oct: 8, dec: 10, hex: 16 };
+    const val = parseBigIntByRadix(raw, radixMap[sourceKey]);
+
+    if (val === null) {
+      baseErrorEl.textContent = "その進数で使えない文字が含まれています。";
+      return;
+    }
+
+    baseErrorEl.textContent = "";
+    if (sourceKey !== "bin") baseInputs.bin.value = val.toString(2);
+    if (sourceKey !== "oct") baseInputs.oct.value = val.toString(8);
+    if (sourceKey !== "dec") baseInputs.dec.value = val.toString(10);
+    if (sourceKey !== "hex") baseInputs.hex.value = val.toString(16).toUpperCase();
+  }
+
+  Object.keys(baseInputs).forEach((key) => {
+    baseInputs[key].addEventListener("input", () => handleBaseInput(key));
+  });
+
+  baseClearBtn.addEventListener("click", () => {
+    Object.values(baseInputs).forEach((el) => (el.value = ""));
+    baseErrorEl.textContent = "";
+  });
+
+  // ==========================================
+  // 9. LED 電流制限抵抗計算
+  // ==========================================
+  const ledVccEl = document.getElementById("led-vcc");
+  const ledVfEl = document.getElementById("led-vf");
+  const ledIfEl = document.getElementById("led-if");
+  const ledCountEl = document.getElementById("led-count");
+  const ledResOhmEl = document.getElementById("led-res-ohm");
+  const ledResE24El = document.getElementById("led-res-e24");
+  const ledResWattEl = document.getElementById("led-res-watt");
+  const ledErrorEl = document.getElementById("led-error");
+  const ledClearBtn = document.getElementById("led-clear-btn");
+
+  const e24Bases = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1];
+
+  function findNearestE24(ohms) {
+    if (ohms <= 0 || !Number.isFinite(ohms)) return "---";
+    const exp = Math.floor(Math.log10(ohms));
+    let best = ohms;
+    let minDiff = Infinity;
+    for (let e = exp - 1; e <= exp + 1; e++) {
+      const mult = Math.pow(10, e);
+      for (const b of e24Bases) {
+        const candidate = b * mult;
+        const diff = Math.abs(candidate - ohms);
+        if (diff < minDiff) {
+          minDiff = diff;
+          best = candidate;
+        }
+      }
+    }
+    const rounded = Math.round(best * 100) / 100;
+    return rounded >= 1000 ? `${(rounded / 1000).toFixed(2)} kΩ (${rounded} Ω)` : `${rounded} Ω`;
+  }
+
+  function calculateLedResistor() {
+    const vcc = parseFloat(ledVccEl.value);
+    const vf = parseFloat(ledVfEl.value);
+    const ifMa = parseFloat(ledIfEl.value);
+    const count = parseInt(ledCountEl.value, 10) || 1;
+
+    if (Number.isNaN(vcc) || Number.isNaN(vf) || Number.isNaN(ifMa)) {
+      ledResOhmEl.textContent = "--- Ω";
+      ledResE24El.textContent = "---";
+      ledResWattEl.textContent = "--- mW";
+      ledErrorEl.textContent = "";
+      return;
+    }
+
+    if (ifMa <= 0 || count < 1) {
+      ledErrorEl.textContent = "電流と個数は1以上の正の数値を入力してください。";
+      return;
+    }
+
+    const vDrop = vcc - vf * count;
+    if (vDrop <= 0) {
+      ledResOhmEl.textContent = "点灯不可";
+      ledResE24El.textContent = "---";
+      ledResWattEl.textContent = "--- mW";
+      ledErrorEl.textContent = `電源電圧 (${vcc}V) がLEDの合計順方向電圧 (${(vf * count).toFixed(2)}V) 以下です。`;
+      return;
+    }
+
+    ledErrorEl.textContent = "";
+    const currentA = ifMa / 1000;
+    const r = vDrop / currentA;
+    const wattMw = vDrop * ifMa;
+
+    ledResOhmEl.textContent = r >= 1000 ? `${(r / 1000).toFixed(3)} kΩ (${r.toFixed(1)} Ω)` : `${r.toFixed(1)} Ω`;
+    ledResE24El.textContent = findNearestE24(r);
+    ledResWattEl.textContent = `${wattMw.toFixed(1)} mW`;
+  }
+
+  [ledVccEl, ledVfEl, ledIfEl, ledCountEl].forEach((el) => {
+    el.addEventListener("input", calculateLedResistor);
+  });
+
+  document.querySelectorAll(".led-vcc-preset").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      ledVccEl.value = btn.dataset.vcc;
+      calculateLedResistor();
+    });
+  });
+
+  document.querySelectorAll(".led-vf-preset").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      ledVfEl.value = btn.dataset.vf;
+      calculateLedResistor();
+    });
+  });
+
+  ledClearBtn.addEventListener("click", () => {
+    ledVccEl.value = "";
+    ledVfEl.value = "";
+    ledIfEl.value = "";
+    ledCountEl.value = "1";
+    calculateLedResistor();
+  });
+
+  // ==========================================
+  // 10. RCフィルター計算（3値のうち2入力で自動算出）
+  // ==========================================
+  const rcFields = {
+    r: { input: document.getElementById("rc-r"), unit: document.getElementById("rc-r-unit") },
+    c: { input: document.getElementById("rc-c"), unit: document.getElementById("rc-c-unit") },
+    fc: { input: document.getElementById("rc-fc"), unit: document.getElementById("rc-fc-unit") }
+  };
+  const rcTauEl = document.getElementById("rc-tau");
+  const rcClearBtn = document.getElementById("rc-clear-btn");
+
+  // 直近にユーザーが手入力した最大2つのキーを保持
+  let rcEditedOrder = [];
+
+  function formatTau(sec) {
+    if (!Number.isFinite(sec) || sec <= 0) return "---";
+    if (sec >= 1) return `${sec.toPrecision(4)} s`;
+    if (sec >= 1e-3) return `${(sec * 1e3).toPrecision(4)} ms`;
+    if (sec >= 1e-6) return `${(sec * 1e6).toPrecision(4)} μs`;
+    return `${(sec * 1e9).toPrecision(4)} ns`;
+  }
+
+  function updateRcFilter() {
+    // 入力が空になったキーを履歴から除外
+    rcEditedOrder = rcEditedOrder.filter((k) => {
+      const v = parseFloat(rcFields[k].input.value);
+      return !Number.isNaN(v) && v > 0;
+    });
+
+    Object.values(rcFields).forEach((f) => f.input.classList.remove("computed"));
+
+    if (rcEditedOrder.length < 2) {
+      rcTauEl.textContent = "---";
+      return;
+    }
+
+    const [k1, k2] = rcEditedOrder.slice(-2);
+    const targetKey = ["r", "c", "fc"].find((k) => k !== k1 && k !== k2);
+
+    const getBaseVal = (k) => parseFloat(rcFields[k].input.value) * parseFloat(rcFields[k].unit.value);
+    const setScaledVal = (k, baseVal) => {
+      const scaled = baseVal / parseFloat(rcFields[k].unit.value);
+      rcFields[k].input.value = String(Number(scaled.toPrecision(5)));
+      rcFields[k].input.classList.add("computed");
+    };
+
+    let rOhm, cFarad;
+
+    if (targetKey === "fc") {
+      rOhm = getBaseVal("r");
+      cFarad = getBaseVal("c");
+      const fcHz = 1 / (2 * Math.PI * rOhm * cFarad);
+      setScaledVal("fc", fcHz);
+    } else if (targetKey === "r") {
+      cFarad = getBaseVal("c");
+      const fcHz = getBaseVal("fc");
+      rOhm = 1 / (2 * Math.PI * fcHz * cFarad);
+      setScaledVal("r", rOhm);
+    } else if (targetKey === "c") {
+      rOhm = getBaseVal("r");
+      const fcHz = getBaseVal("fc");
+      cFarad = 1 / (2 * Math.PI * fcHz * rOhm);
+      setScaledVal("c", cFarad);
+    }
+
+    rcTauEl.textContent = formatTau(rOhm * cFarad);
+  }
+
+  Object.keys(rcFields).forEach((key) => {
+    rcFields[key].input.addEventListener("input", () => {
+      rcEditedOrder = rcEditedOrder.filter((k) => k !== key);
+      rcEditedOrder.push(key);
+      if (rcEditedOrder.length > 2) rcEditedOrder.shift();
+      updateRcFilter();
+    });
+
+    rcFields[key].unit.addEventListener("change", () => {
+      updateRcFilter();
+    });
+  });
+
+  rcClearBtn.addEventListener("click", () => {
+    rcEditedOrder = [];
+    Object.values(rcFields).forEach((f) => {
+      f.input.value = "";
+      f.input.classList.remove("computed");
+    });
+    rcTauEl.textContent = "---";
   });
 });
