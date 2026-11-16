@@ -93,7 +93,7 @@
         </div>
 
         <div class="home-search-bar mt-1">
-          <input type="text" id="home-search-input" class="tool-input" placeholder="ツール名や用途で検索（例: 時計, 微分, 抵抗, DualSense, 16進数, Hz...）" autocomplete="off">
+          <input type="text" id="home-search-input" class="tool-input" placeholder="ツール名や用途で検索（例: 時計, 微分, 抵抗, DualSense, 16進数, QR...）" autocomplete="off">
           <button type="button" id="home-search-clear" class="action-btn">クリア</button>
         </div>
 
@@ -193,23 +193,13 @@
             </div>
             <p>アクセス中のPC・スマホのCPUコア数・GPU・画面解像度・バッテリー等を一覧表示。</p>
           </a>
-        </div>
 
-        <a href="#device" class="tool-card" data-tool="device" data-keywords="端末 スペック cpu メモリ gpu 解像度 os ブラウザ useragent">
-            <div class="tool-card-top">
-              <h3>端末スペック</h3>
-              <span class="tag">システム</span>
-            </div>
-            <p>アクセス中のPC・スマホのCPUコア数・GPU・画面解像度・バッテリー等を一覧表示。</p>
-          </a>
-
-          <!-- ↓ ここから追加 -->
           <a href="#hash" class="tool-card" data-tool="hash" data-keywords="ハッシュ hash md5 sha1 sha256 sha512 sha3 crc32 チェックサム 比較 ファイル">
             <div class="tool-card-top">
               <h3>ハッシュ値計算・比較</h3>
               <span class="tag">検証・開発</span>
             </div>
-            <p>MD5 / SHA-1 / SHA-256 / SHA-512 / SHA-3 / CRC32 に対応。複数ファイルのD&D比較・一致ハイライト付き。</p>
+            <p>MD5 / SHA-1 / SHA-256 / SHA-512 / SHA-3 / CRC32 に対応。複数ファイルのD&amp;D比較・一致ハイライト付き。</p>
           </a>
 
           <a href="#charcount" class="tool-card" data-tool="charcount" data-keywords="文字数 カウント バイト数 行数 単語数 原稿用紙 テキスト">
@@ -993,6 +983,7 @@
         </div>
       </section>
 
+      <!-- 13. ハッシュ値計算 -->
       <section id="panel-hash" class="tool-panel">
         <div class="panel-header">
           <h1>ハッシュ値計算・比較</h1>
@@ -1006,20 +997,17 @@
         </div>
 
         <div class="card">
-          <!-- ドラッグ＆ドロップ領域 -->
           <div id="hash-drop-zone" class="drop-zone">
             <div class="drop-zone-title">ここにファイルをドラッグ＆ドロップ（複数ファイル対応）</div>
             <p class="hint-text">2つ以上読み込むと同一ハッシュ値のファイルを自動で色分けして強調表示します</p>
           </div>
 
-          <!-- 照合用ハッシュ入力欄 -->
           <div class="field-group mt-1">
             <label for="hash-verify-input">ハッシュ値 照合チェック（配布元のMD5 / SHA-256等を貼り付けて一致確認）</label>
             <input type="text" id="hash-verify-input" class="tool-input mono" placeholder="比較したいハッシュ文字列を貼り付け..." autocomplete="off">
           </div>
           <div id="hash-verify-status" class="hash-verify-status"></div>
 
-          <!-- テキスト直接ハッシュ計算 -->
           <details class="mt-1">
             <summary class="details-summary">テキスト文字列から直接ハッシュ計算する</summary>
             <div class="mt-half">
@@ -1029,7 +1017,6 @@
           </details>
         </div>
 
-        <!-- 読み込みファイル一覧・ハッシュ結果 -->
         <div id="hash-file-list" class="hash-file-list mt-1"></div>
       </section>
 
@@ -1159,7 +1146,6 @@
             <div class="form-error" id="bc-error"></div>
           </div>
 
-          <!-- プレビュー表示 -->
           <div class="card bc-preview-card">
             <div class="bc-canvas-wrap">
               <canvas id="bc-canvas"></canvas>
