@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  const allToolIds = ["home", "clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "multivideo", "tonegen", "keymouse", "gamepad", "device"];
+  const allToolIds = ["home", "clock", "calc", "stopwatch", "bpm", "base", "led", "rc", "multivideo", "tonegen", "keymouse", "gamepad", "device", "hash", "charcount", "barcode"];
   const initialHash = location.hash.replace("#", "");
   if (allToolIds.includes(initialHash)) {
     switchTool(initialHash);
@@ -2403,4 +2403,397 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => (deviceCopyBtn.textContent = "情報をコピー"), 1200);
     });
   });
+
+  // ==========================================
+  // 15. ハッシュ値計算・比較（MD5 / SHA-1 / SHA-256 / SHA-512 / SHA-3 / CRC32）
+  // ==========================================
+  const hashDropZone = document.getElementById("hash-drop-zone");
+  const hashFileInput = document.getElementById("hash-file-input");
+  const hashClearBtn = document.getElementById("hash-clear-btn");
+  const hashVerifyInput = document.getElementById("hash-verify-input");
+  const hashVerifyStatus = document.getElementById("hash-verify-status");
+  const hashFileListEl = document.getElementById("hash-file-list");
+  const hashTextInput = document.getElementById("hash-text-input");
+  const hashTextResultsEl = document.getElementById("hash-text-results");
+
+  // CRC32 テーブル生成
+  const crc32Table = (() => {
+    const table = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      table[i] = c;
+    }
+    return table;
+  })();
+
+  function updateCrc32(crc, uint8Arr) {
+    let c = crc ^ 0xFFFFFFFF;
+    for (let i = 0; i < uint8Arr.length; i++) {
+      c = crc32Table[(c ^ uint8Arr[i]) & 0xFF] ^ (c >>> 8);
+    }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  }
+
+  let hashedFiles = []; // { id, name, size, hashes: { CRC32, MD5, SHA1, SHA256, SHA512, SHA3_256, SHA3_512 } }
+  let nextHashFileId = 1;
+
+  async function computeFileHashes(file) {
+    const chunkSize = 2 * 1024 * 1024; // 2MBずつ分割読み込み
+    let crc = 0;
+    const md5 = CryptoJS.algo.MD5.create();
+    const sha1 = CryptoJS.algo.SHA1.create();
+    const sha256 = CryptoJS.algo.SHA256.create();
+    const sha512 = CryptoJS.algo.SHA512.create();
+    const sha3_256 = CryptoJS.algo.SHA3.create({ outputLength: 256 });
+    const sha3_512 = CryptoJS.algo.SHA3.create({ outputLength: 512 });
+
+    for (let offset = 0; offset < file.size; offset += chunkSize) {
+      const slice = file.slice(offset, offset + chunkSize);
+      const buf = await slice.arrayBuffer();
+      const u8 = new Uint8Array(buf);
+      crc = updateCrc32(crc, u8);
+
+      const wa = CryptoJS.lib.WordArray.create(u8);
+      md5.update(wa);
+      sha1.update(wa);
+      sha256.update(wa);
+      sha512.update(wa);
+      sha3_256.update(wa);
+      sha3_512.update(wa);
+    }
+
+    return {
+      CRC32: crc.toString(16).padStart(8, "0").toLowerCase(),
+      MD5: md5.finalize().toString(CryptoJS.enc.Hex),
+      "SHA-1": sha1.finalize().toString(CryptoJS.enc.Hex),
+      "SHA-256": sha256.finalize().toString(CryptoJS.enc.Hex),
+      "SHA-512": sha512.finalize().toString(CryptoJS.enc.Hex),
+      "SHA3-256": sha3_256.finalize().toString(CryptoJS.enc.Hex),
+      "SHA3-512": sha3_512.finalize().toString(CryptoJS.enc.Hex)
+    };
+  }
+
+  function renderHashFileList() {
+    hashFileListEl.innerHTML = "";
+    const verifyTarget = hashVerifyInput.value.trim().toLowerCase();
+    let verifyHitCount = 0;
+
+    // SHA-256 を基準に複数ファイル間の完全一致グループを検出
+    const countMap = new Map();
+    hashedFiles.forEach((f) => {
+      const key = f.hashes["SHA-256"];
+      countMap.set(key, (countMap.get(key) || 0) + 1);
+    });
+
+    const groupColorMap = new Map();
+    let groupIdx = 0;
+    countMap.forEach((cnt, key) => {
+      if (cnt >= 2) {
+        groupColorMap.set(key, groupIdx++);
+      }
+    });
+
+    hashedFiles.forEach((item) => {
+      const sha256 = item.hashes["SHA-256"];
+      const matchGroup = groupColorMap.get(sha256);
+      const card = document.createElement("div");
+      card.className = "hash-file-card" + (matchGroup !== undefined ? ` match-g${matchGroup % 4}` : "");
+
+      const matchBadgeHtml = matchGroup !== undefined
+        ? `<span class="match-badge">一致グループ #${matchGroup + 1}（${countMap.get(sha256)}ファイル一致）</span>`
+        : "";
+
+      let rowsHtml = "";
+      Object.entries(item.hashes).forEach(([algo, val]) => {
+        const isVerifyMatch = verifyTarget !== "" && val.toLowerCase() === verifyTarget;
+        if (isVerifyMatch) verifyHitCount++;
+        rowsHtml += `
+          <div class="hash-kv-row ${isVerifyMatch ? "verified-match" : ""}">
+            <span class="hash-algo">${algo}</span>
+            <span class="hash-val">${val}</span>
+            <button type="button" class="mini-btn hash-copy-btn" data-hash="${val}">コピー</button>
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div class="history-header">
+          <div>
+            <strong>${item.name}</strong> <span class="hint-text">(${formatFileSize(item.size)})</span>
+            ${matchBadgeHtml}
+          </div>
+          <button type="button" class="mini-btn hash-del-btn" data-id="${item.id}">削除</button>
+        </div>
+        <div class="hash-kv-list">${rowsHtml}</div>
+      `;
+
+      hashFileListEl.appendChild(card);
+    });
+
+    // 照合ステータスの表示更新
+    if (verifyTarget === "") {
+      hashVerifyStatus.textContent = "";
+    } else if (verifyHitCount > 0) {
+      hashVerifyStatus.textContent = `✅ 照合一致: ${verifyHitCount} 件のハッシュ値と完全に一致しました！`;
+      hashVerifyStatus.style.color = "#10b981";
+    } else {
+      hashVerifyStatus.textContent = "❌ 一致するハッシュ値は見つかりませんでした。";
+      hashVerifyStatus.style.color = "#ef4444";
+    }
+
+    // コピー・個別削除イベント
+    hashFileListEl.querySelectorAll(".hash-copy-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        navigator.clipboard.writeText(btn.dataset.hash).then(() => {
+          btn.textContent = "完了";
+          setTimeout(() => (btn.textContent = "コピー"), 1000);
+        });
+      });
+    });
+
+    hashFileListEl.querySelectorAll(".hash-del-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.id);
+        hashedFiles = hashedFiles.filter((f) => f.id !== id);
+        renderHashFileList();
+      });
+    });
+  }
+
+  async function processIncomingFiles(fileList) {
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+
+    hashDropZone.querySelector(".drop-zone-title").textContent = "ハッシュ値を計算中...";
+    for (const file of files) {
+      const hashes = await computeFileHashes(file);
+      hashedFiles.push({
+        id: nextHashFileId++,
+        name: file.name,
+        size: file.size,
+        hashes
+      });
+    }
+    hashDropZone.querySelector(".drop-zone-title").textContent = "ここにファイルをドラッグ＆ドロップ（複数ファイル対応）";
+    renderHashFileList();
+  }
+
+  hashDropZone.addEventListener("click", () => hashFileInput.click());
+  hashFileInput.addEventListener("change", (e) => {
+    processIncomingFiles(e.target.files);
+    hashFileInput.value = "";
+  });
+
+  hashDropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    hashDropZone.classList.add("dragover");
+  });
+
+  hashDropZone.addEventListener("dragleave", () => {
+    hashDropZone.classList.remove("dragover");
+  });
+
+  hashDropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    hashDropZone.classList.remove("dragover");
+    if (e.dataTransfer && e.dataTransfer.files) {
+      processIncomingFiles(e.dataTransfer.files);
+    }
+  });
+
+  hashVerifyInput.addEventListener("input", renderHashFileList);
+
+  hashClearBtn.addEventListener("click", () => {
+    hashedFiles = [];
+    hashVerifyInput.value = "";
+    hashTextInput.value = "";
+    hashTextResultsEl.innerHTML = "";
+    renderHashFileList();
+  });
+
+  // テキスト直接入力時のリアルタイムハッシュ計算
+  hashTextInput.addEventListener("input", () => {
+    const txt = hashTextInput.value;
+    if (txt === "") {
+      hashTextResultsEl.innerHTML = "";
+      return;
+    }
+    const u8 = new TextEncoder().encode(txt);
+    const crc = updateCrc32(0, u8).toString(16).padStart(8, "0").toLowerCase();
+    const results = {
+      CRC32: crc,
+      MD5: CryptoJS.MD5(txt).toString(),
+      "SHA-1": CryptoJS.SHA1(txt).toString(),
+      "SHA-256": CryptoJS.SHA256(txt).toString(),
+      "SHA-512": CryptoJS.SHA512(txt).toString(),
+      "SHA3-256": CryptoJS.SHA3(txt, { outputLength: 256 }).toString(),
+      "SHA3-512": CryptoJS.SHA3(txt, { outputLength: 512 }).toString()
+    };
+
+    hashTextResultsEl.innerHTML = "";
+    Object.entries(results).forEach(([algo, val]) => {
+      const row = document.createElement("div");
+      row.className = "hash-kv-row";
+      row.innerHTML = `
+        <span class="hash-algo">${algo}</span>
+        <span class="hash-val">${val}</span>
+        <button type="button" class="mini-btn">コピー</button>
+      `;
+      row.querySelector("button").addEventListener("click", (e) => {
+        navigator.clipboard.writeText(val).then(() => {
+          e.target.textContent = "完了";
+          setTimeout(() => (e.target.textContent = "コピー"), 1000);
+        });
+      });
+      hashTextResultsEl.appendChild(row);
+    });
+  });
+
+  // ==========================================
+  // 16. 文字数カウント
+  // ==========================================
+  const ccTextarea = document.getElementById("cc-textarea");
+  const ccTotalEl = document.getElementById("cc-total");
+  const ccNoSpaceEl = document.getElementById("cc-no-space");
+  const ccNoNewlineEl = document.getElementById("cc-no-newline");
+  const ccLinesEl = document.getElementById("cc-lines");
+  const ccWordsEl = document.getElementById("cc-words");
+  const ccBytesEl = document.getElementById("cc-bytes");
+  const ccTrimBtn = document.getElementById("cc-trim-btn");
+  const ccCopyBtn = document.getElementById("cc-copy-btn");
+  const ccClearBtn = document.getElementById("cc-clear-btn");
+
+  function updateCharCount() {
+    const text = ccTextarea.value;
+    const total = Array.from(text).length;
+    const noSpace = Array.from(text.replace(/\s/g, "")).length;
+    const noNewline = Array.from(text.replace(/\r?\n/g, "")).length;
+    const lines = text === "" ? 0 : text.split(/\r\n|\r|\n/).length;
+    const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+    const utf8Bytes = new TextEncoder().encode(text).length;
+    const genkou = Math.ceil(noNewline / 400);
+
+    ccTotalEl.textContent = `${total.toLocaleString()} 文字`;
+    ccNoSpaceEl.textContent = `${noSpace.toLocaleString()} 文字`;
+    ccNoNewlineEl.textContent = `${noNewline.toLocaleString()} 文字`;
+    ccLinesEl.textContent = `${lines.toLocaleString()} 行`;
+    ccWordsEl.textContent = `${words.toLocaleString()} 語`;
+    ccBytesEl.textContent = `${utf8Bytes.toLocaleString()} B / ${genkou} 枚`;
+  }
+
+  ccTextarea.addEventListener("input", updateCharCount);
+
+  ccTrimBtn.addEventListener("click", () => {
+    ccTextarea.value = ccTextarea.value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .join("\n")
+      .trim();
+    updateCharCount();
+  });
+
+  ccCopyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(ccTextarea.value).then(() => {
+      ccCopyBtn.textContent = "コピー完了";
+      setTimeout(() => (ccCopyBtn.textContent = "テキストコピー"), 1200);
+    });
+  });
+
+  ccClearBtn.addEventListener("click", () => {
+    ccTextarea.value = "";
+    updateCharCount();
+    ccTextarea.focus();
+  });
+
+  // ==========================================
+  // 17. 1次元・2次元コード生成（bwip-js）
+  // ==========================================
+  const bcTypeSelect = document.getElementById("bc-type");
+  const bcTextInput = document.getElementById("bc-text");
+  const bcEccSelect = document.getElementById("bc-ecc");
+  const bcScaleSelect = document.getElementById("bc-scale");
+  const bcIncludeTextCheck = document.getElementById("bc-include-text");
+  const bcCanvas = document.getElementById("bc-canvas");
+  const bcErrorEl = document.getElementById("bc-error");
+  const bcInfoText = document.getElementById("bc-info-text");
+  const bcDownloadBtn = document.getElementById("bc-download-btn");
+
+  const twoDimTypes = new Set([
+    "qrcode", "microqrcode", "rectangularmicroqrcode",
+    "datamatrix", "azteccode", "pdf417", "micropdf417",
+    "hanxin", "dotcode", "maxicode"
+  ]);
+
+  function generateBarcode() {
+    const bcid = bcTypeSelect.value;
+    const text = bcTextInput.value;
+    const scale = parseInt(bcScaleSelect.value, 10) || 3;
+    const ecc = bcEccSelect.value;
+    const is2D = twoDimTypes.has(bcid);
+
+    bcErrorEl.textContent = "";
+    if (!text) {
+      const ctx = bcCanvas.getContext("2d");
+      ctx.clearRect(0, 0, bcCanvas.width, bcCanvas.height);
+      bcInfoText.textContent = "データを入力してください";
+      return;
+    }
+
+    const opts = {
+      bcid,
+      text,
+      scale,
+      includetext: !is2D && bcIncludeTextCheck.checked,
+      textxalign: "center",
+      backgroundcolor: "ffffff",
+      paddingwidth: 4,
+      paddingheight: 4
+    };
+
+    if (!is2D) {
+      opts.height = 14;
+    }
+
+    // 誤り訂正レベルの反映（対応する2次元コード時のみ付与）
+    if (is2D && ecc !== "auto") {
+      if (["qrcode", "microqrcode", "rectangularmicroqrcode"].includes(bcid) && ["L", "M", "Q", "H"].includes(ecc)) {
+        opts.eclevel = ecc;
+      } else if (["pdf417", "micropdf417"].includes(bcid) && /^[0-8]$/.test(ecc)) {
+        opts.eclevel = parseInt(ecc, 10);
+      }
+    }
+
+    try {
+      bwipjs.toCanvas(bcCanvas, opts);
+      bcInfoText.textContent = `規格: ${bcid} ／ サイズ: ${bcCanvas.width} × ${bcCanvas.height} px`;
+    } catch (err) {
+      bcErrorEl.textContent = `生成エラー（入力文字種や桁数を確認してください）: ${err.message}`;
+    }
+  }
+
+  [bcTypeSelect, bcTextInput, bcEccSelect, bcScaleSelect, bcIncludeTextCheck].forEach((el) => {
+    el.addEventListener("input", generateBarcode);
+    el.addEventListener("change", generateBarcode);
+  });
+
+  bcDownloadBtn.addEventListener("click", () => {
+    if (!bcTextInput.value) return;
+    const link = document.createElement("a");
+    link.download = `${bcTypeSelect.value}_${Date.now()}.png`;
+    link.href = bcCanvas.toDataURL("image/png");
+    link.click();
+  });
+
+  // 初期サンプル生成
+  generateBarcode();
 });

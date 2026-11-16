@@ -39,6 +39,9 @@
           <li><a href="#keymouse" class="nav-link tool-link" data-tool="keymouse">キーボード・マウス確認</a></li>
           <li><a href="#gamepad" class="nav-link tool-link" data-tool="gamepad">コントローラー確認</a></li>
           <li><a href="#device" class="nav-link tool-link" data-tool="device">端末スペック</a></li>
+          <li><a href="#hash" class="nav-link tool-link" data-tool="hash">ハッシュ値計算</a></li>
+          <li><a href="#charcount" class="nav-link tool-link" data-tool="charcount">文字数カウント</a></li>
+          <li><a href="#barcode" class="nav-link tool-link" data-tool="barcode">1次元・2次元コード生成</a></li>
         </ul>
 
         <div class="nav-label">LINKS</div>
@@ -189,6 +192,40 @@
               <span class="tag">システム</span>
             </div>
             <p>アクセス中のPC・スマホのCPUコア数・GPU・画面解像度・バッテリー等を一覧表示。</p>
+          </a>
+        </div>
+
+        <a href="#device" class="tool-card" data-tool="device" data-keywords="端末 スペック cpu メモリ gpu 解像度 os ブラウザ useragent">
+            <div class="tool-card-top">
+              <h3>端末スペック</h3>
+              <span class="tag">システム</span>
+            </div>
+            <p>アクセス中のPC・スマホのCPUコア数・GPU・画面解像度・バッテリー等を一覧表示。</p>
+          </a>
+
+          <!-- ↓ ここから追加 -->
+          <a href="#hash" class="tool-card" data-tool="hash" data-keywords="ハッシュ hash md5 sha1 sha256 sha512 sha3 crc32 チェックサム 比較 ファイル">
+            <div class="tool-card-top">
+              <h3>ハッシュ値計算・比較</h3>
+              <span class="tag">検証・開発</span>
+            </div>
+            <p>MD5 / SHA-1 / SHA-256 / SHA-512 / SHA-3 / CRC32 に対応。複数ファイルのD&D比較・一致ハイライト付き。</p>
+          </a>
+
+          <a href="#charcount" class="tool-card" data-tool="charcount" data-keywords="文字数 カウント バイト数 行数 単語数 原稿用紙 テキスト">
+            <div class="tool-card-top">
+              <h3>文字数カウント</h3>
+              <span class="tag">文章作成</span>
+            </div>
+            <p>総文字数・空白除外・行数・単語数・UTF-8バイト数・原稿用紙枚数をリアルタイム計測。</p>
+          </a>
+
+          <a href="#barcode" class="tool-card" data-tool="barcode" data-keywords="バーコード qrコード 2次元コード 1次元コード datamatrix aztec pdf417 jan code128 誤り訂正">
+            <div class="tool-card-top">
+              <h3>1次元・2次元コード生成</h3>
+              <span class="tag">生成ツール</span>
+            </div>
+            <p>QRコード・各種バーコードからDataMatrix・Aztec・PDF417・漢信コードまで生成。誤り訂正レベル変更対応。</p>
           </a>
         </div>
 
@@ -956,12 +993,190 @@
         </div>
       </section>
 
+      <section id="panel-hash" class="tool-panel">
+        <div class="panel-header">
+          <h1>ハッシュ値計算・比較</h1>
+          <div class="header-controls">
+            <label class="action-btn primary file-label">
+              ファイルを選択
+              <input type="file" id="hash-file-input" multiple hidden>
+            </label>
+            <button type="button" id="hash-clear-btn" class="action-btn">すべてクリア</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <!-- ドラッグ＆ドロップ領域 -->
+          <div id="hash-drop-zone" class="drop-zone">
+            <div class="drop-zone-title">ここにファイルをドラッグ＆ドロップ（複数ファイル対応）</div>
+            <p class="hint-text">2つ以上読み込むと同一ハッシュ値のファイルを自動で色分けして強調表示します</p>
+          </div>
+
+          <!-- 照合用ハッシュ入力欄 -->
+          <div class="field-group mt-1">
+            <label for="hash-verify-input">ハッシュ値 照合チェック（配布元のMD5 / SHA-256等を貼り付けて一致確認）</label>
+            <input type="text" id="hash-verify-input" class="tool-input mono" placeholder="比較したいハッシュ文字列を貼り付け..." autocomplete="off">
+          </div>
+          <div id="hash-verify-status" class="hash-verify-status"></div>
+
+          <!-- テキスト直接ハッシュ計算 -->
+          <details class="mt-1">
+            <summary class="details-summary">テキスト文字列から直接ハッシュ計算する</summary>
+            <div class="mt-half">
+              <textarea id="hash-text-input" class="tool-textarea mono" rows="3" placeholder="文字列を入力すると下のハッシュ値がリアルタイム更新されます"></textarea>
+              <div id="hash-text-results" class="hash-kv-list mt-half"></div>
+            </div>
+          </details>
+        </div>
+
+        <!-- 読み込みファイル一覧・ハッシュ結果 -->
+        <div id="hash-file-list" class="hash-file-list mt-1"></div>
+      </section>
+
+      <!-- 14. 文字数カウント -->
+      <section id="panel-charcount" class="tool-panel">
+        <div class="panel-header">
+          <h1>文字数カウント</h1>
+          <div class="header-controls">
+            <button type="button" id="cc-trim-btn" class="action-btn">前後空白整理</button>
+            <button type="button" id="cc-copy-btn" class="action-btn">テキストコピー</button>
+            <button type="button" id="cc-clear-btn" class="action-btn">クリア</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <textarea id="cc-textarea" class="tool-textarea" rows="10" placeholder="ここに文章を入力または貼り付けてください..."></textarea>
+
+          <div class="cc-stats-grid mt-1">
+            <div class="bpm-stat-item">
+              <span class="stat-label">総文字数（空白・改行込）</span>
+              <span class="stat-val mono" id="cc-total">0</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">文字数（空白・改行除く）</span>
+              <span class="stat-val mono" id="cc-no-space">0</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">文字数（改行のみ除く）</span>
+              <span class="stat-val mono" id="cc-no-newline">0</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">行数</span>
+              <span class="stat-val mono" id="cc-lines">0</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">単語数（空白区切り）</span>
+              <span class="stat-val mono" id="cc-words">0</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">UTF-8 バイト数 / 原稿用紙</span>
+              <span class="stat-val mono" id="cc-bytes">0 B / 0 枚</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15. 1次元・2次元コード生成 -->
+      <section id="panel-barcode" class="tool-panel">
+        <div class="panel-header">
+          <h1>1次元・2次元コード生成</h1>
+          <button type="button" id="bc-download-btn" class="action-btn primary">PNG画像を保存</button>
+        </div>
+
+        <div class="bc-layout">
+          <div class="card">
+            <div class="field-group">
+              <label for="bc-type">コード規格（1次元バーコード / 2次元コード）</label>
+              <select id="bc-type" class="tool-input">
+                <optgroup label="2次元コード（メジャー）">
+                  <option value="qrcode" selected>QRコード (QR Code)</option>
+                  <option value="datamatrix">Data Matrix (データマトリクス)</option>
+                  <option value="azteccode">Aztec Code (アズテックコード)</option>
+                  <option value="pdf417">PDF417</option>
+                </optgroup>
+                <optgroup label="2次元コード（特殊・マイナー規格）">
+                  <option value="microqrcode">Micro QR Code (マイクロQR)</option>
+                  <option value="rectangularmicroqrcode">rMQR Code (長方形マイクロQR)</option>
+                  <option value="micropdf417">MicroPDF417</option>
+                  <option value="hanxin">Han Xin Code (漢信コード)</option>
+                  <option value="dotcode">DotCode (ドットコード)</option>
+                  <option value="maxicode">MaxiCode (マキシコード)</option>
+                </optgroup>
+                <optgroup label="1次元バーコード">
+                  <option value="code128">CODE 128（汎用・英数字記号）</option>
+                  <option value="code39">CODE 39（工業用・英大文字数字）</option>
+                  <option value="code93">CODE 93</option>
+                  <option value="ean13">EAN-13 / JAN（13桁商品コード）</option>
+                  <option value="ean8">EAN-8 / JAN短縮（8桁）</option>
+                  <option value="upca">UPC-A（12桁北米商品コード）</option>
+                  <option value="interleaved2of5">ITF（Interleaved 2 of 5）</option>
+                  <option value="rationalizedCodabar">NW-7 / Codabar（宅配・図書館）</option>
+                  <option value="msi">MSI Plessey</option>
+                  <option value="pharmacode">Pharmacode（医薬品包装）</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="field-group mt-1">
+              <label for="bc-text">エンコードするデータ（文字列・数値）</label>
+              <textarea id="bc-text" class="tool-textarea mono" rows="3" placeholder="URLやテキスト、数値を入力">https://kinnnanadan.github.io/kin77dan-tools/</textarea>
+            </div>
+
+            <div class="bc-options-grid mt-1">
+              <div class="field-group">
+                <label for="bc-ecc">誤り訂正レベル（2次元コード用）</label>
+                <select id="bc-ecc" class="tool-input">
+                  <option value="auto">自動（規格デフォルト）</option>
+                  <option value="L">Level L（約7%復元 / QR用）</option>
+                  <option value="M" selected>Level M（約15%復元 / QR用）</option>
+                  <option value="Q">Level Q（約25%復元 / QR用）</option>
+                  <option value="H">Level H（約30%復元 / QR用）</option>
+                  <option value="0">Level 0（PDF417等）</option>
+                  <option value="2">Level 2（PDF417等）</option>
+                  <option value="5">Level 5（PDF417等）</option>
+                  <option value="8">Level 8（最大 / PDF417等）</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label for="bc-scale">サイズ倍率 (Scale)</label>
+                <select id="bc-scale" class="tool-input">
+                  <option value="2">2x（小）</option>
+                  <option value="3" selected>3x（標準）</option>
+                  <option value="4">4x（大）</option>
+                  <option value="6">6x（特大）</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="preset-bar mt-1">
+              <label class="checkbox-label">
+                <input type="checkbox" id="bc-include-text" checked>
+                バーコード下部にテキストを表示（1次元用）
+              </label>
+            </div>
+
+            <div class="form-error" id="bc-error"></div>
+          </div>
+
+          <!-- プレビュー表示 -->
+          <div class="card bc-preview-card">
+            <div class="bc-canvas-wrap">
+              <canvas id="bc-canvas"></canvas>
+            </div>
+            <p class="hint-text mt-1" id="bc-info-text">規格: qrcode</p>
+          </div>
+        </div>
+      </section>
+
       <footer class="footer">
         <p>&copy; 2026 kin77dan</p>
       </footer>
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bwip-js@4.5.1/dist/bwip-js-min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
