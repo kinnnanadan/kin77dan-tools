@@ -27,7 +27,7 @@
       <nav class="nav-section">
         <div class="nav-label">TOOLS</div>
         <ul class="nav-list">
-          <li><a href="#clock" class="nav-link tool-link" data-tool="clock">デジタル時計</a></li>
+          <li><a href="#clock" class="nav-link tool-link" data-tool="clock">時計</a></li>
           <li><a href="#calc" class="nav-link tool-link" data-tool="calc">電卓</a></li>
           <li><a href="#stopwatch" class="nav-link tool-link" data-tool="stopwatch">ストップウォッチ</a></li>
           <li><a href="#bpm" class="nav-link tool-link" data-tool="bpm">BPM測定</a></li>
@@ -42,6 +42,17 @@
           <li><a href="#hash" class="nav-link tool-link" data-tool="hash">ハッシュ値計算</a></li>
           <li><a href="#charcount" class="nav-link tool-link" data-tool="charcount">文字数カウント</a></li>
           <li><a href="#barcode" class="nav-link tool-link" data-tool="barcode">1次元・2次元コード生成</a></li>
+          <li><a href="#scanner" class="nav-link tool-link" data-tool="scanner">1次元・2次元コード読取</a></li>
+          <li><a href="#color" class="nav-link tool-link" data-tool="color">カラーコード変換</a></li>
+          <li><a href="#mojibake" class="nav-link tool-link" data-tool="mojibake">文字化け相互変換</a></li>
+          <li><a href="#ytthumb" class="nav-link tool-link" data-tool="ytthumb">YouTubeサムネ取得</a></li>
+          <li><a href="#roulette" class="nav-link tool-link" data-tool="roulette">ルーレット</a></li>
+          <li><a href="#spectrum" class="nav-link tool-link" data-tool="spectrum">音声スペクトル表示</a></li>
+          <li><a href="#imgtool" class="nav-link tool-link" data-tool="imgtool">画像変換・圧縮・リサイズ</a></li>
+          <li><a href="#monitor" class="nav-link tool-link" data-tool="monitor">モニター・Hz確認</a></li>
+          <li><a href="#diff" class="nav-link tool-link" data-tool="diff">テキスト差分比較</a></li>
+          <li><a href="#pwgen" class="nav-link tool-link" data-tool="pwgen">パスワード・乱数生成</a></li>
+          <li><a href="#unit" class="nav-link tool-link" data-tool="unit">単位変換</a></li>
         </ul>
 
         <div class="nav-label">LINKS</div>
@@ -98,12 +109,12 @@
         </div>
 
         <div id="home-tools-grid" class="home-tools-grid mt-1">
-          <a href="#clock" class="tool-card" data-tool="clock" data-keywords="時計 世界時計 unix 全画面 時刻">
+          <a href="#clock" class="tool-card" data-tool="clock" data-keywords="時計 デジタル アナログ アラーム 目覚まし 音楽 世界時計 unix 全画面 時刻">
             <div class="tool-card-top">
-              <h3>デジタル時計</h3>
+              <h3>時計</h3>
               <span class="tag">日常</span>
             </div>
-            <p>全画面表示・UNIXタイムスタンプ・世界時計表示に対応したシンプル時計。</p>
+            <p>デジタル/アナログ切替・全画面・世界時計・カスタム音楽アラーム（バックグラウンド対応）。</p>
           </a>
 
           <a href="#calc" class="tool-card" data-tool="calc" data-keywords="電卓 計算 関数 微分 積分 方程式 分数 順列 組合せ sin cos">
@@ -210,12 +221,100 @@
             <p>総文字数・空白除外・行数・単語数・UTF-8バイト数・原稿用紙枚数をリアルタイム計測。</p>
           </a>
 
-          <a href="#barcode" class="tool-card" data-tool="barcode" data-keywords="バーコード qrコード 2次元コード 1次元コード datamatrix aztec pdf417 jan code128 誤り訂正">
+          <a href="#barcode" class="tool-card" data-tool="barcode" data-keywords="バーコード qrコード 2次元コード 1次元コード datamatrix aztec pdf417 jan code128 isbn 郵便バーコード 誤り訂正 一括">
             <div class="tool-card-top">
               <h3>1次元・2次元コード生成</h3>
               <span class="tag">生成ツール</span>
             </div>
-            <p>QRコード・各種バーコードからDataMatrix・Aztec・PDF417・漢信コードまで生成。誤り訂正レベル変更対応。</p>
+            <p>QRコード・ISBN・郵便バーコード・DataMatrix・Aztec・PDF417等に対応。全規格一括表示も可能。</p>
+          </a>
+
+          <a href="#scanner" class="tool-card" data-tool="scanner" data-keywords="バーコード qrコード 読み取り スキャン カメラ 画像 1次元 2次元 デコード">
+            <div class="tool-card-top">
+              <h3>1次元・2次元コード読取</h3>
+              <span class="tag">読取ツール</span>
+            </div>
+            <p>カメラや画像ファイル（D&amp;D・貼り付け対応）からQRコードや各種バーコードを読み取り。</p>
+          </a>
+
+          <a href="#color" class="tool-card" data-tool="color" data-keywords="カラー 色 color hex rgb rgba hsl hsla hsv hsb cmyk 変換 ピッカー コントラスト">
+            <div class="tool-card-top">
+              <h3>カラーコード変換</h3>
+              <span class="tag">デザイン・開発</span>
+            </div>
+            <p>HEX・RGB・HSL・HSV・CMYKをリアルタイム相互変換。透明度調整・WCAGコントラスト比判定付き。</p>
+          </a>
+
+          <a href="#mojibake" class="tool-card" data-tool="mojibake" data-keywords="文字化け 復元 変換 エンコード utf-8 shift_jis euc-jp iso-2022-jp latin1 windows-1252">
+            <div class="tool-card-top">
+              <h3>文字化け相互変換</h3>
+              <span class="tag">テキスト</span>
+            </div>
+            <p>UTF-8・Shift_JIS・EUC-JP・JIS等の誤解釈による文字化けの復元・意図的な文字化け変換＆総当たり候補表示。</p>
+          </a>
+
+          <a href="#ytthumb" class="tool-card" data-tool="ytthumb" data-keywords="youtube サムネイル サムネ 画像 取得 高画質 maxresdefault">
+            <div class="tool-card-top">
+              <h3>YouTubeサムネ取得</h3>
+              <span class="tag">メディア</span>
+            </div>
+            <p>YouTube動画のURLやIDから最高画質（1280×720）を含む全サイズのサムネイル画像を取得・保存。</p>
+          </a>
+
+          <a href="#roulette" class="tool-card" data-tool="roulette" data-keywords="ルーレット 抽選 ランダム くじ 順番決め サイコロ">
+            <div class="tool-card-top">
+              <h3>ルーレット</h3>
+              <span class="tag">ユーティリティ</span>
+            </div>
+            <p>自由な項目で抽選できる回転ルーレット。当選項目の除外・効果音・抽選履歴に対応。</p>
+          </a>
+
+          <a href="#spectrum" class="tool-card" data-tool="spectrum" data-keywords="音声 スペクトル fft 周波数 波形 オシロスコープ スペクトログラム マイク リアルタイム">
+            <div class="tool-card-top">
+              <h3>音声スペクトル表示</h3>
+              <span class="tag">オーディオ</span>
+            </div>
+            <p>音声ファイルやマイク入力の周波数スペクトル・波形・スペクトログラムをリアルタイムに可視化。</p>
+          </a>
+
+          <a href="#imgtool" class="tool-card" data-tool="imgtool" data-keywords="画像 変換 圧縮 リサイズ webp jpeg png exif 削除 トリミング">
+            <div class="tool-card-top">
+              <h3>画像変換・圧縮・リサイズ</h3>
+              <span class="tag">画像処理</span>
+            </div>
+            <p>PNG/JPEG/WebP形式変換・品質圧縮・リサイズ・回転反転。ブラウザ内処理でEXIF情報も自動削除。</p>
+          </a>
+
+          <a href="#monitor" class="tool-card" data-tool="monitor" data-keywords="モニター ディスプレイ ドット抜け リフレッシュレート hz fps 焼き付き 階調 テスト">
+            <div class="tool-card-top">
+              <h3>モニター・Hz確認</h3>
+              <span class="tag">デバイス確認</span>
+            </div>
+            <p>実測リフレッシュレート (Hz) 計測・全画面単色ドット抜け確認・階調/残像テスト。</p>
+          </a>
+
+          <a href="#diff" class="tool-card" data-tool="diff" data-keywords="差分 diff 比較 テキスト コード 変更点 チェック">
+            <div class="tool-card-top">
+              <h3>テキスト差分比較 (Diff)</h3>
+              <span class="tag">検証・開発</span>
+            </div>
+            <p>2つの文章やコードを行単位で比較し、追加・削除された箇所を色分け表示。</p>
+          </a>
+
+          <a href="#pwgen" class="tool-card" data-tool="pwgen" data-keywords="パスワード 乱数 uuid トークン 生成 セキュリティ ランダム">
+            <div class="tool-card-top">
+              <h3>パスワード・乱数生成</h3>
+              <span class="tag">セキュリティ</span>
+            </div>
+            <p>暗号論的乱数による安全なパスワード・UUID v4・16進トークンを一括生成。強度(bit)表示付き。</p>
+          </a>
+
+          <a href="#unit" class="tool-card" data-tool="unit" data-keywords="単位 変換 データ容量 gib gb mbps 通信速度 長さ インチ 重さ 温度">
+            <div class="tool-card-top">
+              <h3>単位変換</h3>
+              <span class="tag">計算</span>
+            </div>
+            <p>データ容量 (GB/GiB)・通信速度 (Mbps/MB/s)・長さ・重さ・温度をリアルタイム一括変換。</p>
           </a>
         </div>
 
@@ -224,18 +323,44 @@
         </div>
       </section>
 
-      <!-- 1. デジタル時計 -->
+      <!-- 1. 時計（デジタル / アナログ / アラーム） -->
       <section id="panel-clock" class="tool-panel">
         <div class="panel-header">
-          <h1>デジタル時計</h1>
-          <button type="button" id="clock-fullscreen-btn" class="action-btn">全画面表示</button>
+          <h1>時計</h1>
+          <div class="header-controls">
+            <div class="mode-switch" role="group" aria-label="時計表示形式">
+              <button type="button" class="mode-btn clock-face-btn active" data-clock-face="digital">デジタル</button>
+              <button type="button" class="mode-btn clock-face-btn" data-clock-face="analog">アナログ</button>
+              <button type="button" class="mode-btn clock-face-btn" data-clock-face="both">両方</button>
+            </div>
+            <button type="button" id="clock-fullscreen-btn" class="action-btn">全画面表示</button>
+          </div>
         </div>
 
         <div class="card clock-card" id="clock-display-box">
           <button type="button" id="clock-exit-fs-btn" class="exit-fs-btn">✕ 全画面解除</button>
 
-          <div class="clock-date" id="clock-date">----/--/-- (---)</div>
-          <div class="clock-time" id="clock-time">00:00:00</div>
+          <div class="clock-visual-stage">
+            <div id="clock-analog-wrap" class="clock-analog-wrap hidden">
+              <svg viewBox="0 0 240 240" class="clock-analog-svg" aria-label="アナログ時計">
+                <circle cx="120" cy="120" r="110" class="clock-dial" />
+                <g id="clock-ticks"></g>
+                <text x="120" y="38" class="clock-num">12</text>
+                <text x="204" y="125" class="clock-num">3</text>
+                <text x="120" y="210" class="clock-num">6</text>
+                <text x="36" y="125" class="clock-num">9</text>
+                <line id="clock-hand-hour" x1="120" y1="120" x2="120" y2="62" class="clock-hand hour" />
+                <line id="clock-hand-min" x1="120" y1="120" x2="120" y2="40" class="clock-hand minute" />
+                <line id="clock-hand-sec" x1="120" y1="138" x2="120" y2="32" class="clock-hand second" />
+                <circle cx="120" cy="120" r="5.5" class="clock-center-dot" />
+              </svg>
+            </div>
+
+            <div id="clock-digital-wrap" class="clock-digital-wrap">
+              <div class="clock-date" id="clock-date">----/--/-- (---)</div>
+              <div class="clock-time" id="clock-time">00:00:00</div>
+            </div>
+          </div>
 
           <div id="clock-detail-area" class="clock-detail-area">
             <div class="clock-sub">
@@ -250,6 +375,78 @@
           <div class="mode-switch" role="group" aria-label="時計表示モード">
             <button type="button" class="mode-btn clock-mode-btn active" data-clock-mode="simple">シンプル</button>
             <button type="button" class="mode-btn clock-mode-btn" data-clock-mode="detail">詳細（世界時計）</button>
+          </div>
+        </div>
+
+        <div class="card mt-1" id="clock-alarm-card">
+          <div class="history-header">
+            <h2>アラーム</h2>
+            <div class="header-controls">
+              <label class="toggle-chip" title="ONの場合、別のツール画面を開いていてもアラームが鳴ります">
+                <input type="checkbox" id="alarm-bg-check" checked>
+                <span>バックグラウンド動作</span>
+              </label>
+              <label class="toggle-chip" title="アラーム機能の有効/無効を切り替えます">
+                <input type="checkbox" id="alarm-master-check" checked>
+                <span>アラーム有効</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="alarm-settings-body">
+            <div class="alarm-add-row">
+              <div class="field-group">
+                <label for="alarm-time-input">時刻</label>
+                <input type="time" id="alarm-time-input" class="tool-input mono" value="07:00">
+              </div>
+              <div class="field-group alarm-label-field">
+                <label for="alarm-label-input">ラベル（任意）</label>
+                <input type="text" id="alarm-label-input" class="tool-input" placeholder="例: 起床 / 会議">
+              </div>
+              <div class="field-group">
+                <label for="alarm-repeat-select">繰り返し</label>
+                <select id="alarm-repeat-select" class="tool-input">
+                  <option value="daily">毎日</option>
+                  <option value="once">1回のみ</option>
+                </select>
+              </div>
+              <button type="button" id="alarm-add-btn" class="action-btn primary alarm-add-btn">+ 追加</button>
+            </div>
+
+            <div class="alarm-sound-box mt-1">
+              <div class="alarm-sound-row">
+                <div class="field-group">
+                  <label for="alarm-sound-type">アラーム音源</label>
+                  <select id="alarm-sound-type" class="tool-input">
+                    <option value="beep">内蔵音（電子アラーム）</option>
+                    <option value="chime">内蔵音（チャイム）</option>
+                    <option value="custom">自分の音楽ファイル</option>
+                  </select>
+                </div>
+
+                <div class="field-group alarm-file-group" id="alarm-file-group">
+                  <label>音声ファイル（MP3 / WAV / OGG 等）</label>
+                  <div class="alarm-file-controls">
+                    <label class="action-btn file-label">
+                      音楽を選択
+                      <input type="file" id="alarm-audio-input" accept="audio/*" hidden>
+                    </label>
+                    <span id="alarm-audio-name" class="hint-text">未選択</span>
+                  </div>
+                </div>
+
+                <div class="field-group alarm-vol-group">
+                  <label for="alarm-vol-slider">音量: <strong id="alarm-vol-val">70%</strong></label>
+                  <input type="range" id="alarm-vol-slider" class="tg-slider" min="0" max="100" value="70">
+                </div>
+
+                <button type="button" id="alarm-test-btn" class="action-btn">🔊 テスト再生</button>
+              </div>
+            </div>
+
+            <ul id="alarm-list" class="alarm-list mt-1">
+              <li class="empty-msg">アラームは登録されていません</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -345,7 +542,7 @@
             </div>
 
             <div class="calc-grid">
-              <button type="button" class="calc-btn op" data-val="C">C</button>
+              <button type="button" class="calc-btn op" data-val="CLEAR">C</button>
               <button type="button" class="calc-btn op" data-val="(">(</button>
               <button type="button" class="calc-btn op" data-val=")">)</button>
               <button type="button" class="calc-btn op" data-val="/">÷</button>
@@ -709,6 +906,53 @@
 
           <div id="tg-channels" class="tg-channels mt-1"></div>
         </div>
+
+        <div class="card mt-1" id="tg-sweep-card">
+          <div class="history-header">
+            <h2>周波数スイープ（選択中の音に適用）</h2>
+            <button type="button" id="tg-sweep-btn" class="action-btn primary">▶ スイープ開始</button>
+          </div>
+
+          <div class="tg-sweep-grid">
+            <div class="field-group">
+              <label for="tg-sweep-start">開始周波数 (Hz)</label>
+              <input type="number" id="tg-sweep-start" class="tool-input mono" min="1" max="22000" step="0.1" value="100">
+            </div>
+            <div class="field-group">
+              <label for="tg-sweep-end">終了周波数 (Hz)</label>
+              <input type="number" id="tg-sweep-end" class="tool-input mono" min="1" max="22000" step="0.1" value="2000">
+            </div>
+            <div class="field-group">
+              <label for="tg-sweep-dur">時間 (秒)</label>
+              <input type="number" id="tg-sweep-dur" class="tool-input mono" min="0.1" max="3600" step="0.1" value="5">
+            </div>
+            <div class="field-group">
+              <label for="tg-sweep-curve">変化カーブ</label>
+              <select id="tg-sweep-curve" class="tool-input">
+                <option value="log" selected>対数 (Log)</option>
+                <option value="linear">線形 (Linear)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="tg-sweep-mode">繰り返し</label>
+              <select id="tg-sweep-mode" class="tool-input">
+                <option value="once">1回のみ</option>
+                <option value="loop">ループ</option>
+                <option value="pingpong">往復 (Ping-Pong)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tg-sweep-progress mt-1">
+            <div class="trigger-meter-top">
+              <span class="hint-text">スイープ進捗</span>
+              <strong class="mono" id="tg-sweep-status">待機中</strong>
+            </div>
+            <div class="trigger-bar-bg">
+              <div class="trigger-bar-fill" id="tg-sweep-bar"></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- 10. キーボード・マウス動作確認 -->
@@ -1067,12 +1311,18 @@
       <section id="panel-barcode" class="tool-panel">
         <div class="panel-header">
           <h1>1次元・2次元コード生成</h1>
-          <button type="button" id="bc-download-btn" class="action-btn primary">PNG画像を保存</button>
+          <div class="header-controls">
+            <label class="toggle-chip" title="入力データで生成できる全規格のコードを一覧表示します">
+              <input type="checkbox" id="bc-batch-toggle">
+              <span>全規格一括表示</span>
+            </label>
+            <button type="button" id="bc-download-btn" class="action-btn primary">PNG画像を保存</button>
+          </div>
         </div>
 
-        <div class="bc-layout">
+        <div class="bc-layout" id="bc-layout">
           <div class="card">
-            <div class="field-group">
+            <div class="field-group" id="bc-type-group">
               <label for="bc-type">コード規格（1次元バーコード / 2次元コード）</label>
               <select id="bc-type" class="tool-input">
                 <optgroup label="2次元コード（メジャー）">
@@ -1096,6 +1346,8 @@
                   <option value="ean13">EAN-13 / JAN（13桁商品コード）</option>
                   <option value="ean8">EAN-8 / JAN短縮（8桁）</option>
                   <option value="upca">UPC-A（12桁北米商品コード）</option>
+                  <option value="isbn">ISBN（書籍コード 例: 978-4-10-101001-4）</option>
+                  <option value="japanpost">郵便バーコード（カスタマバーコード 例: 1000001-1-2-3）</option>
                   <option value="interleaved2of5">ITF（Interleaved 2 of 5）</option>
                   <option value="rationalizedCodabar">NW-7 / Codabar（宅配・図書館）</option>
                   <option value="msi">MSI Plessey</option>
@@ -1104,54 +1356,716 @@
               </select>
             </div>
 
-            <div class="field-group mt-1">
-              <label for="bc-text">エンコードするデータ（文字列・数値）</label>
-              <textarea id="bc-text" class="tool-textarea mono" rows="3" placeholder="URLやテキスト、数値を入力">https://kinnnanadan.github.io/kin77dan-tools/</textarea>
-            </div>
-
-            <div class="bc-options-grid mt-1">
+            <div class="bc-settings-body">
               <div class="field-group">
-                <label for="bc-ecc">誤り訂正レベル（2次元コード用）</label>
-                <select id="bc-ecc" class="tool-input">
-                  <option value="auto">自動（規格デフォルト）</option>
-                  <option value="L">Level L（約7%復元 / QR用）</option>
-                  <option value="M" selected>Level M（約15%復元 / QR用）</option>
-                  <option value="Q">Level Q（約25%復元 / QR用）</option>
-                  <option value="H">Level H（約30%復元 / QR用）</option>
-                  <option value="0">Level 0（PDF417等）</option>
-                  <option value="2">Level 2（PDF417等）</option>
-                  <option value="5">Level 5（PDF417等）</option>
-                  <option value="8">Level 8（最大 / PDF417等）</option>
-                </select>
+                <label for="bc-text">エンコードするデータ（文字列・数値）</label>
+                <textarea id="bc-text" class="tool-textarea mono" rows="3" placeholder="URLやテキスト、数値を入力">https://kinnnanadan.github.io/kin77dan-tools/</textarea>
               </div>
 
-              <div class="field-group">
-                <label for="bc-scale">サイズ倍率 (Scale)</label>
-                <select id="bc-scale" class="tool-input">
-                  <option value="2">2x（小）</option>
-                  <option value="3" selected>3x（標準）</option>
-                  <option value="4">4x（大）</option>
-                  <option value="6">6x（特大）</option>
-                </select>
+              <div class="bc-settings-side">
+                <div class="bc-options-grid">
+                  <div class="field-group">
+                    <label for="bc-ecc">誤り訂正レベル（2次元コード用）</label>
+                    <select id="bc-ecc" class="tool-input">
+                      <option value="auto">自動（規格デフォルト）</option>
+                      <option value="L">Level L（約7%復元 / QR用）</option>
+                      <option value="M" selected>Level M（約15%復元 / QR用）</option>
+                      <option value="Q">Level Q（約25%復元 / QR用）</option>
+                      <option value="H">Level H（約30%復元 / QR用）</option>
+                      <option value="0">Level 0（PDF417等）</option>
+                      <option value="2">Level 2（PDF417等）</option>
+                      <option value="5">Level 5（PDF417等）</option>
+                      <option value="8">Level 8（最大 / PDF417等）</option>
+                    </select>
+                  </div>
+
+                  <div class="field-group">
+                    <label for="bc-scale">サイズ倍率 (Scale)</label>
+                    <select id="bc-scale" class="tool-input">
+                      <option value="2">2x（小）</option>
+                      <option value="3" selected>3x（標準）</option>
+                      <option value="4">4x（大）</option>
+                      <option value="6">6x（特大）</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="preset-bar mt-1">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="bc-include-text" checked>
+                    バーコード下部にテキストを表示（1次元用）
+                  </label>
+                </div>
+
+                <div class="form-error" id="bc-error"></div>
               </div>
             </div>
-
-            <div class="preset-bar mt-1">
-              <label class="checkbox-label">
-                <input type="checkbox" id="bc-include-text" checked>
-                バーコード下部にテキストを表示（1次元用）
-              </label>
-            </div>
-
-            <div class="form-error" id="bc-error"></div>
           </div>
 
-          <div class="card bc-preview-card">
+          <div class="card bc-preview-card" id="bc-preview-card">
             <div class="bc-canvas-wrap">
               <canvas id="bc-canvas"></canvas>
             </div>
             <p class="hint-text mt-1" id="bc-info-text">規格: qrcode</p>
           </div>
+        </div>
+
+        <div id="bc-batch-section" class="hidden mt-1">
+          <div class="card bc-batch-header">
+            <span id="bc-batch-summary">生成中...</span>
+            <span class="hint-text">※ 入力文字種・桁数制限により非対応の規格は自動で除外されます</span>
+          </div>
+          <div id="bc-batch-grid" class="bc-batch-grid mt-1"></div>
+        </div>
+      </section>
+
+      <!-- 16. カラーコード変換 -->
+      <section id="panel-color" class="tool-panel">
+        <div class="panel-header">
+          <h1>カラーコード変換</h1>
+          <div class="header-controls">
+            <button type="button" id="color-random-btn" class="action-btn">ランダム色</button>
+            <button type="button" id="color-reset-btn" class="action-btn">リセット</button>
+          </div>
+        </div>
+
+        <div class="color-top-grid">
+          <div class="card color-picker-card">
+            <div class="color-swatch-row">
+              <div class="color-preview-wrap">
+                <div class="color-preview-fill" id="color-preview-fill"></div>
+              </div>
+              <div class="color-picker-inputs">
+                <label class="field-group">
+                  <span>カラーピッカー</span>
+                  <input type="color" id="color-picker" class="color-native-input" value="#2563eb">
+                </label>
+                <div class="field-group">
+                  <label for="color-parse-input">コード直接入力（HEX / RGB / HSL）</label>
+                  <input type="text" id="color-parse-input" class="tool-input mono" placeholder="例: #2563eb, rgb(37,99,235), hsl(221,83%,53%)" autocomplete="off">
+                </div>
+              </div>
+            </div>
+
+            <div class="color-sliders mt-1">
+              <div class="color-slider-row">
+                <label for="color-r-slider">R</label>
+                <input type="range" id="color-r-slider" class="tg-slider" min="0" max="255" value="37">
+                <input type="number" id="color-r-num" class="color-num-input mono" min="0" max="255" value="37">
+              </div>
+              <div class="color-slider-row">
+                <label for="color-g-slider">G</label>
+                <input type="range" id="color-g-slider" class="tg-slider" min="0" max="255" value="99">
+                <input type="number" id="color-g-num" class="color-num-input mono" min="0" max="255" value="99">
+              </div>
+              <div class="color-slider-row">
+                <label for="color-b-slider">B</label>
+                <input type="range" id="color-b-slider" class="tg-slider" min="0" max="255" value="235">
+                <input type="number" id="color-b-num" class="color-num-input mono" min="0" max="255" value="235">
+              </div>
+              <div class="color-slider-row">
+                <label for="color-a-slider">A (%)</label>
+                <input type="range" id="color-a-slider" class="tg-slider" min="0" max="100" value="100">
+                <input type="number" id="color-a-num" class="color-num-input mono" min="0" max="100" value="100">
+              </div>
+            </div>
+            <div class="form-error" id="color-error"></div>
+          </div>
+
+          <div class="card">
+            <div class="history-header">
+              <h2>各種カラーコード</h2>
+            </div>
+            <div class="color-formats-list">
+              <div class="hash-kv-row">
+                <span class="hash-algo">HEX</span>
+                <input type="text" id="color-out-hex" class="color-code-input mono" value="#2563EB">
+                <button type="button" class="mini-btn color-copy-btn" data-target="color-out-hex">コピー</button>
+              </div>
+              <div class="hash-kv-row">
+                <span class="hash-algo">RGB</span>
+                <input type="text" id="color-out-rgb" class="color-code-input mono" value="rgb(37, 99, 235)">
+                <button type="button" class="mini-btn color-copy-btn" data-target="color-out-rgb">コピー</button>
+              </div>
+              <div class="hash-kv-row">
+                <span class="hash-algo">HSL</span>
+                <input type="text" id="color-out-hsl" class="color-code-input mono" value="hsl(221, 83%, 53%)">
+                <button type="button" class="mini-btn color-copy-btn" data-target="color-out-hsl">コピー</button>
+              </div>
+              <div class="hash-kv-row">
+                <span class="hash-algo">HSV/HSB</span>
+                <input type="text" id="color-out-hsv" class="color-code-input mono" readonly value="hsv(221, 84%, 92%)">
+                <button type="button" class="mini-btn color-copy-btn" data-target="color-out-hsv">コピー</button>
+              </div>
+              <div class="hash-kv-row">
+                <span class="hash-algo">CMYK</span>
+                <input type="text" id="color-out-cmyk" class="color-code-input mono" readonly value="cmyk(84%, 58%, 0%, 8%)">
+                <button type="button" class="mini-btn color-copy-btn" data-target="color-out-cmyk">コピー</button>
+              </div>
+              <div class="hash-kv-row">
+                <span class="hash-algo">0xHEX</span>
+                <input type="text" id="color-out-int" class="color-code-input mono" readonly value="0x2563EB">
+                <button type="button" class="mini-btn color-copy-btn" data-target="color-out-int">コピー</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-1">
+          <div class="history-header">
+            <h2>コントラスト比（WCAG）＆ 関連パレット</h2>
+          </div>
+          <div class="color-contrast-grid">
+            <div class="contrast-sample light" id="color-contrast-white-box">
+              <div class="contrast-sample-text" id="color-contrast-white-sample">白背景での文字見え方 Aa あア</div>
+              <div class="contrast-meta">対 #FFFFFF: <strong class="mono" id="color-contrast-white-ratio">---</strong> <span class="contrast-badge" id="color-contrast-white-badge">---</span></div>
+            </div>
+            <div class="contrast-sample dark" id="color-contrast-black-box">
+              <div class="contrast-sample-text" id="color-contrast-black-sample">黒背景での文字見え方 Aa あア</div>
+              <div class="contrast-meta">対 #000000: <strong class="mono" id="color-contrast-black-ratio">---</strong> <span class="contrast-badge" id="color-contrast-black-badge">---</span></div>
+            </div>
+          </div>
+
+          <div class="km-section-label mt-1">明暗バリエーション・補色（クリックで選択）</div>
+          <div id="color-palette-row" class="color-palette-row"></div>
+        </div>
+      </section>
+
+      <!-- 17. 1次元・2次元コード読み取り -->
+      <section id="panel-scanner" class="tool-panel">
+        <div class="panel-header">
+          <h1>1次元・2次元コード読み取り</h1>
+          <div class="header-controls">
+            <select id="scan-camera-select" class="unit-select" aria-label="カメラ選択">
+              <option value="">カメラ自動選択</option>
+            </select>
+            <button type="button" id="scan-cam-btn" class="action-btn primary">📷 カメラで読取</button>
+          </div>
+        </div>
+
+        <div class="scan-top-grid">
+          <div class="card">
+            <div class="history-header">
+              <h2>カメラ / 画像から読み取り</h2>
+              <span class="hint-text" id="scan-engine-badge">エンジン確認中</span>
+            </div>
+
+            <div id="scan-cam-wrap" class="scan-cam-wrap hidden mb-1">
+              <video id="scan-video" class="scan-video" autoplay muted playsinline></video>
+              <div class="scan-guide-box" aria-hidden="true"></div>
+            </div>
+
+            <div id="scan-drop-zone" class="drop-zone">
+              <div class="drop-zone-title">ここに画像をドラッグ＆ドロップ / クリックして選択 / Ctrl+V 貼り付け</div>
+              <p class="hint-text">QRコード・JAN・CODE128・PDF417・DataMatrix・Aztec 等に対応</p>
+              <input type="file" id="scan-file-input" accept="image/*" hidden>
+            </div>
+
+            <div id="scan-image-preview-wrap" class="scan-image-preview-wrap hidden mt-1">
+              <img id="scan-image-preview" class="scan-image-preview" alt="読み取り対象画像">
+            </div>
+
+            <div class="form-error" id="scan-error"></div>
+          </div>
+
+          <div class="card">
+            <div class="history-header">
+              <h2>読み取り結果</h2>
+              <div class="header-controls">
+                <a id="scan-open-url" class="mini-btn hidden" target="_blank" rel="noopener noreferrer">URLを開く</a>
+                <button type="button" id="scan-copy-btn" class="mini-btn" disabled>コピー</button>
+              </div>
+            </div>
+
+            <div class="scan-result-meta">
+              <span>規格: <strong class="mono" id="scan-result-format">---</strong></span>
+            </div>
+            <textarea id="scan-result-text" class="tool-textarea mono mt-half" rows="5" readonly placeholder="ここに読み取り結果が表示されます..."></textarea>
+
+            <div class="history-header mt-1">
+              <h2>読み取り履歴</h2>
+              <button type="button" id="scan-clear-hist-btn" class="mini-btn">消去</button>
+            </div>
+            <ul id="scan-history" class="history-list">
+              <li class="empty-msg">履歴はありません</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 18. 文字化け相互変換 -->
+      <section id="panel-mojibake" class="tool-panel">
+        <div class="panel-header">
+          <h1>文字化け相互変換</h1>
+          <div class="header-controls">
+            <button type="button" id="mb-sample-btn" class="action-btn">サンプル入力</button>
+            <button type="button" id="mb-clear-btn" class="action-btn">クリア</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="mb-controls-bar">
+            <div class="field-group">
+              <label for="mb-from-enc">現在の文字列の解釈（今の文字化け元 / 送信時文字コード）</label>
+              <select id="mb-from-enc" class="tool-input">
+                <option value="SJIS" selected>Shift_JIS (CP932)</option>
+                <option value="UTF8">UTF-8</option>
+                <option value="EUCJP">EUC-JP</option>
+                <option value="JIS">ISO-2022-JP (JIS)</option>
+                <option value="WIN1252">Windows-1252</option>
+                <option value="LATIN1">ISO-8859-1 (Latin-1)</option>
+              </select>
+            </div>
+
+            <button type="button" id="mb-swap-btn" class="action-btn mb-swap-btn" title="変換方向を入れ替える">⇄ 入れ替え</button>
+
+            <div class="field-group">
+              <label for="mb-to-enc">変換先の文字コード（本来の文字コード / 化け先）</label>
+              <select id="mb-to-enc" class="tool-input">
+                <option value="UTF8" selected>UTF-8</option>
+                <option value="SJIS">Shift_JIS (CP932)</option>
+                <option value="EUCJP">EUC-JP</option>
+                <option value="JIS">ISO-2022-JP (JIS)</option>
+                <option value="WIN1252">Windows-1252</option>
+                <option value="LATIN1">ISO-8859-1 (Latin-1)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-io-grid mt-1">
+            <div class="field-group">
+              <label for="mb-input">入力テキスト（文字化けした文、または元の文）</label>
+              <textarea id="mb-input" class="tool-textarea" rows="6" placeholder="文字化けした文字列、または文字化けさせたい文章を入力..."></textarea>
+            </div>
+
+            <div class="field-group">
+              <div class="mb-out-label-row">
+                <label for="mb-output">変換結果</label>
+                <div class="header-controls">
+                  <button type="button" id="mb-apply-out-btn" class="mini-btn">結果を入力へ戻す</button>
+                  <button type="button" id="mb-copy-btn" class="mini-btn">コピー</button>
+                </div>
+              </div>
+              <textarea id="mb-output" class="tool-textarea" rows="6" readonly placeholder="ここに変換結果が表示されます..."></textarea>
+            </div>
+          </div>
+          <div class="form-error" id="mb-error"></div>
+        </div>
+
+        <div class="card mt-1">
+          <div class="history-header">
+            <h2>自動総当たり候補（文字コード組み合わせ一覧）</h2>
+            <span class="hint-text">どの文字コードの組み合わせで化けたか不明なときに便利です</span>
+          </div>
+          <div id="mb-candidates-list" class="mb-candidates-list">
+            <p class="hint-text">テキストを入力すると候補が自動で表示されます。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19. YouTubeサムネ取得 -->
+      <section id="panel-ytthumb" class="tool-panel">
+        <div class="panel-header">
+          <h1>YouTubeサムネイル取得</h1>
+          <button type="button" id="yt-clear-btn" class="action-btn">クリア</button>
+        </div>
+
+        <div class="card">
+          <div class="home-search-bar">
+            <input type="text" id="yt-url-input" class="tool-input mono" placeholder="YouTubeのURL または 動画ID（例: https://www.youtube.com/watch?v=... / youtu.be/... / shorts/...）" autocomplete="off">
+            <button type="button" id="yt-fetch-btn" class="action-btn primary">取得</button>
+          </div>
+          <div class="form-error" id="yt-error"></div>
+          <div id="yt-video-meta" class="hint-text hidden">動画ID: <code id="yt-video-id"></code></div>
+        </div>
+
+        <div id="yt-thumb-grid" class="yt-thumb-grid mt-1"></div>
+      </section>
+
+      <!-- 20. ルーレット -->
+      <section id="panel-roulette" class="tool-panel">
+        <div class="panel-header">
+          <h1>ルーレット</h1>
+          <div class="header-controls">
+            <label class="toggle-chip">
+              <input type="checkbox" id="rl-sound-check" checked>
+              <span>効果音</span>
+            </label>
+            <label class="toggle-chip">
+              <input type="checkbox" id="rl-remove-winner-check">
+              <span>当選項目を次回除外</span>
+            </label>
+            <button type="button" id="rl-spin-btn" class="action-btn primary">🎯 スタート</button>
+          </div>
+        </div>
+
+        <div class="rl-layout">
+          <div class="card rl-wheel-card">
+            <div class="rl-wheel-stage">
+              <div class="rl-pointer" aria-hidden="true">▼</div>
+              <canvas id="rl-canvas" width="420" height="420" class="rl-canvas"></canvas>
+            </div>
+            <div id="rl-result-box" class="rl-result-box mt-1">
+              <span class="hint-text">抽選結果:</span>
+              <strong id="rl-result-text">スタートを押してください</strong>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="history-header">
+              <h2>項目設定（1行につき1項目）</h2>
+            </div>
+
+            <div class="preset-bar">
+              <span class="hint-text">プリセット:</span>
+              <button type="button" class="mini-btn rl-preset" data-preset="lunch">ランチ</button>
+              <button type="button" class="mini-btn rl-preset" data-preset="dice">1〜6</button>
+              <button type="button" class="mini-btn rl-preset" data-preset="yesno">はい/いいえ</button>
+              <button type="button" class="mini-btn rl-preset" data-preset="abcd">A〜D</button>
+            </div>
+
+            <textarea id="rl-items-input" class="tool-textarea" rows="8" placeholder="項目を1行ずつ入力...">ラーメン
+カレー
+寿司
+パスタ
+焼肉
+うどん</textarea>
+
+            <div class="field-group mt-1">
+              <label for="rl-duration-select">回転時間</label>
+              <select id="rl-duration-select" class="tool-input">
+                <option value="2500">短め（2.5秒）</option>
+                <option value="4500" selected>標準（4.5秒）</option>
+                <option value="7000">長め（7秒）</option>
+              </select>
+            </div>
+
+            <div class="history-header mt-1">
+              <h2>抽選履歴</h2>
+              <button type="button" id="rl-clear-hist-btn" class="mini-btn">消去</button>
+            </div>
+            <ul id="rl-history" class="history-list">
+              <li class="empty-msg">履歴はありません</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 21. 音声スペクトル表示 -->
+      <section id="panel-spectrum" class="tool-panel">
+        <div class="panel-header">
+          <h1>音声スペクトル表示</h1>
+          <div class="header-controls">
+            <label class="action-btn primary file-label">
+              音声ファイル読込
+              <input type="file" id="sp-file-input" accept="audio/*" hidden>
+            </label>
+            <button type="button" id="sp-mic-btn" class="action-btn">🎤 マイク入力</button>
+            <button type="button" id="sp-stop-btn" class="action-btn">停止</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sp-player-bar">
+            <audio id="sp-audio" controls class="sp-audio-el"></audio>
+            <span id="sp-source-label" class="hint-text">音声ファイルを選択、または「マイク入力」を押してください</span>
+          </div>
+
+          <div class="sp-options-grid mt-1">
+            <div class="field-group">
+              <label for="sp-view-mode">表示モード</label>
+              <select id="sp-view-mode" class="tool-input">
+                <option value="bars" selected>周波数スペクトル (FFTバー)</option>
+                <option value="wave">リアルタイム波形 (オシロスコープ)</option>
+                <option value="both">両方（バー + 波形）</option>
+                <option value="spectrogram">スペクトログラム (時間×周波数)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="sp-scale-mode">周波数軸</label>
+              <select id="sp-scale-mode" class="tool-input">
+                <option value="log" selected>対数 (Log / 聴覚向け)</option>
+                <option value="linear">線形 (Linear)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="sp-fft-size">FFT解像度</label>
+              <select id="sp-fft-size" class="tool-input">
+                <option value="512">512</option>
+                <option value="1024">1024</option>
+                <option value="2048" selected>2048（標準）</option>
+                <option value="4096">4096（高精細）</option>
+                <option value="8192">8192（超高精細）</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="sp-smoothing">スムージング: <strong id="sp-smoothing-val">0.80</strong></label>
+              <input type="range" id="sp-smoothing" class="tg-slider" min="0" max="0.95" step="0.05" value="0.8">
+            </div>
+          </div>
+
+          <div id="sp-drop-zone" class="sp-canvas-wrap mt-1">
+            <canvas id="sp-canvas" width="960" height="360" class="sp-canvas"></canvas>
+          </div>
+
+          <div class="km-detail-grid mt-1">
+            <div class="bpm-stat-item">
+              <span class="stat-label">ピーク周波数</span>
+              <span class="stat-val mono" id="sp-peak-freq">--- Hz</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">推定音階</span>
+              <span class="stat-val mono" id="sp-peak-note">---</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">音量レベル / サンプルレート</span>
+              <span class="stat-val mono" id="sp-level">--- dB</span>
+            </div>
+          </div>
+          <div class="form-error" id="sp-error"></div>
+        </div>
+      </section>
+
+      <!-- 22. 画像変換・圧縮・リサイズ -->
+      <section id="panel-imgtool" class="tool-panel">
+        <div class="panel-header">
+          <h1>画像変換・圧縮・リサイズ</h1>
+          <div class="header-controls">
+            <button type="button" id="img-reset-btn" class="action-btn">リセット</button>
+            <button type="button" id="img-download-btn" class="action-btn primary" disabled>変換画像を保存</button>
+          </div>
+        </div>
+
+        <div class="img-layout">
+          <div class="card">
+            <div id="img-drop-zone" class="drop-zone">
+              <div class="drop-zone-title">ここに画像をドラッグ＆ドロップ / クリックして選択 / Ctrl+V 貼り付け</div>
+              <p class="hint-text">ローカル内で再エンコードするため、Exif位置情報等のメタデータも自動で削除されます</p>
+              <input type="file" id="img-file-input" accept="image/*" hidden>
+            </div>
+
+            <div class="img-options-grid mt-1">
+              <div class="field-group">
+                <label for="img-format-select">出力形式</label>
+                <select id="img-format-select" class="tool-input">
+                  <option value="image/webp" selected>WebP（高圧縮・おすすめ）</option>
+                  <option value="image/jpeg">JPEG（写真向け）</option>
+                  <option value="image/png">PNG（可逆・透過対応）</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label for="img-quality-slider">画質 (JPEG / WebP): <strong id="img-quality-val">85%</strong></label>
+                <input type="range" id="img-quality-slider" class="tg-slider" min="10" max="100" value="85">
+              </div>
+            </div>
+
+            <div class="img-resize-row mt-1">
+              <div class="field-group">
+                <label for="img-width-input">幅 (px)</label>
+                <input type="number" id="img-width-input" class="tool-input mono" min="1" max="16384" placeholder="---">
+              </div>
+              <div class="field-group">
+                <label for="img-height-input">高さ (px)</label>
+                <input type="number" id="img-height-input" class="tool-input mono" min="1" max="16384" placeholder="---">
+              </div>
+              <label class="toggle-chip">
+                <input type="checkbox" id="img-keep-ratio" checked>
+                <span>比率維持</span>
+              </label>
+            </div>
+
+            <div class="preset-bar mt-1">
+              <span class="hint-text">倍率プリセット:</span>
+              <button type="button" class="mini-btn img-scale-btn" data-scale="1">100%</button>
+              <button type="button" class="mini-btn img-scale-btn" data-scale="0.75">75%</button>
+              <button type="button" class="mini-btn img-scale-btn" data-scale="0.5">50%</button>
+              <button type="button" class="mini-btn img-scale-btn" data-scale="0.25">25%</button>
+              <button type="button" id="img-rotate-btn" class="mini-btn">↻ 90°回転</button>
+              <button type="button" id="img-flip-btn" class="mini-btn">⇄ 左右反転</button>
+            </div>
+
+            <div class="result-box mt-1">
+              <div class="result-sub-grid">
+                <div><span>元サイズ:</span> <strong id="img-orig-info">---</strong></div>
+                <div><span>変換後:</span> <strong id="img-new-info">---</strong></div>
+              </div>
+            </div>
+            <div class="form-error" id="img-error"></div>
+          </div>
+
+          <div class="card img-preview-card">
+            <div class="history-header">
+              <h2>出力プレビュー</h2>
+              <span class="hint-text" id="img-dim-label">---</span>
+            </div>
+            <div class="img-canvas-wrap">
+              <canvas id="img-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 23. モニター・Hz確認 -->
+      <section id="panel-monitor" class="tool-panel">
+        <div class="panel-header">
+          <h1>モニター・リフレッシュレート確認</h1>
+          <div class="header-controls">
+            <button type="button" id="mon-fullscreen-btn" class="action-btn primary">全画面テスト開始</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="km-detail-grid">
+            <div class="bpm-stat-item">
+              <span class="stat-label">実測リフレッシュレート</span>
+              <span class="stat-val mono" id="mon-hz-val">計測中...</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">フレーム間隔 (平均)</span>
+              <span class="stat-val mono" id="mon-frame-ms">--- ms</span>
+            </div>
+            <div class="bpm-stat-item">
+              <span class="stat-label">画面解像度 / DPR</span>
+              <span class="stat-val mono" id="mon-res-val">---</span>
+            </div>
+          </div>
+
+          <div class="preset-bar mt-1">
+            <span class="hint-text">テストパターン選択（全画面中もクリックまたは ← / → キーで切替可能）:</span>
+            <button type="button" class="mini-btn mon-pattern-btn active" data-pattern="black">黒 (光漏れ/輝点)</button>
+            <button type="button" class="mini-btn mon-pattern-btn" data-pattern="white">白 (黒点/色ムラ)</button>
+            <button type="button" class="mini-btn mon-pattern-btn" data-pattern="red">赤 (R)</button>
+            <button type="button" class="mini-btn mon-pattern-btn" data-pattern="green">緑 (G)</button>
+            <button type="button" class="mini-btn mon-pattern-btn" data-pattern="blue">青 (B)</button>
+            <button type="button" class="mini-btn mon-pattern-btn" data-pattern="gray50">灰 50%</button>
+            <button type="button" class="mini-btn mon-pattern-btn" data-pattern="gradient">階調グラデーション</button>
+            <button type="button" class="mini-btn mon-pattern-btn" data-pattern="ghost">残像テスト (移動バー)</button>
+          </div>
+
+          <div id="mon-stage" class="mon-stage mt-1">
+            <div class="mon-stage-hud" id="mon-stage-hud">
+              <span id="mon-pattern-label">黒 (光漏れ/輝点)</span>
+              <span class="hint-text">クリックで次のパターン / Escで終了</span>
+              <button type="button" id="mon-exit-fs-btn" class="mini-btn">✕ 終了</button>
+            </div>
+            <canvas id="mon-ghost-canvas" width="800" height="240" class="mon-ghost-canvas hidden"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- 24. テキスト差分比較 -->
+      <section id="panel-diff" class="tool-panel">
+        <div class="panel-header">
+          <h1>テキスト差分比較 (Diff)</h1>
+          <div class="header-controls">
+            <label class="toggle-chip">
+              <input type="checkbox" id="diff-ignore-ws">
+              <span>前後の空白を無視</span>
+            </label>
+            <label class="toggle-chip">
+              <input type="checkbox" id="diff-ignore-case">
+              <span>大文字/小文字を無視</span>
+            </label>
+            <button type="button" id="diff-swap-btn" class="action-btn">⇄ 左右入替</button>
+            <button type="button" id="diff-clear-btn" class="action-btn">クリア</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="diff-inputs-grid">
+            <div class="field-group">
+              <label for="diff-left">変更前（元テキスト）</label>
+              <textarea id="diff-left" class="tool-textarea mono" rows="8" placeholder="比較元のテキストを入力..."></textarea>
+            </div>
+            <div class="field-group">
+              <label for="diff-right">変更後（新テキスト）</label>
+              <textarea id="diff-right" class="tool-textarea mono" rows="8" placeholder="比較先のテキストを入力..."></textarea>
+            </div>
+          </div>
+
+          <div class="diff-summary mt-1" id="diff-summary">2つのテキストを入力すると行単位で差分を表示します</div>
+          <div id="diff-output" class="diff-output mono mt-half"></div>
+        </div>
+      </section>
+
+      <!-- 25. パスワード・乱数生成 -->
+      <section id="panel-pwgen" class="tool-panel">
+        <div class="panel-header">
+          <h1>パスワード・乱数生成</h1>
+          <button type="button" id="pw-gen-btn" class="action-btn primary">🔄 生成</button>
+        </div>
+
+        <div class="card">
+          <div class="pw-mode-row">
+            <div class="mode-switch" role="group" aria-label="生成モード">
+              <button type="button" class="mode-btn pw-mode-btn active" data-pw-mode="password">パスワード</button>
+              <button type="button" class="mode-btn pw-mode-btn" data-pw-mode="uuid">UUID v4</button>
+              <button type="button" class="mode-btn pw-mode-btn" data-pw-mode="hex">16進トークン (HEX)</button>
+              <button type="button" class="mode-btn pw-mode-btn" data-pw-mode="pin">数字PIN</button>
+            </div>
+            <div class="pw-strength-badge" id="pw-strength-badge">エントロピー: --- bit</div>
+          </div>
+
+          <div class="pw-options-grid mt-1">
+            <div class="field-group" id="pw-len-group">
+              <label for="pw-len-slider">文字数 / バイト数: <strong id="pw-len-val">16</strong></label>
+              <input type="range" id="pw-len-slider" class="tg-slider" min="4" max="128" value="16">
+            </div>
+            <div class="field-group">
+              <label for="pw-count-select">生成個数</label>
+              <select id="pw-count-select" class="tool-input">
+                <option value="1">1個</option>
+                <option value="5" selected>5個</option>
+                <option value="10">10個</option>
+                <option value="20">20個</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="preset-bar mt-1" id="pw-charset-bar">
+            <label class="toggle-chip"><input type="checkbox" id="pw-upper" checked><span>英大文字 (A-Z)</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="pw-lower" checked><span>英小文字 (a-z)</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="pw-digits" checked><span>数字 (0-9)</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="pw-symbols" checked><span>記号 (!@#$%...)</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="pw-no-ambig"><span>紛らわしい文字除外 (0OIl1)</span></label>
+          </div>
+
+          <div id="pw-results-list" class="hash-kv-list mt-1"></div>
+        </div>
+      </section>
+
+      <!-- 26. 単位変換 -->
+      <section id="panel-unit" class="tool-panel">
+        <div class="panel-header">
+          <h1>単位変換</h1>
+          <button type="button" id="unit-clear-btn" class="action-btn">クリア</button>
+        </div>
+
+        <div class="card">
+          <div class="mode-switch unit-cat-switch" role="group" aria-label="変換カテゴリ">
+            <button type="button" class="mode-btn unit-cat-btn active" data-unit-cat="data">データ容量 (GB/GiB)</button>
+            <button type="button" class="mode-btn unit-cat-btn" data-unit-cat="bitrate">通信速度 (Mbps/MB/s)</button>
+            <button type="button" class="mode-btn unit-cat-btn" data-unit-cat="length">長さ (mm/inch)</button>
+            <button type="button" class="mode-btn unit-cat-btn" data-unit-cat="mass">重さ (g/lb)</button>
+            <button type="button" class="mode-btn unit-cat-btn" data-unit-cat="temp">温度 (°C/°F/K)</button>
+          </div>
+
+          <div class="unit-input-row mt-1">
+            <div class="field-group">
+              <label for="unit-val-input">変換する数値</label>
+              <input type="number" id="unit-val-input" class="tool-input mono" step="any" value="1">
+            </div>
+            <div class="field-group">
+              <label for="unit-from-select">元の単位</label>
+              <select id="unit-from-select" class="tool-input"></select>
+            </div>
+          </div>
+
+          <div id="unit-results-grid" class="unit-results-grid mt-1"></div>
         </div>
       </section>
 
@@ -1164,8 +2078,25 @@
     </main>
   </div>
 
+  <!-- アラーム鳴動バナー（全ツール共通・バックグラウンド鳴動時に表示） -->
+  <div id="alarm-ringing-banner" class="alarm-ringing-banner hidden" role="alert">
+    <div class="alarm-ringing-info">
+      <span class="alarm-ringing-icon">🔔</span>
+      <div>
+        <div class="alarm-ringing-title" id="alarm-ringing-title">アラーム鳴動中</div>
+        <div class="alarm-ringing-sub" id="alarm-ringing-sub">00:00</div>
+      </div>
+    </div>
+    <div class="alarm-ringing-actions">
+      <button type="button" id="alarm-snooze-btn" class="action-btn">5分スヌーズ</button>
+      <button type="button" id="alarm-stop-btn" class="action-btn primary">⏹ 停止</button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bwip-js@4.5.1/dist/bwip-js-min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/encoding-japanese@2.2.0/encoding.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
